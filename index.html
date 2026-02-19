@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FA CAI WEALTH AI | IMPERIAL</title>
+    <title>FA CAI SUPREME</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --dark-gold: #b8860b; --black: #050505; --red: #8b0000; }
+        :root { --gold: #ffd700; --dark-gold: #b8860b; --black: #050505; }
         
         body {
             background: var(--black); color: #fff; font-family: 'Orbitron', sans-serif;
@@ -16,99 +16,77 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* Зернистость для премиальности */
+        /* Премиальный шум */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.04; pointer-events: none; z-index: 999;
+            opacity: 0.05; pointer-events: none; z-index: 100;
         }
 
-        /* Ночной режим (Инь) */
-        .night-mode { filter: brightness(0.7) contrast(1.2); background: #000 !important; }
+        .container { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
 
-        .container { position: relative; z-index: 100; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .gold-title { font-size: 24px; font-weight: 900; color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); margin: 0; }
 
-        .gold-title {
-            font-size: 24px; font-weight: 900; letter-spacing: 3px;
-            background: linear-gradient(to bottom, #fff, var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin: 0; filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
-        }
-
-        .balance-card {
-            background: rgba(255, 215, 0, 0.05); border: 1px solid var(--dark-gold);
-            padding: 8px 30px; border-radius: 50px; margin-top: 15px;
-            backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(184,134,11,0.2);
-        }
-
-        /* Колесо Фортуны */
+        /* Колесо */
         .wheel-wrap {
-            width: 220px; height: 220px; margin: 30px 0; position: relative;
-            border: 4px solid var(--dark-gold); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            width: 210px; height: 210px; margin: 25px 0; border: 3px solid var(--gold);
+            border-radius: 50%; position: relative; transition: 4s cubic-bezier(0.15, 0, 0.15, 1);
             background: conic-gradient(from 0deg, #111, #222, #111);
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
         }
-        .wheel-center { font-size: 50px; text-shadow: 0 0 20px var(--gold); }
 
         .spin-btn {
             background: linear-gradient(135deg, var(--gold), var(--dark-gold));
             color: #000; border: none; padding: 16px 50px; border-radius: 12px;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 16px;
-            cursor: pointer; box-shadow: 0 10px 30px rgba(212,175,55,0.4);
+            font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 16px;
+            box-shadow: 0 10px 25px rgba(212,175,55,0.3);
         }
 
         /* Сетка артефактов */
-        .grid { display: flex; gap: 15px; margin-top: 40px; }
-        .artifact {
-            width: 85px; height: 100px; border-radius: 15px;
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212,175,55,0.2);
+        .grid { display: flex; gap: 15px; margin-top: 35px; }
+        .card {
+            width: 90px; height: 110px; border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 15px; background: rgba(255, 255, 255, 0.03);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); transition: 0.3s;
+            backdrop-filter: blur(10px); cursor: pointer; position: relative; overflow: hidden;
         }
 
-        /* Анимация горения благовоний */
-        .burning { animation: glow 1s infinite alternate; border-color: var(--gold); }
-        @keyframes glow { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 25px var(--gold); transform: scale(1.05); } }
+        .card img { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,215,0,0.3)); }
 
-        .locked { opacity: 0.3; filter: grayscale(1); }
+        /* Анимация горения благовоний */
+        .burning { border-color: var(--gold) !important; box-shadow: 0 0 25px var(--gold) !important; transform: scale(1.05); }
+
+        .locked-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; font-size:24px; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main">
-        <div style="font-size: 10px; color: var(--gold); letter-spacing: 5px;">IMPERIAL AI</div>
-        <h1 class="gold-title">FA CAI WEALTH</h1>
+    <audio id="zenAudio" loop><source src="zen.mp3" type="audio/mpeg"></audio>
+
+    <div class="container" id="ui">
+        <h1 class="gold-title">FA CAI SUPREME</h1>
         
-        <div class="balance-card">
-            <span id="bal" style="font-size: 22px; font-weight: 900;">1.94</span> 
-            <span style="font-size: 10px; color: var(--gold);">QK</span>
+        <div style="border: 1px solid var(--gold); padding: 6px 25px; border-radius: 50px; margin: 15px 0; background: rgba(212,175,55,0.1);">
+            <span id="bal" style="font-size: 22px; font-weight: 900;">1.94</span> <span style="font-size: 10px; color: var(--gold);">QK</span>
         </div>
 
         <div class="wheel-wrap" id="wheel">
-            <div class="wheel-center">財</div>
+            <div style="font-size: 45px; color: var(--gold); filter: drop-shadow(0 0 10px var(--gold));">財</div>
         </div>
 
-        <button class="spin-btn" onclick="spinWheel()">SPIN FORTUNE</button>
+        <button class="spin-btn" id="spinBtn">SPIN FORTUNE</button>
 
         <div class="grid">
-            <div class="artifact">
-                <div style="font-size: 30px;">🧧</div>
-                <div style="font-size: 8px; color: var(--gold); margin-top: 5px;">HONGBAO</div>
-            </div>
+            <div class="card"><img src="hongbao.jpg" alt="🧧"></div>
             
-            <div class="artifact" id="incenseBtn" 
-                 onpointerdown="startIncense()" 
-                 onpointerup="stopIncense()" 
-                 onpointerleave="stopIncense()">
-                <div id="incenseEmoji" style="font-size: 30px;">🏮</div>
-                <div id="oracleText" style="font-size: 7px; color: var(--gold); margin-top: 5px; text-align: center;">HOLD TO BURN<br>INCENSE</div>
+            <div class="card" id="oracleCard">
+                <img src="lantern.jpg" alt="🏮">
+                <div style="font-size: 7px; color: var(--gold); margin-top: 5px; font-weight: 900;">HOLD TO BURN</div>
             </div>
 
-            <div class="artifact" id="dragonCard">
-                <div id="dragonIcon" style="font-size: 30px; opacity: 0.5;">🔒</div>
-                <div style="font-size: 8px; color: var(--gold); margin-top: 5px;">DRAGON</div>
+            <div class="card" id="dragonCard">
+                <img src="dragon.jpg" alt="🐉" id="dragonImg" style="display:none;">
+                <div class="locked-overlay" id="lock">🔒</div>
             </div>
         </div>
     </div>
@@ -116,81 +94,65 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
         let balance = 1.94;
-        let incenseTimer;
+        let timer;
 
-        // Инь-Ян: Ночной режим
-        const hour = new Date().getHours();
-        if (hour >= 22 || hour < 6) document.body.classList.add('night-mode');
-
-        // Логика вращения (Гонг/Haptic)
-        function spinWheel() {
+        // Включаем звук и крутим колесо
+        document.getElementById('spinBtn').addEventListener('click', () => {
             const wheel = document.getElementById('wheel');
+            const audio = document.getElementById('zenAudio');
+            
+            // Звук запускается при первом взаимодействии
+            if (audio.paused) { audio.volume = 0.3; audio.play().catch(()=>{}); }
+            
             const deg = Math.floor(Math.random() * 360) + 1800;
             wheel.style.transform = `rotate(${deg}deg)`;
             
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
             setTimeout(() => {
-                balance += Math.random() * 10;
+                balance += Math.random() * 8;
                 document.getElementById('bal').innerText = balance.toFixed(2);
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                tg.HapticFeedback.notificationOccurred('success');
                 
-                // Разблокировка дракона при балансе > 20
-                if (balance > 20) {
-                    document.getElementById('dragonIcon').innerText = "🐉";
-                    document.getElementById('dragonIcon').style.opacity = "1";
-                    document.getElementById('dragonCard').classList.remove('locked');
+                // Разблокировка дракона
+                if (balance > 15) {
+                    document.getElementById('lock').style.display = "none";
+                    document.getElementById('dragonImg').style.display = "block";
                 }
             }, 4000);
-        }
-
-        // Ритуал благовоний (Зажатие 2 секунды)
-        function startIncense() {
-            const btn = document.getElementById('incenseBtn');
-            btn.classList.add('burning');
-            document.getElementById('incenseEmoji').innerText = "🕯️";
-            
-            incenseTimer = setTimeout(() => {
-                showOracle();
-                stopIncense();
-            }, 2000);
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        function stopIncense() {
-            clearTimeout(incenseTimer);
-            const btn = document.getElementById('incenseBtn');
-            btn.classList.remove('burning');
-            document.getElementById('incenseEmoji').innerText = "🏮";
-        }
-
-        function showOracle() {
-            const messages = [
-                "Золотой Дракон видит твой успех. Жди прибыли.",
-                "Квантовые поля сошлись. Время действовать.",
-                "Спокойствие ведет к богатству. Терпение вознаградится."
-            ];
-            const msg = messages[Math.floor(Math.random() * messages.length)];
-            
-            tg.showPopup({
-                title: "Священное Пророчество",
-                message: msg,
-                buttons: [{type: 'ok', color: '#ffd700'}]
-            });
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-        }
-
-        // Параллакс эффект (наклон телефона)
-        window.addEventListener('deviceorientation', (e) => {
-            const x = e.beta / 10;
-            const y = e.gamma / 10;
-            document.getElementById('main').style.transform = `translate(${y}px, ${x}px)`;
         });
+
+        // Ритуал Оракула (Зажатие)
+        const oCard = document.getElementById('oracleCard');
+        oCard.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            oCard.classList.add('burning');
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            timer = setTimeout(() => {
+                tg.showPopup({
+                    title: "Sacred Oracle",
+                    message: "Золотой Дракон благословляет твой путь. Удача близко.",
+                    buttons: [{type: 'ok', color: '#ffd700'}]
+                });
+                oCard.classList.remove('burning');
+            }, 2000);
+        });
+
+        oCard.addEventListener('pointerup', () => {
+            clearTimeout(timer);
+            oCard.classList.remove('burning');
+        });
+
+        // Параллакс (наклон)
+        window.addEventListener('deviceorientation', (e) => {
+            const y = e.gamma / 10; const x = e.beta / 10;
+            document.getElementById('ui').style.transform = `translate(${y}px, ${x}px)`;
+        });
+
+        tg.ready();
     </script>
 </body>
 </html>
