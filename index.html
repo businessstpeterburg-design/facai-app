@@ -3,209 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FA CAI QUANTUM PREMIUM</title>
+    <title>FA CAI WEALTH AI | IMPERIAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --gold: #FFD700;
-            --dark-bg: #030305;
-        }
-
+        :root { --tier-color: #cd7f32; --gold: #d4af37; --black: #050505; --red: #8b0000; }
+        
         body {
-            background-color: var(--dark-bg);
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            margin: 0;
-            padding: 0;
-            /* Включаем плавный скролл для iPhone */
-            overflow-y: auto !important;
-            -webkit-overflow-scrolling: touch;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #030305 100%);
+            background: var(--black); color: #fff; font-family: 'Orbitron', sans-serif;
+            margin: 0; padding: 0; overflow: hidden; min-height: 100vh;
+            background: radial-gradient(circle at 50% 40%, #1a1508 0%, #050505 100%);
         }
 
-        /* Золотая пыльца - Слой 1 (снизу) */
-        #dust-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none !important; /* Пропускает клики */
-            z-index: 1;
+        /* Визуальный шум (Grain Effect) */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.04; pointer-events: none; z-index: 9999;
         }
 
-        .dust {
-            position: absolute;
-            background: rgba(255, 215, 0, 0.4);
-            border-radius: 50%;
-            opacity: 0;
-            animation: flyDust linear infinite;
+        /* Инь-Ян (Ночной режим) */
+        .night-mode {
+            filter: brightness(0.7) contrast(1.2);
+            background: radial-gradient(circle at 50% 40%, #050505 0%, #000 100%) !important;
         }
 
-        @keyframes flyDust {
-            0% { transform: translate(0, 0) scale(0); opacity: 0; }
-            50% { opacity: 0.6; }
-            100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
+        /* Заставка "Печать Мастера" */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .seal-container {
+            width: 120px; height: 120px; background: var(--red); border: 4px solid #5a0000;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 40px rgba(139, 0, 0, 0.6); border-radius: 12px;
+            animation: seal-pulse 2s infinite ease-in-out;
+        }
+        @keyframes seal-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.05); opacity: 1; } }
+
+        /* Интерфейс и Glassmorphism */
+        #main-ui { transition: transform 0.1s ease-out; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100vh; justify-content: center; }
+        
+        .artifact-card {
+            width: 90px; padding: 15px 5px; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05);
+            text-align: center; transition: 0.4s; position: relative;
         }
 
-        /* Огромный иероглиф - Слой 0 (фон) */
-        .bg-symbol {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 85vw;
-            color: rgba(255, 215, 0, 0.02);
-            z-index: 0;
-            font-family: 'Noto Sans SC';
-            pointer-events: none;
-        }
+        .gold-title { font-size: 22px; letter-spacing: 2px; background: linear-gradient(to bottom, #fff, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin: 0; }
+        
+        /* Колесо Фортуны */
+        .wheel-container { position: relative; width: 180px; height: 180px; margin: 25px 0; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--tier-color); background: conic-gradient(from 0deg, #0a0a0a, #1a1a1a, #0a0a0a); transition: 4s cubic-bezier(0.15, 0, 0.15, 1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.1); }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: var(--tier-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 12px; box-shadow: 0 0 15px var(--tier-color); }
 
-        .header {
-            text-align: center;
-            padding: 60px 0 20px;
-            z-index: 10;
-            pointer-events: none;
-        }
+        /* Эффект зажжения (Incense) */
+        .incense-glow { animation: burn 1.5s infinite alternate !important; border-color: var(--gold) !important; }
+        @keyframes burn { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 30px var(--gold); transform: scale(1.02); } }
 
-        h1 {
-            font-size: 36px;
-            margin: 10px 0;
-            background: linear-gradient(90deg, #e0b000, #ffec8b, #e0b000);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        .artifacts-grid { display: flex; gap: 12px; margin-top: 25px; }
+        .lang-switch { position: fixed; top: 20px; right: 20px; background: none; border: 1px solid var(--tier-color); color: var(--tier-color); padding: 5px 12px; border-radius: 8px; z-index: 101; font-size: 10px; cursor: pointer; }
+        
+        button.spin-btn {
+            background: var(--tier-color); color: #000; border: none; padding: 14px 45px; border-radius: 12px;
+            font-family: 'Orbitron'; font-weight: 900; letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(212,175,55,0.3); transition: 0.3s;
         }
-
-        /* Контейнер кнопок - Слой 999 (сверху) */
-        .interactive-content {
-            display: flex;
-            flex-direction: column;
-            gap: 60px;
-            padding-bottom: 120px; /* Запас снизу для скролла */
-            width: 100%;
-            align-items: center;
-            position: relative;
-            z-index: 999 !important;
-            pointer-events: auto !important;
-        }
-
-        .item-3d {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .item-3d:active {
-            transform: scale(0.9); /* Эффект нажатия */
-        }
-
-        .object-img {
-            width: 280px;
-            height: auto;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
-            border-radius: 20px;
-            pointer-events: none; /* Чтобы клик шел на контейнер */
-        }
-
-        .label {
-            margin-top: 25px;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Кнопка языка */
-        .lang-btn {
-            position: fixed;
-            top: 20px; right: 20px;
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            color: var(--gold);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 700;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-        }
+        button.spin-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div id="dust-container"></div>
-    <div class="bg-symbol">發</div>
-    
-    <button class="lang-btn" onclick="toggleLang()" id="langBtn">CN</button>
+    <audio id="zenAudio" loop><source src="zen.mp3" type="audio/mpeg"></audio>
 
-    <div class="header">
-        <div style="color: var(--gold); font-size: 10px; letter-spacing: 4px;">QUANTUM REALM ACCESS</div>
-        <h1>FA CAI AI</h1>
+    <div id="loader">
+        <div class="seal-container"><div style="font-family:'Noto Sans SC'; font-size:60px; color:var(--gold);">財</div></div>
+        <div style="color:var(--gold); font-size:10px; letter-spacing:6px; margin-top:30px; opacity:0.6;">QUANTUM ASCENSION</div>
     </div>
 
-    <div class="interactive-content">
-        
-        <div class="item-3d" onclick="handleAction('Quantum Hongbao')">
-            <img src="hongbao.jpg" class="object-img" alt="Hongbao">
-            <div class="label" id="labelWealth">Quantum Hongbao</div>
+    <button class="lang-switch" onclick="toggleLang()" id="langBtn">CN</button>
+
+    <div id="main-ui">
+        <div class="header">
+            <div id="tierName" style="font-size:9px; color:var(--tier-color); letter-spacing:4px; margin-bottom: 5px;">NOVICE TIER</div>
+            <h1 class="gold-title">FA CAI SUPREME</h1>
+            <div style="border:1px solid var(--tier-color); padding:6px 25px; border-radius:50px; display:inline-block; margin-top:15px; background: rgba(212,175,55,0.05);">
+                <span id="balanceValue" style="font-size: 18px; font-weight: 700;">0.00</span> <span style="font-size:9px; opacity: 0.7;">QK</span>
+            </div>
         </div>
 
-        <div class="item-3d" onclick="handleAction('AI Oracle Gate')">
-            <img src="lantern.jpg" class="object-img" alt="Lantern">
-            <div class="label" id="labelLuck">AI Oracle Gate</div>
+        <div class="wheel-container">
+            <div class="wheel" id="wheel"></div>
+            <div class="wheel-center" id="tierSymbol">初始</div>
         </div>
 
+        <button class="spin-btn" onclick="spin()">SPIN FORTUNE</button>
+
+        <div class="artifacts-grid">
+            <div class="artifact-card"><img src="hongbao.jpg" style="width:60px; border-radius: 10px;"></div>
+            <div class="artifact-card" id="oracleBtn" onpointerdown="startIncense()" onpointerup="stopIncense()" onpointerleave="stopIncense()">
+                <img src="lantern.jpg" style="width:60px; border-radius: 10px;">
+                <div style="font-size:7px; color:var(--gold); margin-top:8px; font-weight: bold;" id="oracleLabel">HOLD TO BURN</div>
+            </div>
+            <div class="artifact-card" id="dragonSlot" style="display: flex; align-items: center; justify-content: center; font-size: 20px;">🔒</div>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.setHeaderColor('#050505');
 
-        // Инициализация золотой пыльцы
-        function initDust() {
-            const container = document.getElementById('dust-container');
-            for (let i = 0; i < 40; i++) {
-                const dust = document.createElement('div');
-                dust.className = 'dust';
-                const size = Math.random() * 3 + 1;
-                dust.style.width = size + 'px';
-                dust.style.height = size + 'px';
-                dust.style.left = Math.random() * 100 + 'vw';
-                dust.style.top = Math.random() * 100 + 'vh';
-                dust.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
-                dust.style.setProperty('--dy', (Math.random() - 0.5) * 200 + 'px');
-                dust.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                dust.style.animationDelay = (Math.random() * 5) + 's';
-                container.appendChild(dust);
-            }
-        }
-        initDust();
+        let balance = 0;
+        let isCN = false;
+        let incenseTimer;
+        const oracles = [
+            { en: "The Golden Dragon rises. Absolute prosperity.", cn: "金龙抬头，万事大吉。" },
+            { en: "Wait for the pulse. The Universe has decided.", cn: "静待时机，乾坤定局。" },
+            { en: "Wealth flows like a river in quantum resonance.", cn: "财源滚滚，量子共振。" },
+            { en: "Trust the spark. Your touch turns stone to gold.", cn: "心有灵犀，点石成金。" }
+        ];
 
-        let currentLang = 'EN';
-        function toggleLang() {
-            currentLang = currentLang === 'EN' ? 'CN' : 'EN';
-            document.getElementById('langBtn').innerText = currentLang === 'EN' ? 'CN' : 'EN';
-            document.getElementById('labelWealth').innerText = currentLang === 'EN' ? 'Quantum Hongbao' : '量子红包';
-            document.getElementById('labelLuck').innerText = currentLang === 'EN' ? 'AI Oracle Gate' : 'AI神谕之门';
+        // 1. Инициализация и Цикл Инь-Ян
+        window.onload = () => {
+            const hour = new Date().getHours();
+            if (hour >= 22 || hour < 6) document.body.classList.add('night-mode');
+            
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader').remove(), 1500);
+            }, 2500);
+        };
+
+        // 2. Параллакс (Гироскоп)
+        window.addEventListener('deviceorientation', (e) => {
+            const x = e.beta / 6; const y = e.gamma / 6;
+            document.getElementById('main-ui').style.transform = `translate(${y}px, ${x}px)`;
+        });
+
+        // 3. Звук при первом клике
+        document.addEventListener('click', () => {
+            const audio = document.getElementById('zenAudio');
+            if (audio.paused) { audio.volume = 0.3; audio.play(); }
+        }, { once: true });
+
+        // 4. Логика Ритуала (Hold)
+        function startIncense() {
+            document.getElementById('oracleBtn').classList.add('incense-glow');
+            incenseTimer = setTimeout(() => {
+                triggerOracle();
+                stopIncense();
+            }, 2000);
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function handleAction(name) {
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            // Используем нативный алерт Телеграма для солидности
-            tg.showAlert(name + " Activated!");
+        function stopIncense() {
+            clearTimeout(incenseTimer);
+            document.getElementById('oracleBtn').classList.remove('incense-glow');
         }
 
-        tg.setHeaderColor('#030305');
-        tg.setBackgroundColor('#030305');
+        function triggerOracle() {
+            const last = localStorage.getItem('lastO');
+            if (last && Date.now() - last < 86400000) {
+                tg.showAlert(isCN ? "能量尚未恢复。请在明日再来。" : "Quantum energy not restored. Return tomorrow.");
+                return;
+            }
+            const o = oracles[Math.floor(Math.random() * oracles.length)];
+            tg.showPopup({
+                title: isCN ? "今日神谕" : "Daily Oracle",
+                message: isCN ? o.cn : o.en,
+                buttons: [{type: 'ok', color: '#d4af37'}]
+            });
+            localStorage.setItem('lastO', Date.now());
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        // 5. Колесо и Уровни
+        function spin() {
+            const wheel = document.getElementById('wheel');
+            const deg = Math.floor(Math.random() * 360) + 1800;
+            wheel.style.transform = `rotate(${deg}deg)`;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
+            setTimeout(() => {
+                const gain = (Math.random() * 4 + 1);
+                balance += gain;
+                updateUI();
+            }, 4000);
+        }
+
+        function updateUI() {
+            document.getElementById('balanceValue').innerText = balance.toFixed(2);
+            const tierEl = document.getElementById('tierName');
+            const symbolEl = document.getElementById('tierSymbol');
+            
+            if (balance >= 50) {
+                tierEl.innerText = "IMMORTAL TIER";
+                document.documentElement.style.setProperty('--tier-color', '#00ffff');
+                symbolEl.innerText = "永生";
+            } else if (balance >= 15) {
+                tierEl.innerText = "MASTER TIER";
+                document.documentElement.style.setProperty('--tier-color', '#d4af37');
+                symbolEl.innerText = "大師";
+                document.getElementById('dragonSlot').innerHTML = '<img src="dragon.jpg" style="width:60px; border-radius:10px; animation: pulse 2s infinite;">';
+            }
+        }
+
+        // 6. Эффект Аура (Тач)
+        document.addEventListener('touchstart', (e) => {
+            const r = document.createElement('div');
+            r.style.position = 'fixed'; r.style.left = e.touches[0].clientX + 'px'; r.style.top = e.touches[0].clientY + 'px';
+            r.style.width = '2px'; r.style.height = '2px'; r.style.border = '1px solid var(--gold)';
+            r.style.borderRadius = '50%'; r.style.pointerEvents = 'none'; r.style.zIndex = '999';
+            r.animate([{transform:'translate(-50%,-50%) scale(0)', opacity:1}, {transform:'translate(-50%,-50%) scale(40)', opacity:0}], {duration:1000});
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 1000);
+        });
+
+        function toggleLang() {
+            isCN = !isCN;
+            document.getElementById('langBtn').innerText = isCN ? 'EN' : 'CN';
+            document.getElementById('oracleLabel').innerText = isCN ? "长按点燃" : "HOLD TO BURN";
+        }
     </script>
 </body>
 </html>
