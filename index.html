@@ -5,73 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FA CAI PREMIUM 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Noto+Sans+SC:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: linear-gradient(135deg, #fceabb 0%, #fccd4d 50%, #f8b500 100%);
             --dark-bg: #050505;
             --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 215, 0, 0.15);
         }
 
         body {
-            background-color: var(--dark-bg);
+            background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #050505 100%);
             color: #fff;
-            font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
-            background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #050505 80%);
+            overflow: hidden; /* Убираем лишнюю прокрутку */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            perspective: 1200px; /* Глубина 3D */
         }
 
-        /* Фоновый иероглиф */
+        /* Огромный фоновый иероглиф "Фа" */
         .bg-symbol {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 80vw;
+            font-size: 90vw;
             color: rgba(255, 215, 0, 0.02);
             z-index: -1;
-            pointer-events: none;
-            font-weight: 700;
-        }
-
-        .app-wrapper {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding-bottom: 100px;
-        }
-
-        /* Премиум карточки */
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* Иероглиф в каждом разделе */
-        .card::before {
-            content: "發";
-            position: absolute;
-            right: -10px;
-            bottom: -20px;
-            font-size: 100px;
-            color: rgba(255, 215, 0, 0.04);
-            pointer-events: none;
             font-family: 'Noto Sans SC';
+            pointer-events: none;
         }
 
         .header {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 40px;
+            z-index: 10;
         }
 
         .gold-text {
@@ -80,81 +52,96 @@
             -webkit-text-fill-color: transparent;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 12px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin: 10px 0;
+            text-shadow: 0 0 30px rgba(252, 205, 77, 0.3);
+        }
+
+        /* Контейнер для летающих объектов */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 70%;
+            width: 100%;
+            align-items: center;
+        }
+
+        /* Анимация левитации */
+        @keyframes float {
+            0% { transform: translateY(0px) rotateY(0deg); }
+            50% { transform: translateY(-20px) rotateY(5deg); }
+            100% { transform: translateY(0px) rotateY(0deg); }
+        }
+
+        .scene3d {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: float 5s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .scene3d:active {
+            transform: scale(0.9) rotateX(15deg);
+        }
+
+        /* Сами картинки (Конверт и Фонарик) */
+        .object-3d {
+            width: 200px; /* Размер картинок */
+            height: auto;
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8));
+            z-index: 2;
+        }
+
+        /* Световое пятно под объектом */
+        .glow-pedestal {
+            position: absolute;
+            bottom: 10px;
+            width: 120px;
+            height: 30px;
+            background: rgba(255, 215, 0, 0.15);
+            filter: blur(20px);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .object-label {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
             letter-spacing: 2px;
         }
-
-        /* Карусель новостей */
-        .carousel {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 15px;
-            scrollbar-width: none;
-        }
-        .carousel::-webkit-scrollbar { display: none; }
-        .news-item {
-            min-width: 85%;
-            scroll-snap-align: center;
-            background: rgba(255,255,255,0.02);
-            padding: 15px;
-            border-radius: 15px;
-            border-left: 3px solid #fccd4d;
-        }
-
-        /* Сетка конвертов */
-        .hongbao-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .hongbao-btn {
-            background: rgba(255, 0, 0, 0.05);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            transition: 0.3s;
-        }
-        .hongbao-btn:active { transform: scale(0.95); background: rgba(255, 0, 0, 0.15); }
-        .hb-icon { font-size: 40px; margin-bottom: 10px; display: block; }
 
         /* Кнопка смены языка */
         .lang-btn {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 12px;
-            z-index: 1000;
-            box-shadow: 0 0 15px rgba(252, 205, 77, 0.4);
-        }
-
-        /* Модалка результата */
-        #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
-        }
-        .modal-content {
-            width: 80%;
-            text-align: center;
             background: var(--glass);
-            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #fccd4d;
+            padding: 10px 20px;
             border-radius: 30px;
-            border: 1px solid var(--gold);
+            font-size: 12px;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            z-index: 100;
         }
 
-        .stats-val { font-size: 32px; color: #fccd4d; font-weight: 700; margin: 10px 0; }
+        /* Скрываем картинки по умолчанию, пока они не загружены */
+        img {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -163,121 +150,43 @@
     
     <button class="lang-btn" onclick="toggleLang()" id="langBtn">CN</button>
 
-    <div class="app-wrapper">
-        <div class="header">
-            <div class="gold-text" style="font-size: 12px;" id="topLabel">FA CAI WEALTH TERMINAL 2026</div>
-            <h1 style="margin: 5px 0; font-size: 28px;">FORTUNE AI</h1>
-        </div>
-
-        <div class="card">
-            <div class="gold-text" style="font-size: 10px; margin-bottom: 10px;" id="newsLabel">MARKET INSIGHTS</div>
-            <div class="carousel">
-                <div class="news-item">
-                    <div id="n1_t" style="font-weight: 700; color: #fccd4d;">TON ecosystem growth</div>
-                    <div id="n1_d" style="font-size: 12px; opacity: 0.6; margin-top: 5px;">AI agents integration expected in Q3 2026.</div>
-                </div>
-                <div class="news-item">
-                    <div id="n2_t" style="font-weight: 700; color: #fccd4d;">Market Sentiment</div>
-                    <div id="n2_d" style="font-size: 12px; opacity: 0.6; margin-top: 5px;">Global wealth flow shifts to decentralized AI.</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="gold-text" style="font-size: 10px; margin-bottom: 15px;" id="hbLabel">CHOOSE YOUR PROPHECY</div>
-            <div class="hongbao-grid">
-                <div class="hongbao-btn" onclick="openHb('Wealth')">
-                    <span class="hb-icon">🧧</span>
-                    <span style="font-size: 12px; font-weight: 700;" class="hb-name">WEALTH</span>
-                </div>
-                <div class="hongbao-btn" onclick="openHb('Success')">
-                    <span class="hb-icon">🏮</span>
-                    <span style="font-size: 12px; font-weight: 700;" class="hb-name">LUCK</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card" style="text-align: center;">
-            <div class="gold-text" style="font-size: 10px; margin-bottom: 10px;" id="sigLabel">AI WEALTH SIGNAL</div>
-            <div id="sigStatus" style="font-size: 18px; color: #00ff88; font-weight: 700;">● STRONG BUY</div>
-            <div style="font-size: 11px; opacity: 0.5; margin-top: 5px;">Confidence Index: 98.4%</div>
-        </div>
+    <div class="header">
+        <div class="gold-text" id="topLabel">Wealth Terminal 2026</div>
+        <h1>FORTUNE AI</h1>
     </div>
 
-    <div id="modal" onclick="closeModal()">
-        <div class="modal-content">
-            <div id="resTitle" class="gold-text">DESTINY REVEALED</div>
-            <div class="stats-val" id="resVal">88%</div>
-            <p id="resDesc" style="font-size: 14px; line-height: 1.6; opacity: 0.8;">The stars align for massive growth in your TON wallet.</p>
-            <button class="gold-text" style="background: none; border: 1px solid #fccd4d; padding: 10px 20px; border-radius: 10px; margin-top: 20px;">DONE</button>
+    <div class="container">
+        <div class="scene3d" onclick="handleAction('Wealth')">
+            <img src="hongbao.png" class="object-3d" alt=" " onerror="this.style.opacity='0.2'">
+            <div class="glow-pedestal"></div>
+            <div class="object-label" id="labelWealth">Hongbao</div>
+        </div>
+
+        <div class="scene3d" onclick="handleAction('Oracle')">
+            <img src="lantern.png" class="object-3d" alt=" " onerror="this.style.opacity='0.2'">
+            <div class="glow-pedestal"></div>
+            <div class="object-label" id="labelLuck">Oracle</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation();
 
         let currentLang = 'EN';
         const translations = {
             EN: {
-                top: "FA CAI WEALTH TERMINAL 2026",
-                news: "MARKET INSIGHTS",
-                hb: "CHOOSE YOUR PROPHECY",
-                sig: "AI WEALTH SIGNAL",
-                lang: "CN",
-                n1t: "TON ecosystem growth",
-                n1d: "AI agents integration expected in Q3 2026.",
-                n2t: "Market Sentiment",
-                n2d: "Global wealth flow shifts to decentralized AI.",
-                destiny: "DESTINY REVEALED",
-                advice: "The stars align for massive growth in your TON wallet."
+                top: "Wealth Terminal 2026",
+                wealth: "Open Hongbao",
+                luck: "Ask Oracle",
+                btn: "CN"
             },
             CN: {
-                top: "發財财富终端 2026",
-                news: "市场洞察",
-                hb: "选择你的预言",
-                sig: "AI 财富信号",
-                lang: "EN",
-                n1t: "TON 生态系统增长",
-                n1d: "AI 代理预计将在 2026 年第三季度整合。",
-                n2t: "市场情绪",
-                n2d: "全球财富流向去中心化 AI。",
-                destiny: "天命已现",
-                advice: "星象显示您的 TON 钱包将迎来巨大增长。"
+                top: "财富终端 2026",
+                wealth: "打开红包",
+                luck: "问神谕",
+                btn: "EN"
             }
         };
 
         function toggleLang() {
-            currentLang = currentLang === 'EN' ? 'CN' : 'EN';
-            const t = translations[currentLang];
-            document.getElementById('topLabel').innerText = t.top;
-            document.getElementById('newsLabel').innerText = t.news;
-            document.getElementById('hbLabel').innerText = t.hb;
-            document.getElementById('sigLabel').innerText = t.sig;
-            document.getElementById('langBtn').innerText = t.lang;
-            document.getElementById('n1_t').innerText = t.n1t;
-            document.getElementById('n1_d').innerText = t.n1d;
-            document.getElementById('n2_t').innerText = t.n2t;
-            document.getElementById('n2_d').innerText = t.n2d;
-            document.getElementById('resTitle').innerText = t.destiny;
-            document.getElementById('resDesc').innerText = t.advice;
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function openHb(type) {
-            const score = Math.floor(Math.random() * (99 - 70 + 1)) + 70;
-            document.getElementById('resVal').innerText = score + "%";
-            document.getElementById('modal').style.display = 'flex';
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        tg.setHeaderColor('#2c1f01');
-        tg.setBackgroundColor('#050505');
-    </script>
-</body>
-</html>
