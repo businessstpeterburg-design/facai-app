@@ -1,170 +1,1782 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FA CAI SUPREME AI</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #ffd700; --dark-gold: #b8860b; --black: #050505; }
-        
-        body {
-            background: var(--black); color: #fff; font-family: 'Orbitron', sans-serif;
-            margin: 0; padding: 0; overflow: hidden; height: 100vh;
-            background: radial-gradient(circle at 50% 30%, #1a1508 0%, #050505 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TON TEMPLE — V4 WebGL</title>
 
-        /* ЗОЛОТЫЕ ЧАСТИЦЫ (Dust) */
-        #particles {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1;
-        }
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        .container { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        
-        .balance-badge {
-            border: 2px solid var(--gold); padding: 8px 35px; border-radius: 50px;
-            background: rgba(212, 175, 55, 0.1); margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-        }
+  <!-- Three.js (module) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 
-        /* КОЛЕСО */
-        .wheel-box {
-            width: 230px; height: 230px; margin-bottom: 30px; position: relative;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .ring {
-            position: absolute; width: 100%; height: 100%; border: 3px solid var(--gold);
-            border-radius: 50%; background: conic-gradient(from 0deg, #111, #332b12, #111);
-            transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
-        }
-        .center-sign { font-size: 60px; color: var(--gold); text-shadow: 0 0 20px var(--gold); z-index: 5; pointer-events: none; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Noto+Sans+SC:wght@400;600;900&display=swap" rel="stylesheet" />
 
-        /* КНОПКА */
-        .spin-btn {
-            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
-            color: #000; border: none; padding: 18px 70px; border-radius: 15px;
-            font-weight: 900; font-family: 'Orbitron'; font-size: 20px;
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4); cursor: pointer;
-        }
-        .spin-btn:active { transform: scale(0.93); }
+  <style>
+    :root{
+      --obsidian:#050509;
+      --obsidian2:#0b0b14;
+      --gold:#ffd36b;
+      --gold2:#b88a1f;
+      --red:#d3172a;
+      --glass:rgba(255,255,255,.06);
+      --glass2:rgba(255,255,255,.08);
+      --stroke:rgba(255,211,107,.22);
+      --stroke2:rgba(255,211,107,.35);
+      --txt:#f6f3ea;
+      --muted:rgba(246,243,234,.72);
+      --danger:#ff3b3b;
+      --ok:#46ffb1;
+      --cyan:#7ee8ff;
 
-        /* СЕТКА АРТЕФАКТОВ */
-        .grid { display: flex; gap: 15px; margin-top: 40px; }
-        .card {
-            width: 95px; height: 115px; border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 20px; background: rgba(255, 255, 255, 0.05);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); transition: 0.3s;
-        }
-        .card img { width: 75px; height: 75px; object-fit: contain; }
+      --uiScale:1;
+      --sceneGlow:1;
+      --meteorRate:1;
+      --dustRate:1;
 
-        /* Анимация Оракула */
-        .burning { 
-            border-color: var(--gold) !important; 
-            box-shadow: 0 0 40px var(--gold) !important; 
-            animation: pulse 0.5s infinite alternate; 
-        }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-    </style>
+      --topSafe: env(safe-area-inset-top);
+      --botSafe: env(safe-area-inset-bottom);
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 50% 15%, #19121b 0%, var(--obsidian) 55%, #020207 100%);
+      color:var(--txt);
+      overflow:hidden;
+      font-family: "Noto Sans SC", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* WebGL stage */
+    #stage{
+      position:fixed;
+      inset:0;
+      z-index:1;
+    }
+
+    /* Overlay UI */
+    #ui{
+      position:fixed;
+      inset:0;
+      z-index:10;
+      pointer-events:none;
+    }
+
+    .hud{
+      position:absolute;
+      left:14px;
+      right:14px;
+      top: calc(12px + var(--topSafe));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      pointer-events:auto;
+    }
+
+    .hudLeft{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-width: 68%;
+    }
+
+    .brandLine{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .logoMark{
+      width:34px;height:34px;
+      border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,211,107,.35), rgba(255,211,107,.08) 60%, rgba(0,0,0,0) 70%),
+        linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      box-shadow: 0 0 26px rgba(255,211,107,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      color:var(--gold);
+      font-family: Orbitron, system-ui;
+      letter-spacing:.5px;
+    }
+
+    .brandTitle{
+      display:flex;
+      flex-direction:column;
+      line-height:1.05;
+    }
+
+    .brandTitle .kicker{
+      font-size:10px;
+      color: rgba(255,211,107,.85);
+      letter-spacing: 4px;
+      font-family: Orbitron, system-ui;
+      text-transform: uppercase;
+    }
+
+    .brandTitle .name{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing: .6px;
+      font-family: Orbitron, system-ui;
+    }
+
+    .pillRow{display:flex;flex-wrap:wrap;gap:8px;}
+
+    .pill{
+      padding:8px 10px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid rgba(255,211,107,.22);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 0 18px rgba(0,0,0,.25);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:11px;
+      color: rgba(246,243,234,.88);
+    }
+
+    .pill b{color:var(--gold); font-weight:900; font-family: Orbitron, system-ui;}
+
+    .hudRight{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+      min-width: 150px;
+    }
+
+    .toggles{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .toggle{
+      pointer-events:auto;
+      user-select:none;
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,211,107,.25);
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size:11px;
+      color: rgba(246,243,234,.85);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .toggle .dot{
+      width:10px;height:10px;
+      border-radius:999px;
+      background: rgba(255,211,107,.25);
+      box-shadow: 0 0 0 rgba(255,211,107,0);
+      transition: .25s;
+    }
+
+    .toggle.active{
+      border-color: rgba(255,211,107,.55);
+      background: rgba(255,211,107,.08);
+    }
+    .toggle.active .dot{
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(255,211,107,.35);
+    }
+
+    /* Main controls */
+    .center{
+      position:absolute;
+      left:0;right:0;
+      bottom: calc(18px + var(--botSafe));
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      pointer-events:none;
+    }
+
+    .grid{
+      pointer-events:auto;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(90px, 110px));
+      gap:12px;
+      padding: 10px 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,211,107,.18);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 0 40px rgba(0,0,0,.45);
+    }
+
+    .artifact{
+      position:relative;
+      width:110px;
+      height:128px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,211,107,.22);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,211,107,.12), rgba(0,0,0,.22) 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      overflow:hidden;
+      cursor:pointer;
+      pointer-events:auto;
+      user-select:none;
+      transform: translateZ(0);
+      box-shadow:
+        0 18px 35px rgba(0,0,0,.45),
+        0 0 0 rgba(255,211,107,0);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .artifact:active{transform: scale(.98);}
+
+    .podium{
+      position:absolute;
+      left:12px; right:12px;
+      bottom:10px;
+      height:24px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 55%, rgba(0,0,0,0) 70%);
+      filter: blur(.2px);
+      opacity:.8;
+    }
+
+    .specSweep{
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(135deg, rgba(255,211,107,0) 35%, rgba(255,211,107,.28) 50%, rgba(255,211,107,0) 65%);
+      transform: translateX(-70%) rotate(12deg);
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .artifact.flash .specSweep{ animation: sweep .7s ease; opacity:1; }
+    @keyframes sweep{
+      0%{ transform: translateX(-70%) rotate(12deg); opacity:0; }
+      25%{opacity:1;}
+      100%{ transform: translateX(70%) rotate(12deg); opacity:0; }
+    }
+
+    .artifact img{
+      position:absolute;
+      left:50%;
+      top:44%;
+      width:74px;
+      height:74px;
+      object-fit:contain;
+      transform: translate(-50%,-50%);
+      filter: drop-shadow(0 14px 20px rgba(0,0,0,.55));
+    }
+
+    .artifact .label{
+      position:absolute;
+      left:10px; right:10px;
+      top:10px;
+      font-size:10px;
+      color: rgba(246,243,234,.78);
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      font-family: Orbitron, system-ui;
+    }
+
+    .artifact .sub{
+      position:absolute;
+      left:10px; right:10px;
+      bottom:8px;
+      font-size:9px;
+      color: rgba(255,211,107,.75);
+      letter-spacing: 1.8px;
+      font-family: Orbitron, system-ui;
+      text-transform: uppercase;
+      text-align:center;
+    }
+
+    .bigBtn{
+      pointer-events:auto;
+      cursor:pointer;
+      user-select:none;
+      border:none;
+      border-radius: 18px;
+      padding: 16px 18px;
+      min-width: 280px;
+      color: #120a00;
+      font-family: Orbitron, system-ui;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffd36b, #b88a1f);
+      box-shadow:
+        0 18px 35px rgba(0,0,0,.55),
+        0 0 45px rgba(255,211,107,.18);
+    }
+
+    .bigBtn:active{transform: scale(.99);}
+
+    /* Modal */
+    .modalWrap{
+      position:fixed;
+      inset:0;
+      z-index:50;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      pointer-events:auto;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .modal{
+      width:min(520px, 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255,211,107,.22);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,211,107,.14), rgba(0,0,0,.25) 45%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 30px 80px rgba(0,0,0,.65);
+      overflow:hidden;
+    }
+
+    .modalHead{
+      padding: 16px 16px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .modalTitle{
+      font-family: Orbitron, system-ui;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      font-size: 14px;
+      color: rgba(255,211,107,.95);
+    }
+
+    .modalBody{padding: 0 16px 16px;}
+
+    .modalText{
+      color: rgba(246,243,234,.9);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .modalBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+
+    .btn{
+      cursor:pointer;
+      border:none;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-family: Orbitron, system-ui;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .btnGold{ background: linear-gradient(135deg, #ffd36b, #b88a1f); color:#120a00; }
+    .btnGhost{ background: rgba(255,255,255,.06); color: rgba(246,243,234,.9); border:1px solid rgba(255,211,107,.2); }
+    .btnDanger{ background: rgba(255,59,59,.12); color: #ffd0d0; border:1px solid rgba(255,59,59,.25); }
+
+    .x{
+      cursor:pointer;
+      width:36px;height:36px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,211,107,.18);
+      background: rgba(0,0,0,.25);
+      color: rgba(246,243,234,.9);
+      font-weight:900;
+      font-family: Orbitron, system-ui;
+    }
+
+    /* VIP ribbon */
+    .vipRibbon{
+      display:none;
+      margin-top:8px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,211,107,.3);
+      background: rgba(255,211,107,.08);
+      box-shadow: 0 0 35px rgba(255,211,107,.15);
+      color: rgba(255,211,107,.95);
+      font-family: Orbitron, system-ui;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align:center;
+    }
+
+    /* Small footer */
+    .footer{
+      position:absolute;
+      left:14px;
+      right:14px;
+      bottom: calc(12px + var(--botSafe));
+      z-index: 12;
+      pointer-events:none;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      opacity:.9;
+    }
+
+    .tiny{
+      pointer-events:auto;
+      font-size:10px;
+      color: rgba(246,243,234,.55);
+      line-height:1.2;
+      max-width: 55%;
+    }
+
+    .tiny b{color: rgba(255,211,107,.85);}
+
+    /* Responsive */
+    @media (max-width:380px){
+      .grid{ grid-template-columns: repeat(3, minmax(86px, 96px)); }
+      .artifact{ width:96px; height:118px; }
+      .artifact img{ width:68px; height:68px; }
+      .bigBtn{ min-width: 250px; }
+    }
+  </style>
 </head>
 <body>
+  <div id="stage"></div>
 
-    <canvas id="particles"></canvas>
-    <audio id="zenAudio" loop><source src="zen.mp3" type="audio/mpeg"></audio>
-
-    <div class="container" id="main-ui">
-        <div class="balance-badge">
-            <span id="bal" style="font-size: 26px; font-weight: 900;">37.11</span> 
-            <span style="font-size: 12px; color: var(--gold);">QK</span>
+  <div id="ui">
+    <div class="hud">
+      <div class="hudLeft">
+        <div class="brandLine">
+          <div class="logoMark">財</div>
+          <div class="brandTitle">
+            <div class="kicker" id="kicker">TON IMPERIAL TEMPLE</div>
+            <div class="name" id="title">TON TEMPLE</div>
+          </div>
         </div>
 
-        <div class="wheel-box">
-            <div class="ring" id="wheel"></div>
-            <div class="center-sign">財</div>
+        <div class="pillRow">
+          <div class="pill"><b id="idLabel">ID</b> <span id="imperialId">#----</span></div>
+          <div class="pill"><b id="rankLabel">RANK</b> <span id="rank">INITIATE</span></div>
+          <div class="pill"><b>QK</b> <span id="qk">37.11</span></div>
+          <div class="pill"><b id="flowLabel">FLOW</b> <span id="flow">73</span>/100</div>
         </div>
 
-        <button class="spin-btn" id="spinBtn">SPIN FORTUNE</button>
-
-        <div class="grid">
-            <div class="card" onclick="tg.showAlert('Твоя удача растет!')"><img src="hongbao.jpg"></div>
-            <div class="card" id="oracleBtn">
-                <img src="lantern.jpg">
-                <div style="font-size: 7px; color: var(--gold); margin-top: 5px; font-weight: 900;">HOLD TO BURN</div>
-            </div>
-            <div class="card"><img src="dragon.jpg"></div>
+        <div class="pillRow">
+          <div class="pill"><b id="riskLabel">RISK</b> <span id="risk">MED</span></div>
+          <div class="pill"><b id="weatherLabel">WEATHER</b> <span id="weather">SILENT NIGHT</span></div>
+          <div class="pill"><b id="sealLabel">SEAL</b> <span id="seal">今日财印</span></div>
         </div>
+
+        <div class="pillRow">
+          <div class="pill"><b id="social1Label">TODAY</b> <span id="social1">3,482</span></div>
+          <div class="pill"><b id="social2Label">VIP 24H</b> <span id="social2">117</span></div>
+          <div class="pill"><b id="social3Label">DAO</b> <span id="social3">892</span></div>
+        </div>
+
+        <div class="vipRibbon" id="vipRibbon">VIP HALL UNLOCKED</div>
+      </div>
+
+      <div class="hudRight">
+        <div class="toggles">
+          <div class="toggle active" id="langToggle"><span class="dot"></span><span id="langTxt">中文</span></div>
+          <div class="toggle active" id="modeToggle"><span class="dot"></span><span id="modeTxt">RITUAL</span></div>
+          <div class="toggle" id="journalBtn"><span class="dot"></span><span id="journalTxt">JOURNAL</span></div>
+        </div>
+
+        <div class="pill" style="justify-content:space-between; width: 100%;">
+          <span id="luckyLabel">LUCKY HOUR</span>
+          <b id="luckyTimer">--:--:--</b>
+        </div>
+      </div>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+    <div class="center">
+      <button class="bigBtn" id="spinBtn">ACTIVATE FLOW</button>
 
-        let balance = 37.11;
-        let timer;
-        const audio = document.getElementById('zenAudio');
+      <div class="grid">
+        <div class="artifact" id="hongbaoCard">
+          <div class="specSweep"></div>
+          <div class="label" id="hongbaoLabel">HONGBAO</div>
+          <img src="hongbao.jpg" alt="hongbao" />
+          <div class="podium"></div>
+          <div class="sub" id="hongbaoSub">TAP • LOOT</div>
+        </div>
 
-        // 1. ЗОЛОТЫЕ ЧАСТИЦЫ
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        function initParticles() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            for(let i=0; i<50; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, v: Math.random()*0.5});
+        <div class="artifact" id="oracleCard">
+          <div class="specSweep"></div>
+          <div class="label" id="oracleLabel">ORACLE</div>
+          <img src="lantern.jpg" alt="lantern" />
+          <div class="podium"></div>
+          <div class="sub" id="oracleSub">HOLD • 2s</div>
+        </div>
+
+        <div class="artifact" id="dragonCard">
+          <div class="specSweep"></div>
+          <div class="label" id="dragonLabel">DRAGON</div>
+          <img src="dragon.jpg" alt="dragon" />
+          <div class="podium"></div>
+          <div class="sub" id="dragonSub">STATUS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="tiny" id="disclaimer">
+        <b>Temple Guidance</b> is informational and ritual-based. It does not guarantee outcomes.
+      </div>
+      <div class="tiny" style="text-align:right" id="build">
+        V4 • WebGL Temple • 2050 UI
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modalWrap" id="modalWrap">
+      <div class="modal">
+        <div class="modalHead">
+          <div>
+            <div class="modalTitle" id="modalTitle">TEMPLE</div>
+          </div>
+          <div class="x" id="closeModal">X</div>
+        </div>
+        <div class="modalBody">
+          <div class="modalText" id="modalText"></div>
+          <div class="modalBtns" id="modalBtns"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ============================
+    // CONFIG
+    // ============================
+    // Replace with your real ref link
+    const REF_LINK = "https://example.com/YOUR_REF_LINK";
+
+    // Lucky hour schedule (local time): 08:00-09:00 and 20:00-21:00
+    const LUCKY_WINDOWS = [
+      { startH: 8, startM: 0, endH: 9, endM: 0 },
+      { startH: 20, startM: 0, endH: 21, endM: 0 },
+    ];
+
+    // ============================
+    // Telegram WebApp
+    // ============================
+    const tg = window.Telegram?.WebApp;
+    try{ tg?.expand?.(); tg?.ready?.(); }catch(e){}
+
+    // ============================
+    // STATE
+    // ============================
+    const LS = {
+      lang: 'tt_lang',
+      mode: 'tt_mode',
+      id: 'tt_id',
+      title: 'tt_title',
+      qk: 'tt_qk',
+      streak: 'tt_streak',
+      lastDay: 'tt_lastDay',
+      sealsDay: 'tt_seal_day',
+      journal: 'tt_journal',
+      loot: 'tt_loot'
+    };
+
+    const CN = 'cn';
+    const EN = 'en';
+
+    const titlesCN = [
+      '天命之财','金龙护主','财运天成','富贵长明','鸿运当头','财门大开','福运加持','万事亨通'
+    ];
+
+    const sealsCN = [
+      '今日财印','天赐福印','福运加持','财门大开','金玉满堂','大吉大利'
+    ];
+
+    const oracleCN = [
+      { ch: '恭喜發財', en: 'Prosperity & Wealth', aura: 'LOW', flow: +8 },
+      { ch: '财源广进', en: 'Wealth flows from many sources', aura: 'MED', flow: +4 },
+      { ch: '金玉满堂', en: 'Gold and jade fill your home', aura: 'LOW', flow: +6 },
+      { ch: '大吉大利', en: 'Great luck, great profit', aura: 'MED', flow: +3 },
+      { ch: '静待时机', en: 'Wait for the moment', aura: 'HIGH', flow: -6 },
+      { ch: '守正待发', en: 'Hold position, then act', aura: 'MED', flow: +1 },
+    ];
+
+    const oracleEN = [
+      { title: 'FLOW ALIGNS', text: 'The Temple opens a clean window. Focus, then act.', aura: 'LOW', flow: +6 },
+      { title: 'RISK RISING', text: 'Volatility increases. Observe and wait.', aura: 'HIGH', flow: -6 },
+      { title: 'CALM MARKET', text: 'Liquidity is stable. Consider a controlled entry.', aura: 'MED', flow: +2 },
+    ];
+
+    const lootPool = [
+      { key:'aura', cn:'龙息碎片', en:'Dragon Aura Fragment' },
+      { key:'seal', cn:'印章残片', en:'Seal Stamp Piece' },
+      { key:'lucky', cn:'幸运时刻令牌', en:'Lucky Hour Token' },
+    ];
+
+    const state = {
+      lang: localStorage.getItem(LS.lang) || CN,
+      mode: localStorage.getItem(LS.mode) || 'ritual',
+      imperialId: localStorage.getItem(LS.id) || null,
+      imperialTitle: localStorage.getItem(LS.title) || null,
+      qk: parseFloat(localStorage.getItem(LS.qk) || '37.11'),
+      streak: parseInt(localStorage.getItem(LS.streak) || '1', 10),
+      flow: 73,
+      risk: 'MED',
+      weather: 'SILENT NIGHT',
+      seal: '今日财印',
+      vip: false,
+      daoSeal: false,
+      journal: [],
+      loot: { aura:0, seal:0, lucky:0 },
+      lastOracle: null,
+      oracleReady: false,
+    };
+
+    // Load journal
+    try{
+      const j = JSON.parse(localStorage.getItem(LS.journal) || '[]');
+      if(Array.isArray(j)) state.journal = j;
+    }catch(e){}
+
+    // Load loot
+    try{
+      const l = JSON.parse(localStorage.getItem(LS.loot) || '{"aura":0,"seal":0,"lucky":0}');
+      if(l && typeof l==='object') state.loot = { ...state.loot, ...l };
+    }catch(e){}
+
+    // ============================
+    // UTIL
+    // ============================
+    const $ = (id)=>document.getElementById(id);
+
+    function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+    function todayKey(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function randInt(a,b){ return Math.floor(a + Math.random()*(b-a+1)); }
+
+    function fmt(n){
+      return new Intl.NumberFormat(state.lang===CN?'zh-CN':'en-US').format(n);
+    }
+
+    function haptic(type){
+      try{
+        if(!tg?.HapticFeedback) return;
+        if(type==='heavy') tg.HapticFeedback.impactOccurred('heavy');
+        if(type==='med') tg.HapticFeedback.impactOccurred('medium');
+        if(type==='light') tg.HapticFeedback.impactOccurred('light');
+        if(type==='success') tg.HapticFeedback.notificationOccurred('success');
+        if(type==='error') tg.HapticFeedback.notificationOccurred('error');
+        if(type==='warn') tg.HapticFeedback.notificationOccurred('warning');
+      }catch(e){}
+    }
+
+    function save(){
+      localStorage.setItem(LS.lang, state.lang);
+      localStorage.setItem(LS.mode, state.mode);
+      localStorage.setItem(LS.id, state.imperialId);
+      localStorage.setItem(LS.title, state.imperialTitle);
+      localStorage.setItem(LS.qk, String(state.qk));
+      localStorage.setItem(LS.streak, String(state.streak));
+      localStorage.setItem(LS.journal, JSON.stringify(state.journal.slice(0,7)));
+      localStorage.setItem(LS.loot, JSON.stringify(state.loot));
+      localStorage.setItem(LS.sealsDay, state.seal);
+    }
+
+    // ============================
+    // DAILY INIT
+    // ============================
+    function initIdentity(){
+      if(!state.imperialId){
+        state.imperialId = `#${String(randInt(1,9999)).padStart(4,'0')}`;
+        state.imperialTitle = titlesCN[randInt(0, titlesCN.length-1)];
+        save();
+      }
+    }
+
+    function initDaily(){
+      const tKey = todayKey();
+      const last = localStorage.getItem(LS.lastDay);
+      if(last !== tKey){
+        // new day
+        state.streak = clamp(state.streak + 1, 1, 999);
+        localStorage.setItem(LS.lastDay, tKey);
+
+        // Daily seal
+        state.seal = sealsCN[randInt(0, sealsCN.length-1)];
+        localStorage.setItem(LS.sealsDay, state.seal);
+
+        // Slight daily QK drift
+        state.qk = clamp(state.qk + randInt(1,6) + Math.random(), 0, 9999);
+
+        // Mark DAO seal not done
+        state.daoSeal = false;
+
+        // Stamp modal
+        setTimeout(()=>{
+          showModal(
+            t('dailySealTitle'),
+            `${t('dailySealText')}\n\n${state.seal}`,
+            [ { label: t('ok'), type:'gold', onClick: ()=>hideModal() } ]
+          );
+          haptic('success');
+          flashScene('seal');
+        }, 900);
+      }else{
+        // same day
+        const s = localStorage.getItem(LS.sealsDay);
+        if(s) state.seal = s;
+      }
+      save();
+    }
+
+    // ============================
+    // I18N
+    // ============================
+    const dict = {
+      cn:{
+        kicker: 'TON 帝国神殿',
+        title: 'TON TEMPLE',
+        id:'身份',
+        rank:'等级',
+        flow:'流',
+        risk:'风险',
+        weather:'天象',
+        seal:'今日印',
+        today:'今日',
+        vip24:'VIP 24H',
+        dao:'DAO',
+        lucky:'幸运时刻',
+        ritual:'仪式',
+        pro:'专业',
+        journal:'日志',
+        btnSpin:'激活量子流',
+        hongbao:'红包',
+        oracle:'神谕',
+        dragon:'金龙',
+        hongbaoSub:'轻触 • 战利品',
+        oracleSub:'长按 • 2秒',
+        dragonSub:'身份',
+        disclaimer:'【Temple Guidance】为信息与仪式体验，不保证结果。',
+        dailySealTitle:'今日财印',
+        dailySealText:'神殿为你盖下今日印。',
+        ok:'确认',
+        close:'关闭',
+        enter:'进入之门',
+        wait:'静待',
+        skip:'跳过',
+        gateTitle:'财富之门',
+        gateText:'你即将进入外部世界。\n\n风险提示：交易具有风险。\n确认后将打开外部链接。',
+        understand:'我已理解风险',
+        cancel:'取消',
+        vipUnlocked:'VIP 大殿已开启',
+        vipText:'你已达到金龙门槛。\n\n进入 VIP 大殿：DAO、权力、印章与神殿特权。',
+        lootTitle:'红包开启',
+        oracleTitle:'神谕降临',
+        proTitle:'PRO 终端',
+        journalTitle:'神殿日志（7日）',
+        daoTitle:'VIP • DAO 大殿',
+      },
+      en:{
+        kicker:'TON IMPERIAL TEMPLE',
+        title:'TON TEMPLE',
+        id:'ID',
+        rank:'RANK',
+        flow:'FLOW',
+        risk:'RISK',
+        weather:'WEATHER',
+        seal:'SEAL',
+        today:'TODAY',
+        vip24:'VIP 24H',
+        dao:'DAO',
+        lucky:'LUCKY HOUR',
+        ritual:'RITUAL',
+        pro:'PRO',
+        journal:'JOURNAL',
+        btnSpin:'ACTIVATE FLOW',
+        hongbao:'HONGBAO',
+        oracle:'ORACLE',
+        dragon:'DRAGON',
+        hongbaoSub:'TAP • LOOT',
+        oracleSub:'HOLD • 2s',
+        dragonSub:'STATUS',
+        disclaimer:'Temple Guidance is informational and ritual-based. It does not guarantee outcomes.',
+        dailySealTitle:"TODAY'S SEAL",
+        dailySealText:'The Temple stamps your daily seal.',
+        ok:'OK',
+        close:'CLOSE',
+        enter:'ENTER GATE',
+        wait:'WAIT',
+        skip:'SKIP',
+        gateTitle:'RISK GATE',
+        gateText:'You are about to open an external link.\n\nTrading involves risk.\nConfirm to proceed.',
+        understand:'I understand',
+        cancel:'Cancel',
+        vipUnlocked:'VIP HALL UNLOCKED',
+        vipText:'You reached the Dragon threshold.\n\nVIP Hall: DAO voting, status seals, and premium access.',
+        lootTitle:'HONGBAO OPENED',
+        oracleTitle:'ORACLE',
+        proTitle:'PRO TERMINAL',
+        journalTitle:'TEMPLE JOURNAL (7 DAYS)',
+        daoTitle:'VIP • DAO HALL',
+      }
+    };
+
+    function t(k){ return dict[state.lang]?.[k] || dict.en[k] || k; }
+
+    function applyI18n(){
+      $('kicker').textContent = t('kicker');
+      $('title').textContent = t('title');
+      $('idLabel').textContent = t('id');
+      $('rankLabel').textContent = t('rank');
+      $('flowLabel').textContent = t('flow');
+      $('riskLabel').textContent = t('risk');
+      $('weatherLabel').textContent = t('weather');
+      $('sealLabel').textContent = t('seal');
+      $('social1Label').textContent = t('today');
+      $('social2Label').textContent = t('vip24');
+      $('social3Label').textContent = t('dao');
+      $('luckyLabel').textContent = t('lucky');
+      $('modeTxt').textContent = state.mode==='ritual' ? t('ritual') : t('pro');
+      $('langTxt').textContent = state.lang===CN ? '中文' : 'EN';
+      $('journalTxt').textContent = t('journal');
+      $('spinBtn').textContent = t('btnSpin');
+      $('hongbaoLabel').textContent = t('hongbao');
+      $('oracleLabel').textContent = t('oracle');
+      $('dragonLabel').textContent = t('dragon');
+      $('hongbaoSub').textContent = t('hongbaoSub');
+      $('oracleSub').textContent = t('oracleSub');
+      $('dragonSub').textContent = t('dragonSub');
+      $('disclaimer').textContent = t('disclaimer');
+      $('vipRibbon').textContent = t('vipUnlocked');
+    }
+
+    // ============================
+    // SOCIAL PROOF
+    // ============================
+    function initSocial(){
+      const base1 = randInt(2200, 8200);
+      const base2 = randInt(60, 260);
+      const base3 = randInt(500, 1800);
+      $('social1').textContent = fmt(base1);
+      $('social2').textContent = fmt(base2);
+      $('social3').textContent = fmt(base3);
+    }
+
+    // ============================
+    // LUCKY HOUR
+    // ============================
+    function inLuckyHour(d=new Date()){
+      const m = d.getHours()*60 + d.getMinutes();
+      for(const w of LUCKY_WINDOWS){
+        const a = w.startH*60 + w.startM;
+        const b = w.endH*60 + w.endM;
+        if(m>=a && m<b) return true;
+      }
+      return false;
+    }
+
+    function nextLuckyDelta(){
+      const now = new Date();
+      const curM = now.getHours()*60 + now.getMinutes();
+      let candidates = [];
+      for(const w of LUCKY_WINDOWS){
+        const start = w.startH*60 + w.startM;
+        let delta = start - curM;
+        if(delta <= 0) delta += 24*60;
+        candidates.push(delta);
+      }
+      const minDelta = Math.min(...candidates);
+      const target = new Date(now.getTime() + minDelta*60*1000);
+      return target - now;
+    }
+
+    function updateLuckyTimer(){
+      const lucky = inLuckyHour();
+      if(lucky){
+        $('luckyTimer').textContent = 'ACTIVE';
+        setWeather('DAWN BLOOM');
+        setScenePreset('lucky');
+      }else{
+        const ms = nextLuckyDelta();
+        const s = Math.floor(ms/1000);
+        const hh = String(Math.floor(s/3600)).padStart(2,'0');
+        const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
+        const ss = String(s%60).padStart(2,'0');
+        $('luckyTimer').textContent = `${hh}:${mm}:${ss}`;
+        // base weather by time
+        const h = new Date().getHours();
+        if(h>=6 && h<18) setWeather('CALM GOLD DUST');
+        else setWeather('SILENT NIGHT');
+      }
+    }
+
+    // ============================
+    // WEATHER + RISK
+    // ============================
+    function setWeather(w){
+      state.weather = w;
+      $('weather').textContent = w;
+    }
+
+    function computeFlow(){
+      // Flow depends on QK, streak, oracle effect, lucky hour
+      let f = 45;
+      f += Math.min(30, state.qk/6);
+      f += Math.min(15, state.streak/2);
+      if(inLuckyHour()) f += 10;
+      if(state.lastOracle?.flow) f += state.lastOracle.flow;
+      f = clamp(Math.round(f), 0, 100);
+      state.flow = f;
+      $('flow').textContent = String(f);
+
+      // Risk aura
+      let r = 'MED';
+      if(f>=78) r='LOW';
+      if(f<=42) r='HIGH';
+      state.risk = r;
+      $('risk').textContent = r;
+
+      // Scene intensity
+      if(inLuckyHour()){
+        setScenePreset('lucky');
+      }else{
+        if(r==='HIGH') setScenePreset('night');
+        else setScenePreset('calm');
+      }
+
+      save();
+    }
+
+    // ============================
+    // RANK / VIP
+    // ============================
+    function computeRank(){
+      let rank = 'INITIATE';
+      if(state.streak>=7) rank = 'DISCIPLE';
+      if(state.qk>=90) rank = 'GUARDIAN';
+      if(state.qk>=140) rank = 'DRAGON';
+      $('rank').textContent = rank;
+
+      // VIP unlock requires: QK>=140, streak>=7, daoSeal true
+      const shouldVip = (state.qk>=140 && state.streak>=7 && state.daoSeal===true);
+      if(shouldVip && !state.vip){
+        state.vip = true;
+        $('vipRibbon').style.display = 'block';
+        flashScene('vip');
+        haptic('success');
+        setTimeout(()=>{
+          showModal(
+            t('vipUnlocked'),
+            t('vipText'),
+            [
+              { label: t('ok'), type:'gold', onClick: ()=>{ hideModal(); openVIP(); } },
+              { label: t('close'), type:'ghost', onClick: ()=>hideModal() }
+            ]
+          );
+        }, 600);
+      }
+      if(state.vip){ $('vipRibbon').style.display = 'block'; }
+      save();
+    }
+
+    // ============================
+    // UI MODAL
+    // ============================
+    const modalWrap = $('modalWrap');
+    const modalTitle = $('modalTitle');
+    const modalText = $('modalText');
+    const modalBtns = $('modalBtns');
+
+    function showModal(title, text, buttons=[]){
+      modalTitle.textContent = title;
+      modalText.textContent = text;
+      modalBtns.innerHTML = '';
+      for(const b of buttons){
+        const el = document.createElement('button');
+        el.className = 'btn ' + (b.type==='gold'?'btnGold': b.type==='danger'?'btnDanger':'btnGhost');
+        el.textContent = b.label;
+        el.onclick = b.onClick;
+        modalBtns.appendChild(el);
+      }
+      modalWrap.style.display = 'flex';
+    }
+
+    function hideModal(){
+      modalWrap.style.display = 'none';
+    }
+
+    $('closeModal').onclick = hideModal;
+    modalWrap.addEventListener('click', (e)=>{
+      if(e.target === modalWrap) hideModal();
+    });
+
+    // ============================
+    // JOURNAL
+    // ============================
+    function addJournal(entry){
+      state.journal.unshift(entry);
+      state.journal = state.journal.slice(0,7);
+      save();
+    }
+
+    function openJournal(){
+      const lines = state.journal.map((j,i)=>{
+        const d = new Date(j.ts);
+        const dt = state.lang===CN ?
+          `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` :
+          `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        return `${i+1}. ${dt}\n• ${j.oracle}\n• ${j.decision}  (+${j.qk.toFixed(2)} QK)\n• FLOW ${j.flow}/100\n`;
+      }).join('\n');
+
+      showModal(
+        t('journalTitle'),
+        lines || (state.lang===CN?'暂无记录。':'No records yet.'),
+        [ { label: t('close'), type:'ghost', onClick: ()=>hideModal() } ]
+      );
+    }
+
+    // ============================
+    // PRO TERMINAL
+    // ============================
+    function openProTerminal(){
+      const tonPulse = clamp(Math.round(40 + state.flow*0.6 + randInt(-6,6)), 0, 100);
+      const vol = clamp(Math.round(20 + (100-state.flow)*0.7 + randInt(-5,5)), 0, 100);
+      const liq = clamp(Math.round(35 + state.flow*0.55 + randInt(-5,5)), 0, 100);
+      const trend = state.flow>=65 ? 'UP' : state.flow<=45 ? 'DOWN' : 'SIDE';
+
+      const txt =
+        `FLOW SCORE: ${state.flow}/100\n`+
+        `RISK AURA: ${state.risk}\n`+
+        `MARKET WEATHER: ${state.weather}\n\n`+
+        `TON PULSE: ${tonPulse}/100\n`+
+        `VOLATILITY: ${vol}/100\n`+
+        `LIQUIDITY: ${liq}/100\n`+
+        `TREND: ${trend}\n\n`+
+        `${state.lang===CN?'提示：PRO 仅为仪式化数据展示。':'Note: PRO is ritualized informational display.'}`;
+
+      showModal(
+        t('proTitle'),
+        txt,
+        [ { label: t('close'), type:'ghost', onClick: ()=>hideModal() } ]
+      );
+    }
+
+    // ============================
+    // VIP HALL
+    // ============================
+    function openVIP(){
+      const quorum = clamp(Math.round(45 + state.flow*0.35 + randInt(-5,5)), 0, 100);
+      const txt =
+        (state.lang===CN ?
+          `欢迎进入 VIP 大殿。\n\nDAO 投票权重：${state.streak}x\nDAO 当前共识：${quorum}%\n\n可用功能：\n• 投票\n• 印章商店（即将上线）\n• VIP 之门` :
+          `Welcome to the VIP Hall.\n\nDAO voting weight: ${state.streak}x\nCurrent quorum: ${quorum}%\n\nFeatures:\n• Vote\n• Cosmetics shop (soon)\n• VIP Gate`);
+
+      showModal(
+        t('daoTitle'),
+        txt,
+        [
+          { label: state.lang===CN?'投票 +1':'VOTE +1', type:'gold', onClick: ()=>{ haptic('med'); flashScene('vote'); state.daoSeal=true; computeRank(); computeFlow(); hideModal(); } },
+          { label: state.lang===CN?'VIP 之门':'VIP GATE', type:'gold', onClick: ()=>{ hideModal(); openRiskGate(true); } },
+          { label: t('close'), type:'ghost', onClick: ()=>hideModal() }
+        ]
+      );
+    }
+
+    // ============================
+    // RISK GATE + PORTAL
+    // ============================
+    function openRiskGate(isVip=false){
+      const risk = state.risk;
+      const msg = `${t('gateText')}\n\n${state.lang===CN?'当前风险：':'Risk Aura: '}${risk}`;
+
+      let understood = false;
+
+      showModal(
+        t('gateTitle'),
+        msg,
+        [
+          { label: t('understand'), type:'ghost', onClick: ()=>{ understood = true; haptic('light'); flashScene('confirm'); } },
+          { label: isVip ? (state.lang===CN?'开启 VIP 传送':'OPEN VIP PORTAL') : (state.lang===CN?'开启传送':'OPEN PORTAL'), type:'gold', onClick: ()=>{
+              if(!understood){ haptic('warn'); flashScene('error'); return; }
+              hideModal();
+              portalSequence(()=>openLink(REF_LINK));
+            }
+          },
+          { label: t('cancel'), type:'danger', onClick: ()=>hideModal() }
+        ]
+      );
+    }
+
+    function openLink(url){
+      try{
+        if(tg?.openLink) tg.openLink(url);
+        else window.open(url, '_blank');
+      }catch(e){ window.open(url, '_blank'); }
+    }
+
+    // ============================
+    // ARTIFACT INTERACTIONS
+    // ============================
+    function flashCard(id){
+      const el = $(id);
+      el.classList.remove('flash');
+      void el.offsetWidth;
+      el.classList.add('flash');
+      setTimeout(()=>el.classList.remove('flash'), 800);
+    }
+
+    // SPIN
+    $('spinBtn').addEventListener('click', ()=>{
+      haptic('heavy');
+      flashScene('spin');
+      flashCard('dragonCard');
+      // Give QK
+      const gain = 3 + Math.random()*9;
+      state.qk = clamp(state.qk + gain, 0, 9999);
+      $('qk').textContent = state.qk.toFixed(2);
+
+      // Make a slight oracle readiness
+      state.oracleReady = true;
+
+      computeFlow();
+      computeRank();
+
+      addJournal({
+        ts: Date.now(),
+        oracle: state.lang===CN?'【轮】激活量子流':'[WHEEL] Activated Flow',
+        decision: 'SPIN',
+        qk: gain,
+        flow: state.flow
+      });
+    });
+
+    // HONGBAO
+    $('hongbaoCard').addEventListener('click', ()=>{
+      flashCard('hongbaoCard');
+      haptic('light');
+      flashScene('hongbao');
+
+      const gain = 2 + Math.random()*6;
+      state.qk = clamp(state.qk + gain, 0, 9999);
+      $('qk').textContent = state.qk.toFixed(2);
+
+      // Loot
+      const item = lootPool[randInt(0, lootPool.length-1)];
+      state.loot[item.key] = (state.loot[item.key]||0) + 1;
+
+      const lootName = state.lang===CN ? item.cn : item.en;
+
+      showModal(
+        t('lootTitle'),
+        `${state.lang===CN?'你获得：':'You received: '} ${lootName}\n\n+${gain.toFixed(2)} QK`,
+        [ { label: t('ok'), type:'gold', onClick: ()=>hideModal() } ]
+      );
+
+      addJournal({
+        ts: Date.now(),
+        oracle: state.lang===CN?`【红包】${lootName}`:`[HONGBAO] ${lootName}`,
+        decision: 'LOOT',
+        qk: gain,
+        flow: state.flow
+      });
+
+      computeFlow();
+      computeRank();
+    });
+
+    // ORACLE (hold 2s)
+    let holdTimer = null;
+    let holding = false;
+
+    function startHold(e){
+      e.preventDefault();
+      if(holding) return;
+      holding = true;
+      flashCard('oracleCard');
+      haptic('med');
+      flashScene('hold');
+
+      holdTimer = setTimeout(()=>{
+        holding = false;
+        resolveOracle();
+      }, 2000);
+    }
+
+    function endHold(){
+      if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+      holding = false;
+    }
+
+    $('oracleCard').addEventListener('pointerdown', startHold);
+    $('oracleCard').addEventListener('pointerup', endHold);
+    $('oracleCard').addEventListener('pointercancel', endHold);
+    $('oracleCard').addEventListener('pointerleave', endHold);
+
+    function resolveOracle(){
+      haptic('success');
+      flashScene('oracle');
+
+      let o;
+      if(state.lang===CN){
+        o = oracleCN[randInt(0, oracleCN.length-1)];
+        state.lastOracle = { flow: o.flow };
+        state.risk = o.aura;
+        $('risk').textContent = o.aura;
+
+        const msg = `${o.ch}\n\n${state.lang===CN?'Temple Guidance：':'Temple Guidance: '}\n${o.en}`;
+
+        showModal(
+          t('oracleTitle'),
+          msg,
+          [
+            { label: t('enter'), type:'gold', onClick: ()=>{ hideModal(); onDecision('ENTER', o.ch); } },
+            { label: t('wait'), type:'ghost', onClick: ()=>{ hideModal(); onDecision('WAIT', o.ch); } },
+            { label: t('skip'), type:'danger', onClick: ()=>{ hideModal(); onDecision('SKIP', o.ch); } },
+          ]
+        );
+      }else{
+        o = oracleEN[randInt(0, oracleEN.length-1)];
+        state.lastOracle = { flow: o.flow };
+        state.risk = o.aura;
+        $('risk').textContent = o.aura;
+
+        const msg = `${o.title}\n\n${o.text}`;
+
+        showModal(
+          t('oracleTitle'),
+          msg,
+          [
+            { label: t('enter'), type:'gold', onClick: ()=>{ hideModal(); onDecision('ENTER', o.title); } },
+            { label: t('wait'), type:'ghost', onClick: ()=>{ hideModal(); onDecision('WAIT', o.title); } },
+            { label: t('skip'), type:'danger', onClick: ()=>{ hideModal(); onDecision('SKIP', o.title); } },
+          ]
+        );
+      }
+
+      computeFlow();
+      computeRank();
+    }
+
+    function onDecision(decision, oracleText){
+      let gain = 0;
+      if(decision==='ENTER') gain = 5 + Math.random()*8;
+      if(decision==='WAIT') gain = 2 + Math.random()*4;
+      if(decision==='SKIP') gain = 0.5 + Math.random()*1.5;
+
+      state.qk = clamp(state.qk + gain, 0, 9999);
+      $('qk').textContent = state.qk.toFixed(2);
+
+      addJournal({
+        ts: Date.now(),
+        oracle: oracleText,
+        decision,
+        qk: gain,
+        flow: state.flow
+      });
+
+      if(decision==='ENTER'){
+        openRiskGate(false);
+      }else if(decision==='WAIT'){
+        flashScene('wait');
+        haptic('light');
+      }else{
+        flashScene('skip');
+        haptic('warn');
+      }
+
+      computeFlow();
+      computeRank();
+    }
+
+    // DRAGON
+    $('dragonCard').addEventListener('click', ()=>{
+      flashCard('dragonCard');
+      haptic('med');
+      flashScene('dragon');
+
+      if(state.vip){
+        openVIP();
+        return;
+      }
+
+      const txt = state.lang===CN ?
+        `你的守护金龙正在观察。\n\n当前：${state.qk.toFixed(2)} QK\n连续：${state.streak} 天\nDAO 印：${state.daoSeal?'已获得':'未获得'}\n\n达到 140 QK + 7 天 + DAO 印，将开启 VIP 大殿。` :
+        `Your Guardian Dragon is watching.\n\nCurrent: ${state.qk.toFixed(2)} QK\nStreak: ${state.streak} days\nDAO Seal: ${state.daoSeal?'Obtained':'Missing'}\n\nReach 140 QK + 7 days + DAO Seal to unlock VIP.`;
+
+      showModal(
+        t('dragon'),
+        txt,
+        [
+          { label: state.lang===CN?'获得 DAO 印':'GET DAO SEAL', type:'gold', onClick: ()=>{ state.daoSeal=true; haptic('success'); flashScene('seal'); computeRank(); hideModal(); } },
+          { label: t('close'), type:'ghost', onClick: ()=>hideModal() }
+        ]
+      );
+    });
+
+    // ============================
+    // TOGGLES
+    // ============================
+    $('langToggle').addEventListener('click', ()=>{
+      state.lang = state.lang===CN ? EN : CN;
+      save();
+      applyI18n();
+      computeFlow();
+      computeRank();
+      haptic('light');
+    });
+
+    $('modeToggle').addEventListener('click', ()=>{
+      state.mode = state.mode==='ritual' ? 'pro' : 'ritual';
+      save();
+      applyI18n();
+      haptic('light');
+      if(state.mode==='pro') openProTerminal();
+    });
+
+    $('journalBtn').addEventListener('click', ()=>{
+      haptic('light');
+      openJournal();
+    });
+
+    // ============================
+    // RENDER UI
+    // ============================
+    function renderHUD(){
+      $('imperialId').textContent = state.imperialId;
+      $('qk').textContent = state.qk.toFixed(2);
+      $('seal').textContent = state.seal;
+      $('risk').textContent = state.risk;
+      $('weather').textContent = state.weather;
+      $('flow').textContent = String(state.flow);
+      computeRank();
+    }
+
+    // ============================
+    // THREE.JS SCENE
+    // ============================
+    const stage = document.getElementById('stage');
+
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    stage.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 120);
+    camera.position.set(0, 1.2, 6.2);
+
+    // Controls (disabled interactions by default; used for debug)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.enableRotate = false;
+
+    // Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambient);
+
+    const key = new THREE.DirectionalLight(0xfff1d6, 1.0);
+    key.position.set(2.8, 4.2, 3.0);
+    key.castShadow = false;
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0xffd36b, 0.85);
+    rim.position.set(-4.2, 2.5, -2.5);
+    scene.add(rim);
+
+    const redFill = new THREE.PointLight(0xff2244, 0.35, 12);
+    redFill.position.set(0, 1.2, 2.5);
+    scene.add(redFill);
+
+    // Temple floor (obsidian)
+    const floorGeo = new THREE.CircleGeometry(6.5, 128);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#07070f'),
+      metalness: 0.9,
+      roughness: 0.22,
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI/2;
+    floor.position.y = -0.65;
+    scene.add(floor);
+
+    // Inner dais
+    const daisGeo = new THREE.CylinderGeometry(2.2, 2.35, 0.45, 128);
+    const daisMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#0b0b16'),
+      metalness: 0.75,
+      roughness: 0.28,
+    });
+    const dais = new THREE.Mesh(daisGeo, daisMat);
+    dais.position.y = -0.42;
+    scene.add(dais);
+
+    // Golden ring portal
+    const ringGeo = new THREE.TorusGeometry(1.25, 0.12, 48, 220);
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#ffd36b'),
+      metalness: 1.0,
+      roughness: 0.22,
+    });
+    const ring = new THREE.Mesh(ringGeo, goldMat);
+    ring.position.set(0, 0.55, 0);
+    scene.add(ring);
+
+    // Center glyph
+    const glyphGeo = new THREE.CircleGeometry(0.58, 64);
+    const glyphMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#0a0a10'),
+      metalness: 0.95,
+      roughness: 0.18,
+      emissive: new THREE.Color('#000000'),
+      emissiveIntensity: 0.0,
+    });
+    const glyph = new THREE.Mesh(glyphGeo, glyphMat);
+    glyph.position.set(0, 0.55, 0);
+    glyph.rotation.y = Math.PI;
+    scene.add(glyph);
+
+    // Fake engraving: a thin golden disc behind
+    const engrGeo = new THREE.CircleGeometry(0.62, 64);
+    const engrMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#b88a1f'),
+      metalness: 1.0,
+      roughness: 0.28,
+      emissive: new THREE.Color('#000000'),
+      emissiveIntensity: 0.0,
+    });
+    const engr = new THREE.Mesh(engrGeo, engrMat);
+    engr.position.set(0, 0.55, -0.01);
+    scene.add(engr);
+
+    // Dragon silhouette (procedural)
+    const dragonGroup = new THREE.Group();
+    scene.add(dragonGroup);
+
+    // Body
+    const bodyGeo = new THREE.TorusKnotGeometry(0.55, 0.14, 160, 24);
+    const dragonMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#11111f'),
+      metalness: 0.95,
+      roughness: 0.25,
+      emissive: new THREE.Color('#000000'),
+      emissiveIntensity: 0.0,
+    });
+    const body = new THREE.Mesh(bodyGeo, dragonMat);
+    body.position.set(0, 1.35, -0.65);
+    body.rotation.set(0.2, 0.2, 0);
+    dragonGroup.add(body);
+
+    // Aura shell
+    const auraGeo = new THREE.SphereGeometry(1.05, 64, 64);
+    const auraMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#ffd36b'),
+      transparent: true,
+      opacity: 0.06,
+      metalness: 0.0,
+      roughness: 0.0,
+      emissive: new THREE.Color('#ffd36b'),
+      emissiveIntensity: 0.25,
+    });
+    const aura = new THREE.Mesh(auraGeo, auraMat);
+    aura.position.set(0, 1.35, -0.65);
+    dragonGroup.add(aura);
+
+    // Particles (gold dust + meteors)
+    const dustCount = 1400;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    const dustVel = new Float32Array(dustCount);
+    for(let i=0;i<dustCount;i++){
+      const r = Math.random()*7.5;
+      const a = Math.random()*Math.PI*2;
+      dustPos[i*3+0] = Math.cos(a)*r;
+      dustPos[i*3+1] = (Math.random()*4.2) - 0.3;
+      dustPos[i*3+2] = Math.sin(a)*r;
+      dustVel[i] = 0.004 + Math.random()*0.012;
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+
+    const dustMat = new THREE.PointsMaterial({
+      color: new THREE.Color('#ffd36b'),
+      size: 0.018,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const dust = new THREE.Points(dustGeo, dustMat);
+    scene.add(dust);
+
+    // Meteors (instanced spheres)
+    const meteorCount = 38;
+    const meteorGeo = new THREE.IcosahedronGeometry(0.07, 1);
+    const meteorMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#ffd36b'),
+      metalness: 1.0,
+      roughness: 0.22,
+      emissive: new THREE.Color('#b88a1f'),
+      emissiveIntensity: 0.15,
+    });
+    const meteors = new THREE.InstancedMesh(meteorGeo, meteorMat, meteorCount);
+    meteors.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(meteors);
+
+    const meteorData = [];
+    const tmpObj = new THREE.Object3D();
+
+    for(let i=0;i<meteorCount;i++){
+      meteorData.push({
+        x: (Math.random()*10-5),
+        y: (Math.random()*4.2+0.2),
+        z: (Math.random()*6-3),
+        vx: (0.004 + Math.random()*0.012) * (Math.random()<0.5?1:-1),
+        vy: (0.0006 + Math.random()*0.002),
+        spin: (Math.random()*0.04+0.01),
+        s: (0.7 + Math.random()*1.6),
+      });
+    }
+
+    // Scene presets
+    const presets = {
+      night:{
+        ambient:0.32, key:0.85, rim:0.65,
+        dust:0.48, meteors:0.7,
+        aura:0.06, glow:0.8,
+      },
+      calm:{
+        ambient:0.38, key:0.95, rim:0.78,
+        dust:0.58, meteors:0.85,
+        aura:0.08, glow:1.0,
+      },
+      lucky:{
+        ambient:0.52, key:1.15, rim:1.05,
+        dust:0.75, meteors:1.25,
+        aura:0.12, glow:1.25,
+      },
+      vip:{
+        ambient:0.6, key:1.25, rim:1.15,
+        dust:0.8, meteors:1.4,
+        aura:0.14, glow:1.35,
+      }
+    };
+
+    let presetName = 'night';
+
+    function setScenePreset(name){
+      if(!presets[name]) return;
+      presetName = name;
+    }
+
+    function flashScene(kind){
+      // quick burst by kind
+      if(kind==='spin'){
+        ring.scale.set(1.05,1.05,1.05);
+        setTimeout(()=>ring.scale.set(1,1,1), 180);
+      }
+      if(kind==='oracle'){
+        auraMat.opacity = 0.14;
+        setTimeout(()=>auraMat.opacity = presets[presetName].aura, 220);
+      }
+      if(kind==='vip'){
+        auraMat.opacity = 0.18;
+        auraMat.emissiveIntensity = 0.55;
+        setTimeout(()=>{
+          auraMat.opacity = presets[presetName].aura;
+          auraMat.emissiveIntensity = 0.25;
+        }, 420);
+      }
+      if(kind==='error'){
+        redFill.intensity = 0.85;
+        setTimeout(()=>redFill.intensity = 0.35, 240);
+      }
+      if(kind==='seal'){
+        engrMat.emissiveIntensity = 0.55;
+        setTimeout(()=>engrMat.emissiveIntensity = 0.0, 220);
+      }
+    }
+
+    // Portal sequence (camera zoom + ring open + dust pull)
+    function portalSequence(done){
+      haptic('heavy');
+      flashScene('spin');
+
+      const startZ = camera.position.z;
+      const startY = camera.position.y;
+      const t0 = performance.now();
+      const dur = 1100;
+
+      function anim(t){
+        const k = clamp((t - t0)/dur, 0, 1);
+        const ease = k<.5 ? 2*k*k : 1 - Math.pow(-2*k+2,2)/2;
+
+        camera.position.z = startZ - ease*2.1;
+        camera.position.y = startY - ease*0.35;
+        ring.rotation.z += 0.12;
+        ring.scale.set(1 + ease*0.22, 1 + ease*0.22, 1 + ease*0.22);
+        dustMat.opacity = clamp(0.55 + ease*0.25, 0, 1);
+
+        if(k<1){
+          requestAnimationFrame(anim);
+        }else{
+          // flash
+          key.intensity += 0.45;
+          setTimeout(()=>key.intensity -= 0.45, 120);
+
+          // reset
+          setTimeout(()=>{
+            camera.position.z = startZ;
+            camera.position.y = startY;
+            ring.scale.set(1,1,1);
+            done?.();
+          }, 140);
         }
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = "#ffd700";
-            pts.forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
-                p.y -= p.v; if(p.y < 0) p.y = canvas.height;
-            });
-            requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(anim);
+    }
+
+    // Parallax (device orientation)
+    let parX=0, parY=0;
+    window.addEventListener('deviceorientation', (e)=>{
+      const x = clamp((e.gamma||0)/30, -1, 1);
+      const y = clamp((e.beta||0)/30, -1, 1);
+      parX = x;
+      parY = y;
+    }, { passive:true });
+
+    // Resize
+    window.addEventListener('resize', ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animate
+    let last = performance.now();
+
+    function tick(now){
+      const dt = Math.min(0.033, (now-last)/1000);
+      last = now;
+
+      // Preset apply (smooth)
+      const p = presets[presetName];
+      ambient.intensity += (p.ambient - ambient.intensity) * 0.03;
+      key.intensity += (p.key - key.intensity) * 0.03;
+      rim.intensity += (p.rim - rim.intensity) * 0.03;
+      dustMat.opacity += (p.dust - dustMat.opacity) * 0.03;
+      auraMat.opacity += (p.aura - auraMat.opacity) * 0.03;
+
+      // Ring slow rotation
+      ring.rotation.z += dt * 0.35;
+
+      // Dragon breathing
+      const breath = 1 + Math.sin(now*0.0014)*0.03;
+      dragonGroup.scale.set(breath, breath, breath);
+      dragonGroup.rotation.y += dt * 0.12;
+
+      // Parallax camera
+      camera.position.x += ((parX*0.55) - camera.position.x) * 0.02;
+      camera.lookAt(0, 0.75 + parY*0.2, 0);
+
+      // Dust movement
+      const pos = dustGeo.attributes.position.array;
+      for(let i=0;i<dustCount;i++){
+        pos[i*3+1] += dustVel[i] * (inLuckyHour()?1.35:1.0);
+        if(pos[i*3+1] > 4.2){
+          pos[i*3+1] = -0.3;
+          pos[i*3+0] = (Math.random()*14-7);
+          pos[i*3+2] = (Math.random()*10-5);
         }
-        initParticles(); draw();
+      }
+      dustGeo.attributes.position.needsUpdate = true;
 
-        // 2. SPIN & GONCH
-        document.getElementById('spinBtn').addEventListener('click', () => {
-            if (audio.paused) { audio.volume = 0.3; audio.play().catch(()=>{}); }
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-            
-            const wheel = document.getElementById('wheel');
-            const deg = Math.floor(Math.random() * 360) + 2160;
-            wheel.style.transform = `rotate(${deg}deg)`;
+      // Meteors
+      for(let i=0;i<meteorCount;i++){
+        const m = meteorData[i];
+        m.x += m.vx * (p.meteors);
+        m.y += m.vy * (p.meteors);
+        if(m.x > 6.5) m.x = -6.5;
+        if(m.x < -6.5) m.x = 6.5;
+        if(m.y > 4.8) m.y = 0.2;
 
-            setTimeout(() => {
-                balance += Math.random() * 5;
-                document.getElementById('bal').innerText = balance.toFixed(2);
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            }, 4000);
-        });
+        tmpObj.position.set(m.x, m.y, m.z);
+        tmpObj.rotation.set(now*0.0006*m.spin, now*0.0008*m.spin, now*0.0007*m.spin);
+        tmpObj.scale.setScalar(m.s);
+        tmpObj.updateMatrix();
+        meteors.setMatrixAt(i, tmpObj.matrix);
+      }
+      meteors.instanceMatrix.needsUpdate = true;
 
-        // 3. РИТУАЛ ОРАКУЛА (Hold)
-        const oBtn = document.getElementById('oracleBtn');
-        function startHold(e) {
-            e.preventDefault();
-            oBtn.classList.add('burning');
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            timer = setTimeout(() => {
-                tg.showPopup({ title: "Oracle", message: "Дракон видит твой успех!", buttons: [{type: 'ok', color: '#ffd700'}] });
-                endHold();
-            }, 2000);
-        }
-        function endHold() { clearTimeout(timer); oBtn.classList.remove('burning'); }
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
 
-        oBtn.addEventListener('touchstart', startHold); oBtn.addEventListener('touchend', endHold);
-        oBtn.addEventListener('mousedown', startHold); oBtn.addEventListener('mouseup', endHold);
+    requestAnimationFrame(tick);
 
-        // 4. ПАРАЛЛАКС
-        window.addEventListener('deviceorientation', (e) => {
-            const x = e.beta / 15; const y = e.gamma / 15;
-            document.getElementById('main-ui').style.transform = `translate(${y}px, ${x}px)`;
-        });
+    // ============================
+    // INIT
+    // ============================
+    initIdentity();
+    initDaily();
+    initSocial();
 
-        tg.ready();
-    </script>
+    // default weather preset
+    setScenePreset('night');
+    updateLuckyTimer();
+    setInterval(updateLuckyTimer, 1000);
+
+    applyI18n();
+    renderHUD();
+    computeFlow();
+    computeRank();
+
+  </script>
 </body>
 </html>
