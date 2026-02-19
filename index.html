@@ -1,178 +1,283 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FA CAI AI Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FA CAI PREMIUM 2026</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --gold: linear-gradient(135deg, #fceabb 0%, #fccd4d 50%, #f8b500 100%);
+            --dark-bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 215, 0, 0.15);
+        }
+
         body {
-            background-color: #050a14;
-            color: #00f2ff;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #050505 80%);
+        }
+
+        /* Фоновый иероглиф */
+        .bg-symbol {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80vw;
+            color: rgba(255, 215, 0, 0.02);
+            z-index: -1;
+            pointer-events: none;
+            font-weight: 700;
+        }
+
+        .app-wrapper {
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            background: radial-gradient(circle at center, #0a1a30 0%, #050a14 100%);
+            gap: 20px;
+            padding-bottom: 100px;
         }
 
-        .scanner-container {
+        /* Премиум карточки */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            padding: 20px;
             position: relative;
-            width: 320px;
-            height: 320px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Твой 3D Конверт */
-        #envelope-container {
-            width: 240px;
-            height: 240px;
-            z-index: 5;
-            background-image: url('envelope.jpg'); /* Ссылка на локальный файл */
-            background-size: cover;
-            background-position: center;
-            border-radius: 30px;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-15px) scale(1.02); }
-        }
-
-        /* Эффект сканирующего луча */
-        .scan-line {
+        /* Иероглиф в каждом разделе */
+        .card::before {
+            content: "發";
             position: absolute;
-            width: 260px;
-            height: 2px;
-            background: rgba(0, 242, 255, 0.8);
-            box-shadow: 0 0 15px #00f2ff;
-            z-index: 6;
-            display: none;
-            top: 40px;
-            animation: moveLine 2s linear infinite;
+            right: -10px;
+            bottom: -20px;
+            font-size: 100px;
+            color: rgba(255, 215, 0, 0.04);
+            pointer-events: none;
+            font-family: 'Noto Sans SC';
         }
 
-        @keyframes moveLine {
-            0% { top: 40px; opacity: 0; }
-            50% { opacity: 1; }
-            100% { top: 280px; opacity: 0; }
-        }
-
-        .ring {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            border: 2px solid transparent;
-            border-top: 2px solid #00f2ff;
-            border-radius: 50%;
-            display: none;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .status-text {
-            margin-top: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #00f2ff;
+        .header {
             text-align: center;
+            margin-top: 20px;
         }
 
-        #result-value {
-            font-size: 80px;
-            font-weight: 900;
-            display: none;
-            background: linear-gradient(to bottom, #fff, #00f2ff);
+        .gold-text {
+            background: var(--gold);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.5));
-        }
-
-        button {
-            margin-top: 50px;
-            padding: 22px 80px;
-            background: linear-gradient(135deg, #ff1a1a 0%, #880000 100%);
-            border: none;
-            color: white;
-            font-size: 16px;
-            font-weight: 900;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
-            cursor: pointer;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.5);
-            transition: 0.4s;
         }
 
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 50px rgba(255, 0, 0, 0.7);
+        /* Карусель новостей */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 15px;
+            scrollbar-width: none;
         }
+        .carousel::-webkit-scrollbar { display: none; }
+        .news-item {
+            min-width: 85%;
+            scroll-snap-align: center;
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 3px solid #fccd4d;
+        }
+
+        /* Сетка конвертов */
+        .hongbao-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .hongbao-btn {
+            background: rgba(255, 0, 0, 0.05);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .hongbao-btn:active { transform: scale(0.95); background: rgba(255, 0, 0, 0.15); }
+        .hb-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+
+        /* Кнопка смены языка */
+        .lang-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 12px;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(252, 205, 77, 0.4);
+        }
+
+        /* Модалка результата */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            width: 80%;
+            text-align: center;
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--gold);
+        }
+
+        .stats-val { font-size: 32px; color: #fccd4d; font-weight: 700; margin: 10px 0; }
     </style>
 </head>
 <body>
 
-    <div class="scanner-container">
-        <div id="ring" class="ring"></div>
-        <div id="scan-line" class="scan-line"></div>
-        <div id="envelope-container"></div>
-        <div id="result-value">0%</div>
+    <div class="bg-symbol">發</div>
+    
+    <button class="lang-btn" onclick="toggleLang()" id="langBtn">CN</button>
+
+    <div class="app-wrapper">
+        <div class="header">
+            <div class="gold-text" style="font-size: 12px;" id="topLabel">FA CAI WEALTH TERMINAL 2026</div>
+            <h1 style="margin: 5px 0; font-size: 28px;">FORTUNE AI</h1>
+        </div>
+
+        <div class="card">
+            <div class="gold-text" style="font-size: 10px; margin-bottom: 10px;" id="newsLabel">MARKET INSIGHTS</div>
+            <div class="carousel">
+                <div class="news-item">
+                    <div id="n1_t" style="font-weight: 700; color: #fccd4d;">TON ecosystem growth</div>
+                    <div id="n1_d" style="font-size: 12px; opacity: 0.6; margin-top: 5px;">AI agents integration expected in Q3 2026.</div>
+                </div>
+                <div class="news-item">
+                    <div id="n2_t" style="font-weight: 700; color: #fccd4d;">Market Sentiment</div>
+                    <div id="n2_d" style="font-size: 12px; opacity: 0.6; margin-top: 5px;">Global wealth flow shifts to decentralized AI.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="gold-text" style="font-size: 10px; margin-bottom: 15px;" id="hbLabel">CHOOSE YOUR PROPHECY</div>
+            <div class="hongbao-grid">
+                <div class="hongbao-btn" onclick="openHb('Wealth')">
+                    <span class="hb-icon">🧧</span>
+                    <span style="font-size: 12px; font-weight: 700;" class="hb-name">WEALTH</span>
+                </div>
+                <div class="hongbao-btn" onclick="openHb('Success')">
+                    <span class="hb-icon">🏮</span>
+                    <span style="font-size: 12px; font-weight: 700;" class="hb-name">LUCK</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <div class="gold-text" style="font-size: 10px; margin-bottom: 10px;" id="sigLabel">AI WEALTH SIGNAL</div>
+            <div id="sigStatus" style="font-size: 18px; color: #00ff88; font-weight: 700;">● STRONG BUY</div>
+            <div style="font-size: 11px; opacity: 0.5; margin-top: 5px;">Confidence Index: 98.4%</div>
+        </div>
     </div>
 
-    <div id="status" class="status-text">AI Neural System Ready</div>
-    
-    <button id="main-btn" onclick="startScan()">Analyze Wealth</button>
+    <div id="modal" onclick="closeModal()">
+        <div class="modal-content">
+            <div id="resTitle" class="gold-text">DESTINY REVEALED</div>
+            <div class="stats-val" id="resVal">88%</div>
+            <p id="resDesc" style="font-size: 14px; line-height: 1.6; opacity: 0.8;">The stars align for massive growth in your TON wallet.</p>
+            <button class="gold-text" style="background: none; border: 1px solid #fccd4d; padding: 10px 20px; border-radius: 10px; margin-top: 20px;">DONE</button>
+        </div>
+    </div>
 
     <script>
-        function startScan() {
-            const ring = document.getElementById('ring');
-            const line = document.getElementById('scan-line');
-            const status = document.getElementById('status');
-            const env = document.getElementById('envelope-container');
-            const resValue = document.getElementById('result-value');
-            const btn = document.getElementById('main-btn');
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
 
-            btn.style.display = 'none';
-            ring.style.display = 'block';
-            line.style.display = 'block';
-            ring.style.animation = 'rotate 1s linear infinite';
-            
-            let steps = ["Syncing Nodes...", "Scanning Assets...", "Neural Mapping...", "Finalizing..."];
-            let i = 0;
-            
-            let interval = setInterval(() => {
-                status.innerText = steps[i];
-                i++;
-                if (i >= steps.length) {
-                    clearInterval(interval);
-                    setTimeout(finish, 1000);
-                }
-            }, 1200);
-
-            function finish() {
-                ring.style.display = 'none';
-                line.style.display = 'none';
-                env.style.display = 'none';
-                
-                let score = Math.floor(Math.random() * 21) + 78; // Высокий шанс
-                resValue.innerText = score + '%';
-                resValue.style.display = 'block';
-                status.innerText = 'Fortune probability high!';
+        let currentLang = 'EN';
+        const translations = {
+            EN: {
+                top: "FA CAI WEALTH TERMINAL 2026",
+                news: "MARKET INSIGHTS",
+                hb: "CHOOSE YOUR PROPHECY",
+                sig: "AI WEALTH SIGNAL",
+                lang: "CN",
+                n1t: "TON ecosystem growth",
+                n1d: "AI agents integration expected in Q3 2026.",
+                n2t: "Market Sentiment",
+                n2d: "Global wealth flow shifts to decentralized AI.",
+                destiny: "DESTINY REVEALED",
+                advice: "The stars align for massive growth in your TON wallet."
+            },
+            CN: {
+                top: "發財财富终端 2026",
+                news: "市场洞察",
+                hb: "选择你的预言",
+                sig: "AI 财富信号",
+                lang: "EN",
+                n1t: "TON 生态系统增长",
+                n1d: "AI 代理预计将在 2026 年第三季度整合。",
+                n2t: "市场情绪",
+                n2d: "全球财富流向去中心化 AI。",
+                destiny: "天命已现",
+                advice: "星象显示您的 TON 钱包将迎来巨大增长。"
             }
+        };
+
+        function toggleLang() {
+            currentLang = currentLang === 'EN' ? 'CN' : 'EN';
+            const t = translations[currentLang];
+            document.getElementById('topLabel').innerText = t.top;
+            document.getElementById('newsLabel').innerText = t.news;
+            document.getElementById('hbLabel').innerText = t.hb;
+            document.getElementById('sigLabel').innerText = t.sig;
+            document.getElementById('langBtn').innerText = t.lang;
+            document.getElementById('n1_t').innerText = t.n1t;
+            document.getElementById('n1_d').innerText = t.n1d;
+            document.getElementById('n2_t').innerText = t.n2t;
+            document.getElementById('n2_d').innerText = t.n2d;
+            document.getElementById('resTitle').innerText = t.destiny;
+            document.getElementById('resDesc').innerText = t.advice;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
+
+        function openHb(type) {
+            const score = Math.floor(Math.random() * (99 - 70 + 1)) + 70;
+            document.getElementById('resVal').innerText = score + "%";
+            document.getElementById('modal').style.display = 'flex';
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        tg.setHeaderColor('#2c1f01');
+        tg.setBackgroundColor('#050505');
     </script>
 </body>
 </html>
