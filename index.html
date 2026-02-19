@@ -8,153 +8,124 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold-primary: #FFD700;
-            --gold-light: #FFEA8D;
-            --dark-bg: #030305;
-            --neon-glow: 0 0 15px rgba(255,215,0,0.4);
+            --gold: #FFD700;
+            --dark: #030305;
         }
 
         body {
-            background-color: var(--dark-bg);
+            background-color: var(--dark);
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             margin: 0;
             padding: 0;
-            /* Исправляем прокрутку */
-            overflow-y: auto; 
-            overflow-x: hidden;
+            /* Включаем скролл и убираем лишнее */
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
             background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #030305 100%);
         }
 
-        /* Золотая пыльца на весь экран */
+        /* Золотая пыльца - ГЛАВНЫЙ ФИКС: pointer-events: none */
         #dust-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Пропускает клики сквозь себя */
-            z-index: 99; /* Поверх всего для видимости */
+            pointer-events: none !important;
+            z-index: 1; /* Самый нижний слой для анимации */
         }
 
         .dust {
             position: absolute;
-            background: radial-gradient(circle, #fff 0%, rgba(255,215,0,0) 70%);
+            background: rgba(255, 215, 0, 0.4);
             border-radius: 50%;
             opacity: 0;
-            filter: blur(1px);
             animation: flyDust linear infinite;
         }
 
         @keyframes flyDust {
             0% { transform: translate(0, 0) scale(0); opacity: 0; }
-            20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
+            50% { opacity: 0.6; }
             100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
         }
 
-        /* Неоновый иероглиф на фоне */
         .bg-symbol {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 85vw;
-            color: rgba(255, 215, 0, 0.03);
-            z-index: -1;
+            color: rgba(255, 215, 0, 0.02);
+            z-index: 0;
             font-family: 'Noto Sans SC';
-            pointer-events: none; /* Не мешает кликам */
+            pointer-events: none;
         }
 
         .header {
             text-align: center;
-            padding: 50px 0 20px;
+            padding: 60px 0 20px;
             z-index: 10;
-        }
-
-        .gold-text {
-            background: linear-gradient(90deg, var(--gold-light), var(--gold-primary), var(--gold-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-size: 12px;
-            text-shadow: var(--neon-glow);
+            pointer-events: none;
         }
 
         h1 {
-            font-size: 40px;
+            font-size: 36px;
             margin: 10px 0;
-            text-shadow: var(--neon-glow);
             background: linear-gradient(90deg, #e0b000, #ffec8b, #e0b000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
-        /* Интерактивная область */
-        .interactive-area {
+        /* Контейнер с кнопками - ГЛАВНЫЙ ФИКС: z-index и pointer-events */
+        .interactive-content {
             display: flex;
             flex-direction: column;
-            gap: 60px; /* Отступ между объектами */
-            padding-bottom: 100px;
+            gap: 60px;
+            padding-bottom: 150px; /* Чтобы фонарик не прилипал к низу */
             width: 100%;
             align-items: center;
-            z-index: 10; /* Выше фона */
             position: relative;
+            z-index: 999 !important; /* Выше пыльцы и фона */
+            pointer-events: auto !important;
         }
 
-        @keyframes float3D {
-            0%, 100% { transform: translateY(0px) rotateX(10deg); }
-            50% { transform: translateY(-20px) rotateX(15deg) rotateY(5deg); }
-        }
-
-        .scene3d {
+        .item-3d {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: float3D 5s ease-in-out infinite;
             cursor: pointer;
-            transition: transform 0.3s;
-            transform-style: preserve-3d;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.2s;
+            pointer-events: auto !important; /* Разрешаем нажатия на сам элемент */
         }
 
-        .scene3d:active {
-            transform: scale(0.9) rotateX(20deg);
+        .item-3d:active {
+            transform: scale(0.9);
         }
 
-        .object-3d {
-            width: 260px;
+        .object-img {
+            width: 280px;
             height: auto;
-            filter: drop-shadow(0 30px 50px rgba(0,0,0,0.9));
-            z-index: 2;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
+            border-radius: 15px;
+            pointer-events: none; /* Чтобы картинка не мешала событию клика по родителю */
         }
 
-        .glow-pedestal {
-            position: absolute;
-            bottom: 30px;
-            width: 160px;
-            height: 40px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0) 70%);
-            filter: blur(20px);
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .object-label {
+        .label {
             margin-top: 25px;
             font-size: 16px;
             font-weight: 700;
-            color: var(--gold-light);
-            text-transform: uppercase;
+            color: var(--gold);
             letter-spacing: 3px;
-            text-shadow: var(--neon-glow);
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            pointer-events: none;
         }
 
         .lang-btn {
@@ -162,14 +133,15 @@
             top: 20px;
             right: 20px;
             background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: var(--gold-primary);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: var(--gold);
             padding: 10px 20px;
             border-radius: 30px;
             font-size: 12px;
             font-weight: 700;
             backdrop-filter: blur(10px);
-            z-index: 100;
+            z-index: 1000;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -181,72 +153,61 @@
     <button class="lang-btn" onclick="toggleLang()" id="langBtn">CN</button>
 
     <div class="header">
-        <div class="gold-text" id="topLabel">QUANTUM REALM ACCESS</div>
+        <div style="color: var(--gold); font-size: 10px; letter-spacing: 4px;">QUANTUM REALM ACCESS</div>
         <h1>FA CAI AI</h1>
     </div>
 
-    <div class="interactive-area">
-        <div class="scene3d" onclick="handleAction('Wealth')">
-            <img src="hongbao.png" class="object-3d" alt=" " onerror="this.style.opacity='0.2';">
-            <div class="glow-pedestal"></div>
-            <div class="object-label" id="labelWealth">Quantum Hongbao</div>
+    <div class="interactive-content">
+        
+        <div class="item-3d" onclick="handleAction('Quantum Hongbao')">
+            <img src="hongbao.jpg" class="object-img" alt="Hongbao">
+            <div class="label" id="labelWealth">Quantum Hongbao</div>
         </div>
 
-        <div class="scene3d" onclick="handleAction('Oracle')">
-            <img src="lantern.png" class="object-3d" alt=" " onerror="this.style.opacity='0.2';">
-            <div class="glow-pedestal"></div>
-            <div class="object-label" id="labelLuck">AI Oracle Gate</div>
+        <div class="item-3d" onclick="handleAction('AI Oracle Gate')">
+            <img src="lantern.jpg" class="object-img" alt="Lantern">
+            <div class="label" id="labelLuck">AI Oracle Gate</div>
         </div>
+
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Система золотой пыльцы
-        function createDust() {
+        // Медленная золотая пыльца
+        function initDust() {
             const container = document.getElementById('dust-container');
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 40; i++) {
                 const dust = document.createElement('div');
                 dust.className = 'dust';
-                
                 const size = Math.random() * 3 + 1;
                 dust.style.width = size + 'px';
                 dust.style.height = size + 'px';
-                
                 dust.style.left = Math.random() * 100 + 'vw';
                 dust.style.top = Math.random() * 100 + 'vh';
-                
-                // Случайное направление полета
                 dust.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
                 dust.style.setProperty('--dy', (Math.random() - 0.5) * 200 + 'px');
-                
-                dust.style.animationDuration = (Math.random() * 5 + 5) + 's';
-                dust.style.animationDelay = (Math.random() * 10) + 's';
-                
+                dust.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                dust.style.animationDelay = (Math.random() * 5) + 's';
                 container.appendChild(dust);
             }
         }
-        createDust();
+        initDust();
 
         let currentLang = 'EN';
-        const translations = {
-            EN: { top: "QUANTUM REALM ACCESS", wealth: "Quantum Hongbao", luck: "AI Oracle Gate", btn: "CN" },
-            CN: { top: "量子领域入口", wealth: "量子红包", luck: "AI神谕之门", btn: "EN" }
-        };
-
         function toggleLang() {
             currentLang = currentLang === 'EN' ? 'CN' : 'EN';
-            document.getElementById('topLabel').innerText = translations[currentLang].top;
-            document.getElementById('labelWealth').innerText = translations[currentLang].wealth;
-            document.getElementById('labelLuck').innerText = translations[currentLang].luck;
-            document.getElementById('langBtn').innerText = translations[currentLang].btn;
+            document.getElementById('langBtn').innerText = currentLang === 'EN' ? 'CN' : 'EN';
+            document.getElementById('labelWealth').innerText = currentLang === 'EN' ? 'Quantum Hongbao' : '量子红包';
+            document.getElementById('labelLuck').innerText = currentLang === 'EN' ? 'AI Oracle Gate' : 'AI神谕之门';
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function handleAction(type) {
+        function handleAction(name) {
+            // Подтверждение клика вибрацией и алертом
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert(type + (currentLang === 'EN' ? " activated!" : " 已激活!"));
+            tg.showAlert(name + " Activated!");
         }
 
         tg.setHeaderColor('#030305');
