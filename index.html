@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,228 +7,190 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --tier-color: #cd7f32; --gold: #d4af37; --black: #050505; --red: #8b0000; }
+        :root { --gold: #ffd700; --dark-gold: #b8860b; --black: #050505; --red: #8b0000; }
         
         body {
             background: var(--black); color: #fff; font-family: 'Orbitron', sans-serif;
-            margin: 0; padding: 0; overflow: hidden; min-height: 100vh;
-            background: radial-gradient(circle at 50% 40%, #1a1508 0%, #050505 100%);
+            margin: 0; padding: 0; overflow: hidden; height: 100vh;
+            background: radial-gradient(circle at 50% 30%, #1a1508 0%, #050505 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* Визуальный шум (Grain Effect) */
+        /* Зернистость для премиальности */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.04; pointer-events: none; z-index: 9999;
+            opacity: 0.04; pointer-events: none; z-index: 999;
         }
 
-        /* Инь-Ян (Ночной режим) */
-        .night-mode {
-            filter: brightness(0.7) contrast(1.2);
-            background: radial-gradient(circle at 50% 40%, #050505 0%, #000 100%) !important;
+        /* Ночной режим (Инь) */
+        .night-mode { filter: brightness(0.7) contrast(1.2); background: #000 !important; }
+
+        .container { position: relative; z-index: 100; display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+        .gold-title {
+            font-size: 24px; font-weight: 900; letter-spacing: 3px;
+            background: linear-gradient(to bottom, #fff, var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 0; filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
         }
 
-        /* Заставка "Печать Мастера" */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 10000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-        .seal-container {
-            width: 120px; height: 120px; background: var(--red); border: 4px solid #5a0000;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 40px rgba(139, 0, 0, 0.6); border-radius: 12px;
-            animation: seal-pulse 2s infinite ease-in-out;
-        }
-        @keyframes seal-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.05); opacity: 1; } }
-
-        /* Интерфейс и Glassmorphism */
-        #main-ui { transition: transform 0.1s ease-out; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100vh; justify-content: center; }
-        
-        .artifact-card {
-            width: 90px; padding: 15px 5px; border-radius: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05);
-            text-align: center; transition: 0.4s; position: relative;
+        .balance-card {
+            background: rgba(255, 215, 0, 0.05); border: 1px solid var(--dark-gold);
+            padding: 8px 30px; border-radius: 50px; margin-top: 15px;
+            backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(184,134,11,0.2);
         }
 
-        .gold-title { font-size: 22px; letter-spacing: 2px; background: linear-gradient(to bottom, #fff, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin: 0; }
-        
         /* Колесо Фортуны */
-        .wheel-container { position: relative; width: 180px; height: 180px; margin: 25px 0; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--tier-color); background: conic-gradient(from 0deg, #0a0a0a, #1a1a1a, #0a0a0a); transition: 4s cubic-bezier(0.15, 0, 0.15, 1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.1); }
-        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: var(--tier-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 12px; box-shadow: 0 0 15px var(--tier-color); }
-
-        /* Эффект зажжения (Incense) */
-        .incense-glow { animation: burn 1.5s infinite alternate !important; border-color: var(--gold) !important; }
-        @keyframes burn { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 30px var(--gold); transform: scale(1.02); } }
-
-        .artifacts-grid { display: flex; gap: 12px; margin-top: 25px; }
-        .lang-switch { position: fixed; top: 20px; right: 20px; background: none; border: 1px solid var(--tier-color); color: var(--tier-color); padding: 5px 12px; border-radius: 8px; z-index: 101; font-size: 10px; cursor: pointer; }
-        
-        button.spin-btn {
-            background: var(--tier-color); color: #000; border: none; padding: 14px 45px; border-radius: 12px;
-            font-family: 'Orbitron'; font-weight: 900; letter-spacing: 1px;
-            box-shadow: 0 5px 20px rgba(212,175,55,0.3); transition: 0.3s;
+        .wheel-wrap {
+            width: 220px; height: 220px; margin: 30px 0; position: relative;
+            border: 4px solid var(--dark-gold); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: conic-gradient(from 0deg, #111, #222, #111);
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
         }
-        button.spin-btn:active { transform: scale(0.95); }
+        .wheel-center { font-size: 50px; text-shadow: 0 0 20px var(--gold); }
+
+        .spin-btn {
+            background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+            color: #000; border: none; padding: 16px 50px; border-radius: 12px;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 16px;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(212,175,55,0.4);
+        }
+
+        /* Сетка артефактов */
+        .grid { display: flex; gap: 15px; margin-top: 40px; }
+        .artifact {
+            width: 85px; height: 100px; border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212,175,55,0.2);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); transition: 0.3s;
+        }
+
+        /* Анимация горения благовоний */
+        .burning { animation: glow 1s infinite alternate; border-color: var(--gold); }
+        @keyframes glow { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 25px var(--gold); transform: scale(1.05); } }
+
+        .locked { opacity: 0.3; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
-    <audio id="zenAudio" loop><source src="zen.mp3" type="audio/mpeg"></audio>
-
-    <div id="loader">
-        <div class="seal-container"><div style="font-family:'Noto Sans SC'; font-size:60px; color:var(--gold);">財</div></div>
-        <div style="color:var(--gold); font-size:10px; letter-spacing:6px; margin-top:30px; opacity:0.6;">QUANTUM ASCENSION</div>
-    </div>
-
-    <button class="lang-switch" onclick="toggleLang()" id="langBtn">CN</button>
-
-    <div id="main-ui">
-        <div class="header">
-            <div id="tierName" style="font-size:9px; color:var(--tier-color); letter-spacing:4px; margin-bottom: 5px;">NOVICE TIER</div>
-            <h1 class="gold-title">FA CAI SUPREME</h1>
-            <div style="border:1px solid var(--tier-color); padding:6px 25px; border-radius:50px; display:inline-block; margin-top:15px; background: rgba(212,175,55,0.05);">
-                <span id="balanceValue" style="font-size: 18px; font-weight: 700;">0.00</span> <span style="font-size:9px; opacity: 0.7;">QK</span>
-            </div>
+    <div class="container" id="main">
+        <div style="font-size: 10px; color: var(--gold); letter-spacing: 5px;">IMPERIAL AI</div>
+        <h1 class="gold-title">FA CAI WEALTH</h1>
+        
+        <div class="balance-card">
+            <span id="bal" style="font-size: 22px; font-weight: 900;">1.94</span> 
+            <span style="font-size: 10px; color: var(--gold);">QK</span>
         </div>
 
-        <div class="wheel-container">
-            <div class="wheel" id="wheel"></div>
-            <div class="wheel-center" id="tierSymbol">初始</div>
+        <div class="wheel-wrap" id="wheel">
+            <div class="wheel-center">財</div>
         </div>
 
-        <button class="spin-btn" onclick="spin()">SPIN FORTUNE</button>
+        <button class="spin-btn" onclick="spinWheel()">SPIN FORTUNE</button>
 
-        <div class="artifacts-grid">
-            <div class="artifact-card"><img src="hongbao.jpg" style="width:60px; border-radius: 10px;"></div>
-            <div class="artifact-card" id="oracleBtn" onpointerdown="startIncense()" onpointerup="stopIncense()" onpointerleave="stopIncense()">
-                <img src="lantern.jpg" style="width:60px; border-radius: 10px;">
-                <div style="font-size:7px; color:var(--gold); margin-top:8px; font-weight: bold;" id="oracleLabel">HOLD TO BURN</div>
+        <div class="grid">
+            <div class="artifact">
+                <div style="font-size: 30px;">🧧</div>
+                <div style="font-size: 8px; color: var(--gold); margin-top: 5px;">HONGBAO</div>
             </div>
-            <div class="artifact-card" id="dragonSlot" style="display: flex; align-items: center; justify-content: center; font-size: 20px;">🔒</div>
+            
+            <div class="artifact" id="incenseBtn" 
+                 onpointerdown="startIncense()" 
+                 onpointerup="stopIncense()" 
+                 onpointerleave="stopIncense()">
+                <div id="incenseEmoji" style="font-size: 30px;">🏮</div>
+                <div id="oracleText" style="font-size: 7px; color: var(--gold); margin-top: 5px; text-align: center;">HOLD TO BURN<br>INCENSE</div>
+            </div>
+
+            <div class="artifact" id="dragonCard">
+                <div id="dragonIcon" style="font-size: 30px; opacity: 0.5;">🔒</div>
+                <div style="font-size: 8px; color: var(--gold); margin-top: 5px;">DRAGON</div>
+            </div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#050505');
+        tg.ready();
 
-        let balance = 0;
-        let isCN = false;
+        let balance = 1.94;
         let incenseTimer;
-        const oracles = [
-            { en: "The Golden Dragon rises. Absolute prosperity.", cn: "金龙抬头，万事大吉。" },
-            { en: "Wait for the pulse. The Universe has decided.", cn: "静待时机，乾坤定局。" },
-            { en: "Wealth flows like a river in quantum resonance.", cn: "财源滚滚，量子共振。" },
-            { en: "Trust the spark. Your touch turns stone to gold.", cn: "心有灵犀，点石成金。" }
-        ];
 
-        // 1. Инициализация и Цикл Инь-Ян
-        window.onload = () => {
-            const hour = new Date().getHours();
-            if (hour >= 22 || hour < 6) document.body.classList.add('night-mode');
+        // Инь-Ян: Ночной режим
+        const hour = new Date().getHours();
+        if (hour >= 22 || hour < 6) document.body.classList.add('night-mode');
+
+        // Логика вращения (Гонг/Haptic)
+        function spinWheel() {
+            const wheel = document.getElementById('wheel');
+            const deg = Math.floor(Math.random() * 360) + 1800;
+            wheel.style.transform = `rotate(${deg}deg)`;
             
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
             setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').remove(), 1500);
-            }, 2500);
-        };
+                balance += Math.random() * 10;
+                document.getElementById('bal').innerText = balance.toFixed(2);
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                
+                // Разблокировка дракона при балансе > 20
+                if (balance > 20) {
+                    document.getElementById('dragonIcon').innerText = "🐉";
+                    document.getElementById('dragonIcon').style.opacity = "1";
+                    document.getElementById('dragonCard').classList.remove('locked');
+                }
+            }, 4000);
+        }
 
-        // 2. Параллакс (Гироскоп)
-        window.addEventListener('deviceorientation', (e) => {
-            const x = e.beta / 6; const y = e.gamma / 6;
-            document.getElementById('main-ui').style.transform = `translate(${y}px, ${x}px)`;
-        });
-
-        // 3. Звук при первом клике
-        document.addEventListener('click', () => {
-            const audio = document.getElementById('zenAudio');
-            if (audio.paused) { audio.volume = 0.3; audio.play(); }
-        }, { once: true });
-
-        // 4. Логика Ритуала (Hold)
+        // Ритуал благовоний (Зажатие 2 секунды)
         function startIncense() {
-            document.getElementById('oracleBtn').classList.add('incense-glow');
+            const btn = document.getElementById('incenseBtn');
+            btn.classList.add('burning');
+            document.getElementById('incenseEmoji').innerText = "🕯️";
+            
             incenseTimer = setTimeout(() => {
-                triggerOracle();
+                showOracle();
                 stopIncense();
             }, 2000);
+            
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
 
         function stopIncense() {
             clearTimeout(incenseTimer);
-            document.getElementById('oracleBtn').classList.remove('incense-glow');
+            const btn = document.getElementById('incenseBtn');
+            btn.classList.remove('burning');
+            document.getElementById('incenseEmoji').innerText = "🏮";
         }
 
-        function triggerOracle() {
-            const last = localStorage.getItem('lastO');
-            if (last && Date.now() - last < 86400000) {
-                tg.showAlert(isCN ? "能量尚未恢复。请在明日再来。" : "Quantum energy not restored. Return tomorrow.");
-                return;
-            }
-            const o = oracles[Math.floor(Math.random() * oracles.length)];
-            tg.showPopup({
-                title: isCN ? "今日神谕" : "Daily Oracle",
-                message: isCN ? o.cn : o.en,
-                buttons: [{type: 'ok', color: '#d4af37'}]
-            });
-            localStorage.setItem('lastO', Date.now());
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        // 5. Колесо и Уровни
-        function spin() {
-            const wheel = document.getElementById('wheel');
-            const deg = Math.floor(Math.random() * 360) + 1800;
-            wheel.style.transform = `rotate(${deg}deg)`;
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-
-            setTimeout(() => {
-                const gain = (Math.random() * 4 + 1);
-                balance += gain;
-                updateUI();
-            }, 4000);
-        }
-
-        function updateUI() {
-            document.getElementById('balanceValue').innerText = balance.toFixed(2);
-            const tierEl = document.getElementById('tierName');
-            const symbolEl = document.getElementById('tierSymbol');
+        function showOracle() {
+            const messages = [
+                "Золотой Дракон видит твой успех. Жди прибыли.",
+                "Квантовые поля сошлись. Время действовать.",
+                "Спокойствие ведет к богатству. Терпение вознаградится."
+            ];
+            const msg = messages[Math.floor(Math.random() * messages.length)];
             
-            if (balance >= 50) {
-                tierEl.innerText = "IMMORTAL TIER";
-                document.documentElement.style.setProperty('--tier-color', '#00ffff');
-                symbolEl.innerText = "永生";
-            } else if (balance >= 15) {
-                tierEl.innerText = "MASTER TIER";
-                document.documentElement.style.setProperty('--tier-color', '#d4af37');
-                symbolEl.innerText = "大師";
-                document.getElementById('dragonSlot').innerHTML = '<img src="dragon.jpg" style="width:60px; border-radius:10px; animation: pulse 2s infinite;">';
-            }
+            tg.showPopup({
+                title: "Священное Пророчество",
+                message: msg,
+                buttons: [{type: 'ok', color: '#ffd700'}]
+            });
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
         }
 
-        // 6. Эффект Аура (Тач)
-        document.addEventListener('touchstart', (e) => {
-            const r = document.createElement('div');
-            r.style.position = 'fixed'; r.style.left = e.touches[0].clientX + 'px'; r.style.top = e.touches[0].clientY + 'px';
-            r.style.width = '2px'; r.style.height = '2px'; r.style.border = '1px solid var(--gold)';
-            r.style.borderRadius = '50%'; r.style.pointerEvents = 'none'; r.style.zIndex = '999';
-            r.animate([{transform:'translate(-50%,-50%) scale(0)', opacity:1}, {transform:'translate(-50%,-50%) scale(40)', opacity:0}], {duration:1000});
-            document.body.appendChild(r);
-            setTimeout(() => r.remove(), 1000);
+        // Параллакс эффект (наклон телефона)
+        window.addEventListener('deviceorientation', (e) => {
+            const x = e.beta / 10;
+            const y = e.gamma / 10;
+            document.getElementById('main').style.transform = `translate(${y}px, ${x}px)`;
         });
-
-        function toggleLang() {
-            isCN = !isCN;
-            document.getElementById('langBtn').innerText = isCN ? 'EN' : 'CN';
-            document.getElementById('oracleLabel').innerText = isCN ? "长按点燃" : "HOLD TO BURN";
-        }
     </script>
 </body>
 </html>
