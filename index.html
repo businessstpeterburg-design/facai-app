@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FA CAI QUANTUM LUXURY</title>
+    <title>FA CAI QUANTUM PREMIUM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #FFD700;
-            --dark: #030305;
+            --dark-bg: #030305;
         }
 
         body {
-            background-color: var(--dark);
+            background-color: var(--dark-bg);
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             margin: 0;
             padding: 0;
-            /* Включаем скролл и убираем лишнее */
+            /* Включаем плавный скролл для iPhone */
             overflow-y: auto !important;
             -webkit-overflow-scrolling: touch;
             min-height: 100vh;
@@ -28,15 +28,13 @@
             background: radial-gradient(circle at 50% -20%, #2c1f01 0%, #030305 100%);
         }
 
-        /* Золотая пыльца - ГЛАВНЫЙ ФИКС: pointer-events: none */
+        /* Золотая пыльца - Слой 1 (снизу) */
         #dust-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none !important;
-            z-index: 1; /* Самый нижний слой для анимации */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none !important; /* Пропускает клики */
+            z-index: 1;
         }
 
         .dust {
@@ -53,10 +51,10 @@
             100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
         }
 
+        /* Огромный иероглиф - Слой 0 (фон) */
         .bg-symbol {
             position: fixed;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             font-size: 85vw;
             color: rgba(255, 215, 0, 0.02);
@@ -81,40 +79,38 @@
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
-        /* Контейнер с кнопками - ГЛАВНЫЙ ФИКС: z-index и pointer-events */
+        /* Контейнер кнопок - Слой 999 (сверху) */
         .interactive-content {
             display: flex;
             flex-direction: column;
             gap: 60px;
-            padding-bottom: 150px; /* Чтобы фонарик не прилипал к низу */
+            padding-bottom: 120px; /* Запас снизу для скролла */
             width: 100%;
             align-items: center;
             position: relative;
-            z-index: 999 !important; /* Выше пыльцы и фона */
+            z-index: 999 !important;
             pointer-events: auto !important;
         }
 
         .item-3d {
-            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s;
-            pointer-events: auto !important; /* Разрешаем нажатия на сам элемент */
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .item-3d:active {
-            transform: scale(0.9);
+            transform: scale(0.9); /* Эффект нажатия */
         }
 
         .object-img {
             width: 280px;
             height: auto;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
-            border-radius: 15px;
-            pointer-events: none; /* Чтобы картинка не мешала событию клика по родителю */
+            border-radius: 20px;
+            pointer-events: none; /* Чтобы клик шел на контейнер */
         }
 
         .label {
@@ -125,13 +121,12 @@
             letter-spacing: 3px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            pointer-events: none;
         }
 
+        /* Кнопка языка */
         .lang-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 20px; right: 20px;
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.4);
             color: var(--gold);
@@ -141,7 +136,6 @@
             font-weight: 700;
             backdrop-filter: blur(10px);
             z-index: 1000;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -175,7 +169,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Медленная золотая пыльца
+        // Инициализация золотой пыльцы
         function initDust() {
             const container = document.getElementById('dust-container');
             for (let i = 0; i < 40; i++) {
@@ -205,8 +199,8 @@
         }
 
         function handleAction(name) {
-            // Подтверждение клика вибрацией и алертом
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            // Используем нативный алерт Телеграма для солидности
             tg.showAlert(name + " Activated!");
         }
 
