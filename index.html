@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FA CAI SUPREME</title>
+    <title>FA CAI SUPREME AI</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
@@ -16,78 +16,86 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* Премиальный шум */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.05; pointer-events: none; z-index: 100;
+        /* ЗОЛОТЫЕ ЧАСТИЦЫ (Dust) */
+        #particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
         }
 
         .container { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
-
-        .gold-title { font-size: 24px; font-weight: 900; color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); margin: 0; }
-
-        /* Колесо */
-        .wheel-wrap {
-            width: 210px; height: 210px; margin: 25px 0; border: 3px solid var(--gold);
-            border-radius: 50%; position: relative; transition: 4s cubic-bezier(0.15, 0, 0.15, 1);
-            background: conic-gradient(from 0deg, #111, #222, #111);
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
+        
+        .balance-badge {
+            border: 2px solid var(--gold); padding: 8px 35px; border-radius: 50px;
+            background: rgba(212, 175, 55, 0.1); margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
 
+        /* КОЛЕСО */
+        .wheel-box {
+            width: 230px; height: 230px; margin-bottom: 30px; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ring {
+            position: absolute; width: 100%; height: 100%; border: 3px solid var(--gold);
+            border-radius: 50%; background: conic-gradient(from 0deg, #111, #332b12, #111);
+            transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+        }
+        .center-sign { font-size: 60px; color: var(--gold); text-shadow: 0 0 20px var(--gold); z-index: 5; pointer-events: none; }
+
+        /* КНОПКА */
         .spin-btn {
             background: linear-gradient(135deg, var(--gold), var(--dark-gold));
-            color: #000; border: none; padding: 16px 50px; border-radius: 12px;
-            font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 16px;
-            box-shadow: 0 10px 25px rgba(212,175,55,0.3);
+            color: #000; border: none; padding: 18px 70px; border-radius: 15px;
+            font-weight: 900; font-family: 'Orbitron'; font-size: 20px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4); cursor: pointer;
         }
+        .spin-btn:active { transform: scale(0.93); }
 
-        /* Сетка артефактов */
-        .grid { display: flex; gap: 15px; margin-top: 35px; }
+        /* СЕТКА АРТЕФАКТОВ */
+        .grid { display: flex; gap: 15px; margin-top: 40px; }
         .card {
-            width: 90px; height: 110px; border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 15px; background: rgba(255, 255, 255, 0.03);
+            width: 95px; height: 115px; border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px; background: rgba(255, 255, 255, 0.05);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); cursor: pointer; position: relative; overflow: hidden;
+            backdrop-filter: blur(10px); transition: 0.3s;
         }
+        .card img { width: 75px; height: 75px; object-fit: contain; }
 
-        .card img { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,215,0,0.3)); }
-
-        /* Анимация горения благовоний */
-        .burning { border-color: var(--gold) !important; box-shadow: 0 0 25px var(--gold) !important; transform: scale(1.05); }
-
-        .locked-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; font-size:24px; }
+        /* Анимация Оракула */
+        .burning { 
+            border-color: var(--gold) !important; 
+            box-shadow: 0 0 40px var(--gold) !important; 
+            animation: pulse 0.5s infinite alternate; 
+        }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
+    <canvas id="particles"></canvas>
     <audio id="zenAudio" loop><source src="zen.mp3" type="audio/mpeg"></audio>
 
-    <div class="container" id="ui">
-        <h1 class="gold-title">FA CAI SUPREME</h1>
-        
-        <div style="border: 1px solid var(--gold); padding: 6px 25px; border-radius: 50px; margin: 15px 0; background: rgba(212,175,55,0.1);">
-            <span id="bal" style="font-size: 22px; font-weight: 900;">1.94</span> <span style="font-size: 10px; color: var(--gold);">QK</span>
+    <div class="container" id="main-ui">
+        <div class="balance-badge">
+            <span id="bal" style="font-size: 26px; font-weight: 900;">37.11</span> 
+            <span style="font-size: 12px; color: var(--gold);">QK</span>
         </div>
 
-        <div class="wheel-wrap" id="wheel">
-            <div style="font-size: 45px; color: var(--gold); filter: drop-shadow(0 0 10px var(--gold));">財</div>
+        <div class="wheel-box">
+            <div class="ring" id="wheel"></div>
+            <div class="center-sign">財</div>
         </div>
 
         <button class="spin-btn" id="spinBtn">SPIN FORTUNE</button>
 
         <div class="grid">
-            <div class="card"><img src="hongbao.jpg" alt="🧧"></div>
-            
-            <div class="card" id="oracleCard">
-                <img src="lantern.jpg" alt="🏮">
+            <div class="card" onclick="tg.showAlert('Твоя удача растет!')"><img src="hongbao.jpg"></div>
+            <div class="card" id="oracleBtn">
+                <img src="lantern.jpg">
                 <div style="font-size: 7px; color: var(--gold); margin-top: 5px; font-weight: 900;">HOLD TO BURN</div>
             </div>
-
-            <div class="card" id="dragonCard">
-                <img src="dragon.jpg" alt="🐉" id="dragonImg" style="display:none;">
-                <div class="locked-overlay" id="lock">🔒</div>
-            </div>
+            <div class="card"><img src="dragon.jpg"></div>
         </div>
     </div>
 
@@ -95,61 +103,65 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let balance = 1.94;
+        let balance = 37.11;
         let timer;
+        const audio = document.getElementById('zenAudio');
 
-        // Включаем звук и крутим колесо
+        // 1. ЗОЛОТЫЕ ЧАСТИЦЫ
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+        function initParticles() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            for(let i=0; i<50; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, v: Math.random()*0.5});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = "#ffd700";
+            pts.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+                p.y -= p.v; if(p.y < 0) p.y = canvas.height;
+            });
+            requestAnimationFrame(draw);
+        }
+        initParticles(); draw();
+
+        // 2. SPIN & GONCH
         document.getElementById('spinBtn').addEventListener('click', () => {
-            const wheel = document.getElementById('wheel');
-            const audio = document.getElementById('zenAudio');
-            
-            // Звук запускается при первом взаимодействии
             if (audio.paused) { audio.volume = 0.3; audio.play().catch(()=>{}); }
-            
-            const deg = Math.floor(Math.random() * 360) + 1800;
-            wheel.style.transform = `rotate(${deg}deg)`;
-            
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            
+            const wheel = document.getElementById('wheel');
+            const deg = Math.floor(Math.random() * 360) + 2160;
+            wheel.style.transform = `rotate(${deg}deg)`;
 
             setTimeout(() => {
-                balance += Math.random() * 8;
+                balance += Math.random() * 5;
                 document.getElementById('bal').innerText = balance.toFixed(2);
-                tg.HapticFeedback.notificationOccurred('success');
-                
-                // Разблокировка дракона
-                if (balance > 15) {
-                    document.getElementById('lock').style.display = "none";
-                    document.getElementById('dragonImg').style.display = "block";
-                }
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             }, 4000);
         });
 
-        // Ритуал Оракула (Зажатие)
-        const oCard = document.getElementById('oracleCard');
-        oCard.addEventListener('pointerdown', (e) => {
+        // 3. РИТУАЛ ОРАКУЛА (Hold)
+        const oBtn = document.getElementById('oracleBtn');
+        function startHold(e) {
             e.preventDefault();
-            oCard.classList.add('burning');
+            oBtn.classList.add('burning');
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
             timer = setTimeout(() => {
-                tg.showPopup({
-                    title: "Sacred Oracle",
-                    message: "Золотой Дракон благословляет твой путь. Удача близко.",
-                    buttons: [{type: 'ok', color: '#ffd700'}]
-                });
-                oCard.classList.remove('burning');
+                tg.showPopup({ title: "Oracle", message: "Дракон видит твой успех!", buttons: [{type: 'ok', color: '#ffd700'}] });
+                endHold();
             }, 2000);
-        });
+        }
+        function endHold() { clearTimeout(timer); oBtn.classList.remove('burning'); }
 
-        oCard.addEventListener('pointerup', () => {
-            clearTimeout(timer);
-            oCard.classList.remove('burning');
-        });
+        oBtn.addEventListener('touchstart', startHold); oBtn.addEventListener('touchend', endHold);
+        oBtn.addEventListener('mousedown', startHold); oBtn.addEventListener('mouseup', endHold);
 
-        // Параллакс (наклон)
+        // 4. ПАРАЛЛАКС
         window.addEventListener('deviceorientation', (e) => {
-            const y = e.gamma / 10; const x = e.beta / 10;
-            document.getElementById('ui').style.transform = `translate(${y}px, ${x}px)`;
+            const x = e.beta / 15; const y = e.gamma / 15;
+            document.getElementById('main-ui').style.transform = `translate(${y}px, ${x}px)`;
         });
 
         tg.ready();
