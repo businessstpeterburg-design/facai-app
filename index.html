@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
@@ -36,36 +36,21 @@
       overflow-x:hidden;
     }
 
-    /* =========================
-       FIX: layers + click safety
-       ========================= */
+    /* FX layers never catch clicks */
     #fxDust, #fxMeteors{
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      pointer-events:none;
-      z-index:0;
+      position:fixed; inset:0; width:100%; height:100%;
+      pointer-events:none; z-index:0;
       opacity:.95;
     }
     #fxMeteors{opacity:.75; mix-blend-mode: screen;}
 
-    /* WebGL behind UI - never catches clicks */
     #webglRoot{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
+      position:fixed; inset:0;
+      z-index:0; pointer-events:none;
     }
-    #webgl{
-      width:100%;
-      height:100%;
-      display:block;
-    }
+    #webgl{width:100%;height:100%;display:block}
     #webglVignette{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+      position:absolute; inset:0; pointer-events:none;
       background:
         radial-gradient(60% 50% at 50% 30%, rgba(255,211,106,.10), rgba(0,0,0,0) 55%),
         radial-gradient(80% 60% at 50% 70%, rgba(255,43,63,.06), rgba(0,0,0,0) 60%),
@@ -75,10 +60,8 @@
     }
 
     .flash{
-      position:fixed;
-      inset:0;
-      z-index:60;
-      pointer-events:none;
+      position:fixed; inset:0;
+      z-index:60; pointer-events:none;
       opacity:0;
       background:
         radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.35), transparent 60%),
@@ -88,10 +71,9 @@
     }
     .flash.on{opacity:1}
 
-    /* App shell */
     .app{
       position:relative;
-      z-index:10; /* UI above everything */
+      z-index:10;
       min-height:100vh;
       display:flex;
       flex-direction:column;
@@ -101,7 +83,7 @@
     .topbar{
       position:sticky;
       top:0;
-      z-index:30;
+      z-index:90; /* ALWAYS above bang */
       backdrop-filter: blur(12px);
       background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.35));
       border-bottom: 1px solid rgba(255,211,106,.14);
@@ -116,42 +98,25 @@
       margin:0 auto;
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width: 220px;
-    }
+    .brand{display:flex;align-items:center;gap:10px;min-width: 220px;}
     .sigil{
-      width:38px;height:38px;
-      border-radius:14px;
+      width:38px;height:38px;border-radius:14px;
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.30), transparent 45%),
         linear-gradient(135deg, rgba(255,211,106,.85), rgba(184,134,11,.55));
       box-shadow: 0 0 0 1px rgba(255,211,106,.28), 0 18px 50px rgba(255,211,106,.12);
-      position:relative;
-      overflow:hidden;
+      position:relative; overflow:hidden;
     }
     .sigil:after{
       content:"財";
       position:absolute; inset:0;
       display:grid; place-items:center;
-      font-weight:900;
-      color:#1a1406;
-      font-size:20px;
+      font-weight:900; color:#1a1406; font-size:20px;
       text-shadow: 0 1px 0 rgba(255,255,255,.25);
     }
     .brand-text{display:flex;flex-direction:column;line-height:1.05}
-    .brand-text .t1{
-      font-size:12px;
-      letter-spacing:.38em;
-      color: rgba(255,211,106,.95);
-      text-transform:uppercase;
-    }
-    .brand-text .t2{
-      font-size:12px;
-      color: rgba(255,255,255,.75);
-    }
+    .brand-text .t1{font-size:12px;letter-spacing:.38em;color: rgba(255,211,106,.95);text-transform:uppercase;}
+    .brand-text .t2{font-size:12px;color: rgba(255,255,255,.75);}
 
     .top-controls{
       display:flex;
@@ -162,9 +127,7 @@
     }
 
     .pill{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      display:flex; align-items:center; gap:8px;
       padding:10px 12px;
       border-radius:999px;
       background: rgba(255,255,255,.06);
@@ -208,27 +171,16 @@
       background: linear-gradient(135deg, rgba(255,43,63,.92), rgba(180,0,29,.92));
       box-shadow: 0 18px 50px rgba(255,43,63,.10);
     }
-    .btn:disabled{
-      opacity:.42;
-      cursor:not-allowed;
-      filter: grayscale(.25);
-      transform:none;
-    }
+    .btn:disabled{opacity:.42;cursor:not-allowed;filter: grayscale(.25);transform:none;}
 
-    /* Switches */
     .toggle{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:999px;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:999px;
       background: rgba(255,255,255,.06);
       border:1px solid rgba(255,211,106,.16);
     }
     .seg{
-      display:flex;
-      border-radius:999px;
-      overflow:hidden;
+      display:flex;border-radius:999px;overflow:hidden;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.20);
     }
@@ -245,27 +197,207 @@
       background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
     }
 
-    /* Main */
     .wrap{
       max-width:1100px;
       width:100%;
-      margin: 0 auto;
+      margin:0 auto;
       padding: 18px 14px 110px;
       display:flex;
       flex-direction:column;
       gap:16px;
     }
 
+    /* ===== Dragon 3D scene (NEW) ===== */
+    .dragonCard{
+      border-radius:26px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
+      border:1px solid rgba(255,211,106,.16);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .dragonCard:before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(900px 340px at 50% 20%, rgba(255,211,106,.18), transparent 60%),
+        radial-gradient(900px 520px at 50% 75%, rgba(255,43,63,.10), transparent 62%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    .dragonInner{
+      position:relative;
+      z-index:2;
+      padding:16px;
+    }
+    .dragonHead{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .dragonHead h2{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: rgba(255,211,106,.92);
+    }
+    .sub{font-size:12px;color:rgba(255,255,255,.68)}
+
+    .dragonScene{
+      width:100%;
+      height: min(52vh, 520px);
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      perspective: 1100px;
+    }
+
+    /* subtle star noise */
+    .dragonScene:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.22), transparent 60%),
+        radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.16), transparent 60%),
+        radial-gradient(1px 1px at 80% 35%, rgba(255,255,255,.18), transparent 60%),
+        radial-gradient(1px 1px at 60% 85%, rgba(255,255,255,.14), transparent 60%),
+        radial-gradient(1px 1px at 55% 40%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.12), transparent 60%);
+      opacity:.75;
+      pointer-events:none;
+    }
+
+    .dragon3d{
+      position:relative;
+      width: min(360px, 70vw);
+      aspect-ratio: 1/1;
+      transform-style: preserve-3d;
+      transform: rotateX(10deg) rotateY(-12deg);
+      filter: drop-shadow(0 35px 60px rgba(0,0,0,.65));
+      animation: dragonFloat 6.5s ease-in-out infinite;
+      z-index:3;
+    }
+    @keyframes dragonFloat{
+      0%,100%{transform: rotateX(10deg) rotateY(-12deg) translateY(0px) translateZ(0px)}
+      50%{transform: rotateX(12deg) rotateY(-6deg) translateY(-8px) translateZ(10px)}
+    }
+
+    #dragonImg{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      transform: translateZ(22px);
+      filter:
+        drop-shadow(0 0 22px rgba(255,211,106,.18))
+        drop-shadow(0 0 48px rgba(255,43,63,.08));
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    .dragonGlow{
+      position:absolute;
+      inset:-18%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,211,106,.22), transparent 55%),
+        radial-gradient(circle at 50% 55%, rgba(255,43,63,.10), transparent 62%);
+      transform: translateZ(0);
+      filter: blur(1px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    /* Orbits */
+    .orbits{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      pointer-events:none;
+      z-index:2;
+    }
+    .orbit{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--d);
+      height: var(--d);
+      margin-left: calc(var(--d)/-2);
+      margin-top: calc(var(--d)/-2);
+      border-radius:50%;
+      border: 1px solid rgba(255,211,106,.10);
+      transform:
+        translateZ(var(--z))
+        rotateX(var(--rx))
+        rotateY(var(--ry));
+      opacity:.85;
+    }
+
+    .planet{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--p);
+      height: var(--p);
+      border-radius:50%;
+      transform-style: preserve-3d;
+      transform:
+        rotate(var(--a))
+        translateX(calc(var(--d)/2))
+        translateZ(var(--pz));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 18px 40px rgba(0,0,0,.45);
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),
+                  radial-gradient(circle at 60% 70%, rgba(0,0,0,.25), rgba(0,0,0,0) 55%),
+                  linear-gradient(135deg, var(--c1), var(--c2));
+      filter: saturate(1.05);
+    }
+
+    .planet:after{
+      content: attr(data-name);
+      position:absolute;
+      left:50%;
+      top: calc(100% + 10px);
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.70);
+      padding: 5px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,211,106,.12);
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(8px);
+      white-space:nowrap;
+      pointer-events:none;
+    }
+
+    .spinWrap{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      animation: orbitSpin var(--t) linear infinite;
+    }
+    @keyframes orbitSpin{
+      from{transform: translateZ(0) rotateZ(0deg)}
+      to{transform: translateZ(0) rotateZ(360deg)}
+    }
+
+    /* Content cards */
     .hero{
       display:grid;
       grid-template-columns: 1.1fr .9fr;
       gap:14px;
       align-items:stretch;
     }
-    @media (max-width: 980px){
-      .hero{grid-template-columns:1fr; }
-      .brand{min-width:auto}
-    }
+    @media (max-width: 980px){ .hero{grid-template-columns:1fr;} .brand{min-width:auto} }
 
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
@@ -278,8 +410,7 @@
     .card .inner{padding:16px}
     .card:before{
       content:"";
-      position:absolute;
-      inset:-1px;
+      position:absolute; inset:-1px;
       background:
         radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.18), transparent 55%),
         radial-gradient(400px 280px at 85% 20%, rgba(255,43,63,.12), transparent 55%);
@@ -289,12 +420,8 @@
     .card .inner, .card .row, .card .grid{position:relative; z-index:2}
 
     .hline{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
+      display:flex; align-items:baseline; justify-content:space-between;
+      gap:12px; flex-wrap:wrap; margin-bottom:10px;
     }
     .hline h2{
       margin:0;
@@ -303,57 +430,27 @@
       text-transform:uppercase;
       color: rgba(255,211,106,.92);
     }
-    .sub{font-size:12px;color:rgba(255,255,255,.68)}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:10px;
-    }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-    }
+    .grid{display:grid;grid-template-columns: repeat(3, 1fr);gap:10px;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
     .tile{
       border-radius:18px;
       padding:12px 12px;
       background: rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.10);
     }
-    .tile .k{
-      font-size:11px;
-      color: rgba(255,255,255,.60);
-      letter-spacing:.12em;
-      text-transform:uppercase;
-    }
-    .tile .v{
-      margin-top:6px;
-      display:flex;
-      align-items:baseline;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .tile .v .big{
-      font-size:22px;
-      font-weight:1000;
-      letter-spacing:.02em;
-      color: rgba(255,211,106,.96);
-    }
+    .tile .k{font-size:11px;color: rgba(255,255,255,.60);letter-spacing:.12em;text-transform:uppercase;}
+    .tile .v{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+    .tile .v .big{font-size:22px;font-weight:1000;letter-spacing:.02em;color: rgba(255,211,106,.96);}
     .tile .v .tag{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
+      font-size:12px;padding:6px 10px;border-radius:999px;
       border:1px solid rgba(255,211,106,.22);
       background: rgba(255,211,106,.08);
       color: rgba(255,255,255,.85);
     }
 
-    .stage{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-      align-items:center;
-      justify-items:center;
-    }
+    .stage{display:grid;grid-template-columns: 1fr;gap:10px;align-items:center;justify-items:center;}
     .wheelWrap{
       width:min(420px, 92vw);
       aspect-ratio: 1/1;
@@ -441,11 +538,8 @@
       gap:6px;
     }
     .oracleText .headline{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;flex-wrap:wrap;
     }
     .oracleText .headline b{
       color: rgba(255,211,106,.95);
@@ -458,28 +552,22 @@
       margin-top:auto;
       font-size:12px;
       color: rgba(255,255,255,.60);
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
     }
     .meta .chip{
-      padding:6px 10px;
-      border-radius:999px;
+      padding:6px 10px;border-radius:999px;
       background: rgba(255,211,106,.08);
       border:1px solid rgba(255,211,106,.20);
     }
-    .meta .chip.red{
-      background: rgba(255,43,63,.10);
-      border-color: rgba(255,43,63,.26);
-    }
-    .meta .chip.ok{
-      background: rgba(67,255,179,.10);
-      border-color: rgba(67,255,179,.26);
-    }
+    .meta .chip.red{background: rgba(255,43,63,.10);border-color: rgba(255,43,63,.26);}
+    .meta .chip.ok{background: rgba(67,255,179,.10);border-color: rgba(67,255,179,.26);}
 
     .choices{display:flex;gap:10px;flex-wrap:wrap}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .tiny{font-size:12px; color: rgba(255,255,255,.60)}
+    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0}
 
+    /* Bottom Dock */
     .bottomDock{
       position:fixed;
       left:0; right:0; bottom:0;
@@ -497,25 +585,16 @@
       gap:10px;
     }
     .dockBtn{
-      flex:1;
-      min-width: 0;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      flex:1;min-width:0;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
       gap:6px;
       padding:10px 6px;
-      background: transparent;
-      border:none;
-      color:#fff;
-      cursor:pointer;
-      user-select:none;
+      background: transparent;border:none;color:#fff;
+      cursor:pointer;user-select:none;
     }
     .dockIcon{
-      width: 54px;
-      height: 54px;
-      display:grid;
-      place-items:center;
+      width: 54px;height: 54px;
+      display:grid;place-items:center;
       border-radius: 18px;
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), transparent 55%),
@@ -525,10 +604,7 @@
         0 16px 45px rgba(0,0,0,.35);
       transition: transform .25s ease;
     }
-    .dockIcon span{
-      font-size: 26px;
-      filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));
-    }
+    .dockIcon span{font-size: 26px;filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));}
     .dockBtn small{
       font-size: 11px;
       letter-spacing:.08em;
@@ -573,11 +649,8 @@
     }
     .modal .mInner{position:relative; z-index:2; padding: 16px}
     .mHead{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:12px;margin-bottom:8px;
     }
     .mHead h3{
       margin:0;
@@ -596,17 +669,7 @@
     }
     .mBody .sec{margin:12px 0}
     .mBody .sec b{color: rgba(255,211,106,.95)}
-    .mFoot{
-      margin-top: 12px;
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .tiny{font-size:12px; color: rgba(255,255,255,.60)}
-    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0}
+    .mFoot{margin-top: 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 
     body.luckyHour .sigil{
       box-shadow: 0 0 0 1px rgba(255,211,106,.32), 0 22px 60px rgba(255,211,106,.18);
@@ -617,11 +680,9 @@
       box-shadow: 0 0 40px rgba(255,211,106,.20);
     }
 
-    /* =========================
-       “ЧЁЛКА” (Top curtain) — CLOSED by default, opens by button
-       ========================= */
+    /* ===== CHЁЛКА (FIXED): hidden by default; never huge on phone ===== */
     .bangToggle{
-      width:44px;height:44px;
+      width:40px;height:40px;          /* smaller on phone */
       border-radius:14px;
       border:1px solid rgba(255,211,106,.22);
       background: rgba(0,0,0,.22);
@@ -631,15 +692,18 @@
       font-size: 14px;
       cursor:pointer;
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      flex: 0 0 auto;
     }
+
+    /* bang overlay sits UNDER topbar, so buttons stay clickable */
     #bang{
       position:fixed;
       left:0; right:0;
       top:0;
-      height: 52vh;                 /* не “пол-экрана вниз” по умолчанию, потому что закрыто */
-      z-index:70;
-      pointer-events:none;          /* важно: когда закрыто — не ловит клики */
-      transform: translateY(-110%); /* спрятано */
+      height: min(42vh, 360px);
+      z-index:50;               /* lower than topbar (90) */
+      pointer-events:none;      /* DOES NOT catch clicks */
+      transform: translateY(-110%);
       transition: transform .28s cubic-bezier(.2,0,.2,1);
       background:
         radial-gradient(900px 420px at 50% 30%, rgba(255,211,106,.22), transparent 60%),
@@ -650,29 +714,30 @@
     }
     #bang.open{
       transform: translateY(0);
-      pointer-events:auto; /* когда открыто — можно кликнуть по “внутренним” элементам (если добавишь) */
+      pointer-events:none; /* keep none always, чтобы не ломало клики */
+    }
+
+    @media (max-width: 420px){
+      .bangToggle{width:38px;height:38px}
+      #bang{height: min(36vh, 300px)}
+      .pill{display:none} /* on tiny screens: remove time pill to avoid crowd */
     }
   </style>
 </head>
 
 <body>
-  <!-- FX layers -->
   <canvas id="fxDust"></canvas>
   <canvas id="fxMeteors"></canvas>
   <div class="flash" id="flash"></div>
 
-  <!-- WebGL behind UI -->
   <div id="webglRoot" aria-hidden="true">
     <canvas id="webgl"></canvas>
     <div id="webglVignette"></div>
   </div>
 
-  <!-- “ЧЁЛКА” overlay -->
   <div id="bang" aria-hidden="true"></div>
 
   <div class="app">
-
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-inner">
         <div class="brand">
@@ -684,13 +749,13 @@
         </div>
 
         <div class="top-controls">
-          <!-- “Чёлка” button -->
-          <button class="bangToggle" id="btnBang" type="button" title="Чёлка">〣</button>
+          <!-- bang toggle -->
+          <button class="bangToggle" id="btnBang" type="button" title="Bang">〣</button>
 
-          <!-- help button (?) — opens RULES -->
+          <!-- help (?) opens rules -->
           <button class="bangToggle" id="helpBtn" type="button" title="Rules / Guide">?</button>
 
-          <div class="pill" title="Local time / Lucky Hour schedule">
+          <div class="pill" title="Local time / Lucky Hour">
             <div class="small" id="tTimeLabel">LOCAL TIME</div>
             <b id="localTime">--:--</b>
             <span class="small" id="luckyCountdown">• Next Lucky Hour --:--:--</span>
@@ -707,9 +772,9 @@
           <div class="toggle">
             <span class="small" id="tLangLabel">LANG</span>
             <div class="seg" role="tablist" aria-label="Language">
-              <button id="btnZH" class="active" type="button">中文</button>
+              <button id="btnZH" type="button">中文</button>
               <button id="btnEN" type="button">EN</button>
-              <button id="btnRU" type="button">RU</button>
+              <button id="btnRU" class="active" type="button">RU</button>
             </div>
           </div>
 
@@ -720,6 +785,26 @@
     </div>
 
     <div class="wrap">
+
+      <!-- NEW: DRAGON 3D + PLANETS -->
+      <div class="dragonCard">
+        <div class="dragonInner">
+          <div class="dragonHead">
+            <h2 id="tDragonTitle">Solar Dragon</h2>
+            <div class="sub" id="tDragonSub">Centered 3D emblem + orbiting planets.</div>
+          </div>
+
+          <div class="dragonScene" aria-label="Dragon with planets">
+            <div class="orbits" id="orbits"></div>
+
+            <div class="dragon3d">
+              <div class="dragonGlow"></div>
+              <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- HERO -->
       <div class="hero">
         <!-- LEFT: HUD -->
@@ -730,7 +815,7 @@
               <div class="sub" id="tHudSub">Everything is explained. First-time friendly.</div>
             </div>
 
-            <div class="grid" id="hudGrid">
+            <div class="grid">
               <div class="tile">
                 <div class="k" id="tQKLabel">QK — Quantum Karma</div>
                 <div class="v">
@@ -764,7 +849,7 @@
             <div class="row">
               <div class="tiny" id="tDailySealLabel">Daily Seal</div>
               <div class="pill" style="padding:8px 10px">
-                <b id="dailySeal">今日财印</b>
+                <b id="dailySeal">SEAL</b>
                 <span class="small" id="sealSub">• stamped</span>
               </div>
             </div>
@@ -844,9 +929,7 @@
                     <b id="oracleHead">Temple Guidance</b>
                     <span class="tiny" id="oracleStamp">—</span>
                   </div>
-                  <div class="body" id="oracleBody">
-                    Tap <b>ORACLE</b> to receive guidance. Then decide: Enter / Wait / Skip.
-                  </div>
+                  <div class="body" id="oracleBody">Tap ORACLE to receive guidance.</div>
                   <div class="meta" id="oracleMeta">
                     <span class="chip" id="chipWeather">Market Weather: Calm</span>
                     <span class="chip ok" id="chipAura">Risk Aura: Low</span>
@@ -860,16 +943,14 @@
                   <button class="btn danger" id="btnSkip" type="button" disabled>SKIP</button>
                 </div>
 
-                <div class="tiny" id="tDisclaimer">
-                  This is a ritualized UI. Not financial advice. Use your judgment.
-                </div>
+                <div class="tiny" id="tDisclaimer">This is a ritualized UI. Not financial advice.</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PRO TERMINAL + JOURNAL -->
+      <!-- PRO TERMINAL -->
       <div class="card" id="proCard">
         <div class="inner">
           <div class="hline">
@@ -928,11 +1009,12 @@
           </div>
           <div class="tile">
             <div class="tiny" id="tExtraBody">
-              This area is intentionally long to allow natural scrolling. Later сюда добавим: “Trophy Room 7/21/49”, “Artifact Skins”, “VIP Hall UI” (locked), и настоящий TON Connect.
+              This area is intentionally long to allow natural scrolling.
             </div>
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- Bottom Dock -->
@@ -954,7 +1036,7 @@
           <div class="dockIcon"><span>⟠</span></div>
           <small id="dGate">Gate</small>
         </button>
-        <!-- Rules button #2 (dock) -->
+        <!-- Rules button #2 -->
         <button class="dockBtn" id="dockRules" type="button">
           <div class="dockIcon"><span>❖</span></div>
           <small id="dRules">Rules</small>
@@ -1015,10 +1097,9 @@
 
   <script>
   /*****************************************************************
-   * TON TEMPLE — CLEAN V5 (single file, click-safe)
+   * TON TEMPLE — Dragon Center + Planets + Fixed Bang + Full i18n
    *****************************************************************/
 
-  // ---------- Helpers ----------
   const $ = (id) => document.getElementById(id);
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const rnd = (a=0, b=1) => a + Math.random()*(b-a);
@@ -1034,42 +1115,24 @@
     setTimeout(()=>f.classList.remove('on'), 140);
   }
 
-  // ---------- App State ----------
   const state = {
-    lang: 'zh',
+    lang: 'ru',
     mode: 'ritual',
     qk: 37.11,
     flowScore: 73,
     weather: 'CALM',
     risk: 'LOW',
     streak: 3,
-    today: {
-      key: dayKey(),
-      oracleUsed: false,
-      oraclePaidExtra: 0,
-      pos: 8,
-      neg: 1,
-    },
+    today: { key: dayKey(), oracleUsed: false, oraclePaidExtra: 0, pos: 8, neg: 1 },
     oracle: { type:'day', last:null, decision:null },
-    wheel: {
-      petals: 15,
-      angle: 0,
-      spinning: false,
-      usedToday: false,
-      velocity: 0,
-      friction: 0.987,
-      stopEps: 0.0010,
-      resultIndex: null,
-    },
+    wheel: { petals: 15, angle: 0, spinning: false, usedToday: false, velocity: 0, friction: 0.987, stopEps: 0.0010, resultIndex: null },
     gate: { refUrl: "https://example.com" },
     lucky: { morningHour:9, eveningHour:21, windowMinutes:45, isLuckyNow:false, nextLuckyIn:0 },
     social: {a:3482, vip:117},
     journal: []
   };
 
-  // ---------- Persistence ----------
-  const LS_KEY = 'ton_temple_v5_state_clean';
-
+  const LS_KEY = 'ton_temple_dragon_v1';
   function loadState(){
     try{
       const raw = localStorage.getItem(LS_KEY);
@@ -1078,7 +1141,6 @@
       const k = dayKey();
 
       if(saved?.today?.key !== k){
-        // day rollover
         state.today.key = k;
         state.today.oracleUsed = false;
         state.today.oraclePaidExtra = 0;
@@ -1091,133 +1153,16 @@
       } else {
         Object.assign(state, saved);
       }
-
       state.qk = clamp(Number(state.qk)||37.11, 0, 9999);
       state.flowScore = clamp(Number(state.flowScore)||73, 0, 100);
       if(!Array.isArray(state.journal)) state.journal = [];
       state.journal = state.journal.slice(0,7);
     }catch(e){}
   }
-  function saveState(){
-    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
-  }
+  function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 
-  // ---------- i18n (ZH/EN/RU) ----------
+  /* ===== FULL i18n: RU / EN / ZH ===== */
   const I18N = {
-    zh: {
-      brand1:"TON TEMPLE",
-      brand2:"帝王量子福流仪式",
-      timeLabel:"本地时间",
-      modeLabel:"模式",
-      langLabel:"语言",
-      rules:"规则",
-      hudTitle:"神殿 HUD",
-      hudSub:"新用户也能秒懂：所有指标都有解释。",
-      qkLabel:"QK — 量子福业值",
-      qkHint:"每日仪式能量：用于等级、状态与解锁。",
-      flowScoreLabel:"FLOW SCORE",
-      flowHint:"0–100 指标。越高越容易做冷静决定。",
-      weatherLabel:"市场天气",
-      weatherHint:"用“合法词汇”表达，而不是“信号”。",
-      dailySeal:"今日印章",
-      streak:"连击天数",
-      streakHint:"靠坚持解锁，不是纯氪金。",
-      stats:"今日统计",
-      statsHint:"希望引擎：正向永远更多。",
-      social:"神殿脉冲",
-      socialHint:"无聊天的社交证明（安全、干净）。",
-      ritualTitle:"每日仪式",
-      ritualSub:"每天一次慢速转盘。清晰可见，不糊。",
-      activateFlow:"启动福流",
-      oracle:"神谕",
-      gate:"开启之门",
-      forecast:"预测类型",
-      limit:"限制",
-      disclaimer:"这是“仪式化界面”。非投资建议。请自行判断。",
-      proTitle:"专业终端",
-      proSub:"给面子：严肃、干净、像终端。",
-      journalTitle:"神殿日志",
-      journalSub:"最近 7 天（决策记忆）。",
-      extraTitle:"神殿层级",
-      extraSub:"可滚动（不是一个屏）。",
-      extraBody:"这里留给：奖杯室 7/21/49、皮肤、VIP 大厅、未来 TON Connect。",
-      dockRitual:"仪式",
-      dockWheel:"转盘",
-      dockOracle:"神谕",
-      dockGate:"之门",
-      dockRules:"规则",
-      oracleHead:"神殿指引",
-      oracleTap:"点按 ORACLE 获取指引，然后选择：进入 / 等待 / 跳过。",
-      enter:"进入",
-      wait:"等待",
-      skip:"跳过",
-      day:"日常",
-      ton:"TON",
-      paywallTitle:"黄金祭坛",
-      payLater:"稍后",
-      payNow:"供奉 1 TON（Mock）",
-      riskTitle:"风险之门",
-      cancel:"取消",
-      go:"进入之门",
-      rulesTitle:"规则 / 指标解释",
-    },
-    en: {
-      brand1:"TON TEMPLE",
-      brand2:"Imperial Quantum Flow Ritual",
-      timeLabel:"LOCAL TIME",
-      modeLabel:"MODE",
-      langLabel:"LANG",
-      rules:"RULES",
-      hudTitle:"Temple HUD",
-      hudSub:"First-time friendly: every indicator is explained.",
-      qkLabel:"QK — Quantum Karma",
-      qkHint:"Daily ritual energy. Used for status, progression, unlocks.",
-      flowScoreLabel:"FLOW SCORE",
-      flowHint:"0–100 indicator. Higher = calmer decisions.",
-      weatherLabel:"Market Weather",
-      weatherHint:"Legit vocabulary (not “signals”).",
-      dailySeal:"Daily Seal",
-      streak:"Streak",
-      streakHint:"Unlock via consistency, not pure spending.",
-      stats:"Today Stats",
-      statsHint:"Hope engine: positives dominate by design.",
-      social:"Temple Pulse",
-      socialHint:"Social proof without chat (safe & clean).",
-      ritualTitle:"Daily Ritual",
-      ritualSub:"One slow spin per day. Visible petals. No blur.",
-      activateFlow:"ACTIVATE FLOW",
-      oracle:"ORACLE",
-      gate:"OPEN GATE",
-      forecast:"FORECAST",
-      limit:"LIMIT",
-      disclaimer:"Ritualized UI. Not financial advice. Use your judgment.",
-      proTitle:"Pro Terminal",
-      proSub:"For mianzi: serious, clean, terminal-like.",
-      journalTitle:"Temple Journal",
-      journalSub:"Last 7 days (decision memory).",
-      extraTitle:"Temple Layer",
-      extraSub:"Scrollable (not a single screen).",
-      extraBody:"Reserved for: Trophy Room 7/21/49, skins, VIP Hall, future TON Connect.",
-      dockRitual:"Ritual",
-      dockWheel:"Wheel",
-      dockOracle:"Oracle",
-      dockGate:"Gate",
-      dockRules:"Rules",
-      oracleHead:"Temple Guidance",
-      oracleTap:"Tap ORACLE to receive guidance, then choose: Enter / Wait / Skip.",
-      enter:"ENTER",
-      wait:"WAIT",
-      skip:"SKIP",
-      day:"DAY",
-      ton:"TON",
-      paywallTitle:"Golden Altar",
-      payLater:"Later",
-      payNow:"Donate 1 TON (Mock)",
-      riskTitle:"Risk Gate",
-      cancel:"Cancel",
-      go:"Enter Gate",
-      rulesTitle:"Rules / Indicator Guide",
-    },
     ru: {
       brand1:"TON TEMPLE",
       brand2:"Имперский ритуал квантового потока",
@@ -1225,67 +1170,275 @@
       modeLabel:"РЕЖИМ",
       langLabel:"ЯЗЫК",
       rules:"ПРАВИЛА",
+
+      dragonTitle:"Solar Dragon",
+      dragonSub:"Эмблема по центру (3D) + планеты по орбитам.",
+
       hudTitle:"HUD ХРАМА",
       hudSub:"Всё объяснено. Подходит с первого запуска.",
       qkLabel:"QK — Квантовая карма",
       qkHint:"Ежедневная энергия ритуала: статус, прогресс, разблокировки.",
       flowScoreLabel:"FLOW SCORE",
       flowHint:"Индикатор 0–100. Чем выше — тем спокойнее решения.",
-      weatherLabel:"Погода рынка",
+      weatherLabel:"ПОГОДА РЫНКА",
       weatherHint:"Нарратив “как терминал”, а не “сигналы”.",
-      dailySeal:"Печать дня",
-      streak:"Серия",
+      dailySeal:"ПЕЧАТЬ ДНЯ",
+      sealStamped:"• проставлено",
+      streak:"СЕРИЯ",
       streakHint:"Разблокировки через регулярность, не только донат.",
-      stats:"Статистика дня",
+      stats:"СТАТИСТИКА ДНЯ",
       statsHint:"Дизайн-правило: позитив всегда доминирует.",
-      social:"Пульс храма",
+      caution:"Осторожность",
+      social:"ПУЛЬС ХРАМА",
       socialHint:"Соц.доказательство без чата (чисто и безопасно).",
-      ritualTitle:"Ежедневный ритуал",
-      ritualSub:"Один медленный спин в день. Лепестки видны. Без блюра.",
+
+      ritualTitle:"ЕЖЕДНЕВНЫЙ РИТУАЛ",
+      ritualSub:"Один медленный спин в день. Без блюра.",
       activateFlow:"АКТИВИРОВАТЬ ПОТОК",
       oracle:"ОРАКУЛ",
       gate:"ОТКРЫТЬ ВРАТА",
       forecast:"ПРОГНОЗ",
+      day:"DAY",
+      ton:"TON",
       limit:"ЛИМИТ",
+      limitExtra:"• доп: 1 TON",
+      oracleHead:"Указ храма",
+      oracleTap:"Нажми ORACLE, получи указ. Потом выбери: ENTER / WAIT / SKIP.",
+      enter:"ENTER",
+      wait:"WAIT",
+      skip:"SKIP",
       disclaimer:"Это ритуализированный UI. Не финсовет. Решение за тобой.",
+
       proTitle:"PRO-ТЕРМИНАЛ",
       proSub:"Цифры “для статуса”: серьёзно, чисто, как терминал.",
+      tonPulse:"TON Pulse",
+      tonPulseHint:"Синтетика для премиум-терминала (MVP).",
+      vol:"Волатильность",
+      volHint:"Влияет на Risk Aura и предупреждение Gate.",
+      window:"Окно потока",
+      windowHint:"Синхрон с Lucky Hour расписанием.",
+
       journalTitle:"ЖУРНАЛ ХРАМА",
       journalSub:"Последние 7 дней (память решений).",
+      noRecords:"Пока нет записей.",
+
       extraTitle:"СЛОЙ ХРАМА",
       extraSub:"Скролл (не один экран).",
       extraBody:"Зарезервировано: трофеи 7/21/49, скины, VIP зал, будущий TON Connect.",
+
       dockRitual:"Ритуал",
       dockWheel:"Колесо",
       dockOracle:"Оракул",
       dockGate:"Врата",
       dockRules:"Правила",
-      oracleHead:"Указ храма",
-      oracleTap:"Нажми ORACLE для указа. Затем выбери: Enter / Wait / Skip.",
+
+      rulesTitle:"Правила / Гайд по индикаторам",
+      close:"Закрыть",
+      ok:"ОК",
+
+      payTitle:"Золотой алтарь",
+      payLater:"Позже",
+      payNow:"Пожертвовать 1 TON (Mock)",
+      payText1:"Бесплатный лимит на сегодня исчерпан.",
+      payText2:"“Золотой алтарь” даёт ещё 1 указ за 1 TON (пока Mock).",
+
+      riskTitle:"Врата риска",
+      riskText1:"Подтверди осознанность: риск-аура и личная ответственность.",
+      riskText2:"Откроется внешняя ссылка (твой ref).",
+      riskAgree:"Я понимаю риск",
+      cancel:"Отмена",
+      go:"Войти"
+    },
+
+    en: {
+      brand1:"TON TEMPLE",
+      brand2:"Imperial Quantum Flow Ritual",
+      timeLabel:"LOCAL TIME",
+      modeLabel:"MODE",
+      langLabel:"LANG",
+      rules:"RULES",
+
+      dragonTitle:"Solar Dragon",
+      dragonSub:"Centered 3D emblem + orbiting planets.",
+
+      hudTitle:"Temple HUD",
+      hudSub:"First-time friendly: everything is explained.",
+      qkLabel:"QK — Quantum Karma",
+      qkHint:"Daily ritual energy for status, progression, unlocks.",
+      flowScoreLabel:"FLOW SCORE",
+      flowHint:"0–100 indicator. Higher = calmer decisions.",
+      weatherLabel:"MARKET WEATHER",
+      weatherHint:"Terminal-like narrative (not “signals”).",
+      dailySeal:"DAILY SEAL",
+      sealStamped:"• stamped",
+      streak:"STREAK",
+      streakHint:"Unlock via consistency (not pure spending).",
+      stats:"TODAY STATS",
+      statsHint:"Hope engine: positives dominate by design.",
+      caution:"Caution",
+      social:"TEMPLE PULSE",
+      socialHint:"Social proof without chat (safe & clean).",
+
+      ritualTitle:"DAILY RITUAL",
+      ritualSub:"One slow spin per day. No blur.",
+      activateFlow:"ACTIVATE FLOW",
+      oracle:"ORACLE",
+      gate:"OPEN GATE",
+      forecast:"FORECAST",
+      day:"DAY",
+      ton:"TON",
+      limit:"LIMIT",
+      limitExtra:"• extra: 1 TON",
+      oracleHead:"Temple Guidance",
+      oracleTap:"Tap ORACLE to receive guidance, then choose: ENTER / WAIT / SKIP.",
       enter:"ENTER",
       wait:"WAIT",
       skip:"SKIP",
+      disclaimer:"Ritualized UI. Not financial advice. Use your judgment.",
+
+      proTitle:"PRO TERMINAL",
+      proSub:"Numbers for “mianzi”: serious, clean UI.",
+      tonPulse:"TON Pulse",
+      tonPulseHint:"Synthetic metrics for premium terminal feel (MVP).",
+      vol:"Volatility",
+      volHint:"Shapes Risk Aura + Gate warning.",
+      window:"Flow Window",
+      windowHint:"Aligned with Lucky Hour schedule.",
+
+      journalTitle:"TEMPLE JOURNAL",
+      journalSub:"Last 7 days (decision memory).",
+      noRecords:"No records yet.",
+
+      extraTitle:"TEMPLE LAYER",
+      extraSub:"Scrollable (not a single screen).",
+      extraBody:"Reserved for: Trophy Room 7/21/49, skins, VIP Hall, future TON Connect.",
+
+      dockRitual:"Ritual",
+      dockWheel:"Wheel",
+      dockOracle:"Oracle",
+      dockGate:"Gate",
+      dockRules:"Rules",
+
+      rulesTitle:"Rules / Indicator Guide",
+      close:"Close",
+      ok:"OK",
+
+      payTitle:"Golden Altar",
+      payLater:"Later",
+      payNow:"Donate 1 TON (Mock)",
+      payText1:"Free daily limit reached.",
+      payText2:"“Golden Altar” grants 1 more oracle for 1 TON (Mock).",
+
+      riskTitle:"Risk Gate",
+      riskText1:"Confirm: Risk Aura & your own judgment.",
+      riskText2:"This will open an external link (your ref).",
+      riskAgree:"I understand the risk",
+      cancel:"Cancel",
+      go:"Enter"
+    },
+
+    zh: {
+      brand1:"TON TEMPLE",
+      brand2:"帝王量子福流仪式",
+      timeLabel:"本地时间",
+      modeLabel:"模式",
+      langLabel:"语言",
+      rules:"规则",
+
+      dragonTitle:"Solar Dragon",
+      dragonSub:"中心 3D 徽章 + 行星环绕轨道。",
+
+      hudTitle:"神殿 HUD",
+      hudSub:"新手友好：所有指标都解释清楚。",
+      qkLabel:"QK — 量子福业值",
+      qkHint:"每日仪式能量：用于状态、进度与解锁。",
+      flowScoreLabel:"FLOW SCORE",
+      flowHint:"0–100 指标。越高越冷静。",
+      weatherLabel:"市场天气",
+      weatherHint:"用“合法词汇”表达，而不是“信号”。",
+      dailySeal:"今日印章",
+      sealStamped:"• 已盖章",
+      streak:"连击",
+      streakHint:"靠坚持解锁，不是纯氪金。",
+      stats:"今日统计",
+      statsHint:"希望引擎：正向永远更多。",
+      caution:"谨慎",
+      social:"神殿脉冲",
+      socialHint:"无聊天的社交证明（安全、干净）。",
+
+      ritualTitle:"每日仪式",
+      ritualSub:"每天一次慢速转盘。无模糊。",
+      activateFlow:"启动福流",
+      oracle:"神谕",
+      gate:"开启之门",
+      forecast:"预测",
       day:"DAY",
       ton:"TON",
-      paywallTitle:"Золотой алтарь",
-      payLater:"Позже",
-      payNow:"Пожертвовать 1 TON (Mock)",
-      riskTitle:"Врата риска",
-      cancel:"Отмена",
-      go:"Войти",
-      rulesTitle:"Правила / Гайд по индикаторам",
+      limit:"限制",
+      limitExtra:"• 额外: 1 TON",
+      oracleHead:"神殿指引",
+      oracleTap:"点击 ORACLE 获取指引，然后选择：ENTER / WAIT / SKIP。",
+      enter:"ENTER",
+      wait:"WAIT",
+      skip:"SKIP",
+      disclaimer:"这是仪式化 UI。非投资建议。请自行判断。",
+
+      proTitle:"专业终端",
+      proSub:"给面子：严肃、干净、像终端。",
+      tonPulse:"TON Pulse",
+      tonPulseHint:"合成指标用于终端感（MVP）。",
+      vol:"波动率",
+      volHint:"影响 Risk Aura 与 Gate 提示。",
+      window:"福流窗口",
+      windowHint:"与 Lucky Hour 对齐。",
+
+      journalTitle:"神殿日志",
+      journalSub:"最近 7 天（决策记忆）。",
+      noRecords:"暂无记录。",
+
+      extraTitle:"神殿层",
+      extraSub:"可滚动（不止一屏）。",
+      extraBody:"预留：奖杯室 7/21/49、皮肤、VIP 大厅、未来 TON Connect。",
+
+      dockRitual:"仪式",
+      dockWheel:"转盘",
+      dockOracle:"神谕",
+      dockGate:"之门",
+      dockRules:"规则",
+
+      rulesTitle:"规则 / 指标说明",
+      close:"关闭",
+      ok:"好的",
+
+      payTitle:"黄金祭坛",
+      payLater:"稍后",
+      payNow:"供奉 1 TON（Mock）",
+      payText1:"今日免费次数已用完。",
+      payText2:"“黄金祭坛”以 1 TON 获得额外一次（当前 Mock）。",
+
+      riskTitle:"风险之门",
+      riskText1:"进入前确认：风险光环与自我判断。",
+      riskText2:"将打开外部链接（你的 ref）。",
+      riskAgree:"我已理解风险",
+      cancel:"取消",
+      go:"进入"
     }
   };
 
-  function t(key){ return I18N[state.lang]?.[key] ?? I18N.en[key] ?? key; }
+  const t = (key) => (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en[key] || key);
 
   function applyI18n(){
+    document.documentElement.lang = state.lang;
+
     $('tBrand1').textContent = t('brand1');
     $('tBrand2').textContent = t('brand2');
     $('tTimeLabel').textContent = t('timeLabel');
     $('tModeLabel').textContent = t('modeLabel');
     $('tLangLabel').textContent = t('langLabel');
     $('btnRules').textContent = t('rules');
+
+    $('tDragonTitle').textContent = t('dragonTitle');
+    $('tDragonSub').textContent = t('dragonSub');
 
     $('tHudTitle').textContent = t('hudTitle');
     $('tHudSub').textContent = t('hudSub');
@@ -1295,7 +1448,10 @@
     $('tFlowHint').textContent = t('flowHint');
     $('tWeatherLabel').textContent = t('weatherLabel');
     $('tWeatherHint').textContent = t('weatherHint');
+
     $('tDailySealLabel').textContent = t('dailySeal');
+    $('sealSub').textContent = t('sealStamped');
+
     $('tStreakLabel').textContent = t('streak');
     $('tStreakHint').textContent = t('streakHint');
     $('tStatsLabel').textContent = t('stats');
@@ -1309,13 +1465,29 @@
     $('btnOracle').textContent = t('oracle');
     $('btnGate').textContent = t('gate');
     $('tForecastType').textContent = t('forecast');
+    $('btnForecastDay').textContent = t('day');
+    $('btnForecastTON').textContent = t('ton');
     $('tLimitLabel').textContent = t('limit');
+    $('limitPaywall').textContent = t('limitExtra');
+    $('oracleHead').textContent = t('oracleHead');
+    if(!state.oracle.last) $('oracleBody').textContent = t('oracleTap');
+    $('btnEnter').textContent = t('enter');
+    $('btnWait').textContent = t('wait');
+    $('btnSkip').textContent = t('skip');
     $('tDisclaimer').textContent = t('disclaimer');
 
     $('tProTitle').textContent = t('proTitle');
     $('tProSub').textContent = t('proSub');
+    $('tTonPulse').textContent = t('tonPulse');
+    $('tTonPulseHint').textContent = t('tonPulseHint');
+    $('tVol').textContent = t('vol');
+    $('tVolHint').textContent = t('volHint');
+    $('tWindow').textContent = t('window');
+    $('tWindowHint').textContent = t('windowHint');
+
     $('tJournalTitle').textContent = t('journalTitle');
     $('tJournalSub').textContent = t('journalSub');
+
     $('tExtraTitle').textContent = t('extraTitle');
     $('tExtraSub').textContent = t('extraSub');
     $('tExtraBody').textContent = t('extraBody');
@@ -1326,39 +1498,169 @@
     $('dGate').textContent = t('dockGate');
     $('dRules').textContent = t('dockRules');
 
-    $('oracleHead').textContent = t('oracleHead');
-    if(!state.oracle.last){
-      $('oracleBody').innerHTML = t('oracleTap').replace('ORACLE','<b>ORACLE</b>');
-    }
-
-    $('btnEnter').textContent = t('enter');
-    $('btnWait').textContent = t('wait');
-    $('btnSkip').textContent = t('skip');
-    $('btnForecastDay').textContent = t('day');
-    $('btnForecastTON').textContent = t('ton');
-
     $('rulesTitle').textContent = t('rulesTitle');
-    $('rulesOk').textContent = "OK";
+    $('rulesClose').textContent = t('close');
+    $('rulesOk').textContent = t('ok');
 
-    $('payTitle').textContent = t('paywallTitle');
+    $('payTitle').textContent = t('payTitle');
+    $('payClose').textContent = t('close');
     $('payLater').textContent = t('payLater');
     $('payMock').textContent = t('payNow');
 
     $('riskTitle').textContent = t('riskTitle');
+    $('riskClose').textContent = t('close');
     $('riskCancel').textContent = t('cancel');
     $('riskGo').textContent = t('go');
+
+    $('btnZH').classList.toggle('active', state.lang==='zh');
+    $('btnEN').classList.toggle('active', state.lang==='en');
+    $('btnRU').classList.toggle('active', state.lang==='ru');
   }
 
-  // ---------- “Чёлка” toggle ----------
-  function toggleBang(){
-    const b = $('bang');
-    b.classList.toggle('open');
+  /* ===== Dragon Planets (names per language) ===== */
+  const PLANETS = {
+    ru: ["Меркурий","Венера","Земля","Марс","Юпитер","Сатурн","Уран","Нептун"],
+    en: ["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],
+    zh: ["水星","金星","地球","火星","木星","土星","天王星","海王星"]
+  };
+
+  function buildOrbits(){
+    const root = $('orbits');
+    root.innerHTML = "";
+
+    const names = PLANETS[state.lang] || PLANETS.en;
+
+    const cfg = [
+      {d: 260, p: 14, t: 9.0,  z: -20, rx:"62deg", ry:"10deg", pz:  8,  a:"20deg",  c1:"#c2b280", c2:"#7a6a4a"},
+      {d: 320, p: 18, t: 12.0, z: -10, rx:"58deg", ry:"-8deg",pz: 10, a:"120deg", c1:"#f4caa6", c2:"#b77e53"},
+      {d: 390, p: 20, t: 15.5, z:  0,  rx:"54deg", ry:"14deg",pz: 12, a:"220deg", c1:"#3fa9f5", c2:"#1b3b8f"},
+      {d: 460, p: 16, t: 18.0, z:  8,  rx:"50deg", ry:"-10deg",pz: 14,a:"310deg", c1:"#ff7a4b", c2:"#8f1b10"},
+      {d: 560, p: 28, t: 24.0, z: 16,  rx:"46deg", ry:"8deg", pz: 18, a:"70deg",  c1:"#f1d07a", c2:"#b07c2b"},
+      {d: 650, p: 26, t: 30.0, z: 22,  rx:"44deg", ry:"-12deg",pz: 20,a:"170deg", c1:"#ffe8a8", c2:"#a7792b"},
+      {d: 740, p: 22, t: 36.0, z: 28,  rx:"42deg", ry:"10deg",pz: 22,a:"250deg", c1:"#88d7ff", c2:"#2a7a9b"},
+      {d: 840, p: 22, t: 44.0, z: 34,  rx:"40deg", ry:"-6deg", pz: 24,a:"340deg", c1:"#6fa8ff", c2:"#2b3f9f"},
+    ];
+
+    cfg.forEach((c, i)=>{
+      const orbit = document.createElement("div");
+      orbit.className = "orbit";
+      orbit.style.setProperty("--d", c.d+"px");
+      orbit.style.setProperty("--z", c.z+"px");
+      orbit.style.setProperty("--rx", c.rx);
+      orbit.style.setProperty("--ry", c.ry);
+
+      const spin = document.createElement("div");
+      spin.className = "spinWrap";
+      spin.style.setProperty("--t", c.t+"s");
+
+      const planet = document.createElement("div");
+      planet.className = "planet";
+      planet.style.setProperty("--d", c.d+"px");
+      planet.style.setProperty("--p", c.p+"px");
+      planet.style.setProperty("--pz", c.pz+"px");
+      planet.style.setProperty("--a", c.a);
+      planet.style.setProperty("--c1", c.c1);
+      planet.style.setProperty("--c2", c.c2);
+      planet.setAttribute("data-name", names[i]);
+
+      spin.appendChild(planet);
+      orbit.appendChild(spin);
+      root.appendChild(orbit);
+    });
   }
 
-  // ---------- Wheel ----------
+  /* ===== Bang toggle ===== */
+  function toggleBang(){ $('bang').classList.toggle('open'); }
+
+  /* ===== Rules content (localized) ===== */
+  function rulesHTML(){
+    if(state.lang==='ru'){
+      return `
+        <div class="sec"><b>Одна строка:</b> Это “ритуализированный UI”. Мы продаём ритм/уверенность/статус, а не “сигналы”.</div>
+        <div class="sec"><b>QK</b> — энергия статуса. Даётся колесом/оракулом/решением.</div>
+        <div class="sec"><b>Flow Score (0–100)</b> — индикатор спокойствия решений.</div>
+        <div class="sec"><b>Погода рынка</b> — нарратив: CALM / BREEZE / HEAVY / STORM.</div>
+        <div class="sec"><b>Risk Aura</b> — LOW / MED / HIGH. Перед Gate всегда подтверждение.</div>
+        <div class="sec"><b>Wheel</b> — 1 раз в день.</div>
+        <div class="sec"><b>Oracle</b> — 1 раз в день бесплатно (DAY/TON), далее доп. попытка за 1 TON (Mock).</div>
+        <div class="sec"><b>Gate</b> — сначала Risk Gate, потом ref-ссылка.</div>
+        <div class="sec"><b>Важно:</b> не финсовет.</div>
+      `;
+    }
+    if(state.lang==='zh'){
+      return `
+        <div class="sec"><b>一句话：</b>仪式化 UI。卖的是节奏/信心/状态，不是“信号”。</div>
+        <div class="sec"><b>QK</b>：状态能量，来自 Wheel/Oracle/Decision。</div>
+        <div class="sec"><b>Flow Score (0–100)</b>：决策冷静度指标。</div>
+        <div class="sec"><b>Market Weather</b>：CALM / BREEZE / HEAVY / STORM。</div>
+        <div class="sec"><b>Risk Aura</b>：LOW / MED / HIGH。Gate 前确认。</div>
+        <div class="sec"><b>Wheel</b>：每天一次。</div>
+        <div class="sec"><b>Oracle</b>：每天一次免费，额外 1 次 1 TON（Mock）。</div>
+        <div class="sec"><b>Gate</b>：Risk Gate → ref 链接。</div>
+        <div class="sec"><b>注意：</b>非投资建议。</div>
+      `;
+    }
+    return `
+      <div class="sec"><b>One-liner:</b> Ritualized UI. You sell rhythm/confidence/status — not “signals”.</div>
+      <div class="sec"><b>QK</b> status energy from Wheel/Oracle/Decisions.</div>
+      <div class="sec"><b>Flow Score (0–100)</b> calm indicator.</div>
+      <div class="sec"><b>Market Weather</b> narrative: CALM / BREEZE / HEAVY / STORM.</div>
+      <div class="sec"><b>Risk Aura</b> LOW / MED / HIGH; Gate confirmation.</div>
+      <div class="sec"><b>Wheel</b> 1/day.</div>
+      <div class="sec"><b>Oracle</b> 1/day free, extra 1 for 1 TON (Mock).</div>
+      <div class="sec"><b>Gate</b> Risk Gate → ref link.</div>
+      <div class="sec"><b>Note:</b> not financial advice.</div>
+    `;
+  }
+
+  function openRules(){ $('rulesBody').innerHTML = rulesHTML(); $('rulesBack').style.display = 'flex'; }
+  function closeRules(){ $('rulesBack').style.display = 'none'; }
+
+  function openPaywall(){
+    const html = `
+      <div class="sec"><b>${t('payText1')}</b></div>
+      <div class="sec">${t('payText2')}</div>
+    `;
+    $('payBody').innerHTML = html;
+    $('payBack').style.display = 'flex';
+  }
+  function closePaywall(){ $('payBack').style.display = 'none'; }
+
+  let riskConfirmed = false;
+  function openRiskGate(){
+    riskConfirmed = false;
+    $('riskBody').innerHTML = `
+      <div class="sec"><b>${t('riskText1')}</b></div>
+      <div class="sec">${t('riskText2')}</div>
+      <div class="sec">
+        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
+          Risk Aura: <b>${state.risk}</b>
+        </span>
+      </div>
+      <div class="sec">
+        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
+          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
+          <span>${t('riskAgree')}</span>
+        </label>
+      </div>
+    `;
+    $('riskBack').style.display = 'flex';
+    setTimeout(()=>{
+      const cb = $('riskCheck');
+      if(cb) cb.addEventListener('change', ()=> riskConfirmed = cb.checked);
+    },0);
+  }
+  function closeRiskGate(){ $('riskBack').style.display = 'none'; }
+  function goGate(){
+    if(!riskConfirmed) return;
+    closeRiskGate();
+    flash();
+    setTimeout(()=> window.open(state.gate.refUrl, "_blank"), 520);
+  }
+
+  /* ===== Wheel ===== */
   const wheelCanvas = $('wheel');
   const wctx = wheelCanvas.getContext('2d');
-
   const luckSymbols = ["福","禄","寿","喜","财","吉","祥","安","顺","旺","昌","瑞","德","和","兴"];
 
   function resizeWheel(){
@@ -1371,8 +1673,7 @@
 
   function drawWheel(){
     const rect = wheelCanvas.getBoundingClientRect();
-    const cx = rect.width/2;
-    const cy = rect.height/2;
+    const cx = rect.width/2, cy = rect.height/2;
     const R = Math.min(cx,cy)*0.92;
     const inner = R*0.18;
 
@@ -1382,9 +1683,7 @@
     ringGrad.addColorStop(0, "rgba(255,211,106,.08)");
     ringGrad.addColorStop(1, "rgba(255,43,63,.10)");
     wctx.fillStyle = ringGrad;
-    wctx.beginPath();
-    wctx.arc(cx,cy,R*1.02,0,Math.PI*2);
-    wctx.fill();
+    wctx.beginPath(); wctx.arc(cx,cy,R*1.02,0,Math.PI*2); wctx.fill();
 
     const N = state.wheel.petals;
     const step = (Math.PI*2)/N;
@@ -1396,24 +1695,20 @@
       const alt = (i%2===0);
       const col1 = alt ? "rgba(180,0,29,.95)" : "rgba(255,43,63,.70)";
       const col2 = alt ? "rgba(255,43,63,.55)" : "rgba(180,0,29,.85)";
-
       const g = wctx.createLinearGradient(
         cx + Math.cos(a1)*R, cy + Math.sin(a1)*R,
         cx + Math.cos(a2)*R, cy + Math.sin(a2)*R
       );
-      g.addColorStop(0, col1);
-      g.addColorStop(1, col2);
+      g.addColorStop(0, col1); g.addColorStop(1, col2);
 
       wctx.beginPath();
       wctx.moveTo(cx,cy);
       wctx.arc(cx,cy,R,a1,a2);
       wctx.closePath();
-      wctx.fillStyle = g;
-      wctx.fill();
+      wctx.fillStyle = g; wctx.fill();
 
       wctx.strokeStyle = "rgba(255,211,106,.28)";
-      wctx.lineWidth = 1;
-      wctx.stroke();
+      wctx.lineWidth = 1; wctx.stroke();
 
       const mid = (a1+a2)/2;
       const tx = cx + Math.cos(mid)*R*0.63;
@@ -1432,21 +1727,13 @@
       wctx.restore();
     }
 
-    wctx.beginPath();
-    wctx.arc(cx,cy,R*0.40,0,Math.PI*2);
-    wctx.fillStyle = "rgba(0,0,0,.35)";
-    wctx.fill();
-    wctx.strokeStyle = "rgba(255,211,106,.18)";
-    wctx.lineWidth = 1;
-    wctx.stroke();
+    wctx.beginPath(); wctx.arc(cx,cy,R*0.40,0,Math.PI*2);
+    wctx.fillStyle = "rgba(0,0,0,.35)"; wctx.fill();
+    wctx.strokeStyle = "rgba(255,211,106,.18)"; wctx.lineWidth = 1; wctx.stroke();
 
-    wctx.beginPath();
-    wctx.arc(cx,cy,inner,0,Math.PI*2);
-    wctx.fillStyle = "rgba(0,0,0,.60)";
-    wctx.fill();
-    wctx.strokeStyle = "rgba(255,211,106,.20)";
-    wctx.lineWidth = 1;
-    wctx.stroke();
+    wctx.beginPath(); wctx.arc(cx,cy,inner,0,Math.PI*2);
+    wctx.fillStyle = "rgba(0,0,0,.60)"; wctx.fill();
+    wctx.strokeStyle = "rgba(255,211,106,.20)"; wctx.lineWidth = 1; wctx.stroke();
   }
 
   function computeWheelIndex(){
@@ -1480,7 +1767,7 @@
   function startSpin(){
     const tk = dayKey();
     if(state.wheel.usedToday && state.today.key === tk){
-      openRules("SPIN_LIMIT");
+      openRules();
       return;
     }
     if(state.wheel.spinning) return;
@@ -1525,197 +1812,8 @@
     requestAnimationFrame(wheelTick);
   }
 
-  // ---------- Rules ----------
-  function rulesHTML(){
-    const zh = state.lang==='zh';
-    const en = state.lang==='en';
-    const ru = state.lang==='ru';
-
-    if(ru){
-      return `
-        <div class="sec"><b>Одна строка:</b> Это “ритуализированный UI”. Мы продаём ритм/уверенность/статус, а не “сигналы”.</div>
-        <div class="sec"><b>QK</b> — энергия статуса. Даётся колесом/оракулом/решением. Нужна для прогресса и VIP.</div>
-        <div class="sec"><b>Flow Score (0–100)</b> — терминальный индикатор спокойствия решений.</div>
-        <div class="sec"><b>Market Weather</b> — нарратив: CALM / BREEZE / HEAVY / STORM.</div>
-        <div class="sec"><b>Risk Aura</b> — LOW / MED / HIGH. Перед Gate всегда подтверждение.</div>
-        <div class="sec"><b>Wheel</b> — 1 раз в день. Медленно, без блюра. Лёгкий апдейт QK/Flow.</div>
-        <div class="sec"><b>Oracle</b> — 1 раз в день бесплатно (DAY/TON). Потом выбор: Enter / Wait / Skip.</div>
-        <div class="sec"><b>Gate</b> — сначала Risk Gate (осознанность), потом открываем ref-ссылку.</div>
-        <div class="sec"><b>Важно:</b> Это демо/геймификация, не финсовет.</div>
-      `;
-    }
-
-    if(en){
-      return `
-        <div class="sec"><b>One-liner:</b> Ritualized UI. You sell rhythm/confidence/status — not “signals”.</div>
-        <div class="sec"><b>QK</b> status energy from Wheel/Oracle/Decisions (progress + VIP).</div>
-        <div class="sec"><b>Flow Score (0–100)</b> terminal-like calm indicator.</div>
-        <div class="sec"><b>Market Weather</b> narrative: CALM / BREEZE / HEAVY / STORM.</div>
-        <div class="sec"><b>Risk Aura</b> LOW / MED / HIGH used in Risk Gate confirmation.</div>
-        <div class="sec"><b>Wheel</b> 1/day slow spin, slight QK/Flow shift.</div>
-        <div class="sec"><b>Oracle</b> 1/day free (DAY/TON), then Enter/Wait/Skip.</div>
-        <div class="sec"><b>Gate</b> requires Risk Gate, then opens your ref link.</div>
-        <div class="sec"><b>Note:</b> Demo/gamified UI. Not financial advice.</div>
-      `;
-    }
-
-    // zh default
-    return `
-      <div class="sec"><b>一句话：</b>这是“神殿仪式化 UI”。我们卖的是“节奏、信心、状态”，不是“信号”。</div>
-      <div class="sec"><b>QK</b> — 量子福业值：来自转盘、神谕、选择，用于进度与 VIP。</div>
-      <div class="sec"><b>Flow Score (0–100)</b>：终端感指标，越高越冷静。</div>
-      <div class="sec"><b>Market Weather</b>：CALM / BREEZE / HEAVY / STORM。</div>
-      <div class="sec"><b>Risk Aura</b>：LOW / MED / HIGH，用于 Gate 前确认。</div>
-      <div class="sec"><b>Wheel</b>：每天一次慢转，轻微更新 QK/Flow。</div>
-      <div class="sec"><b>Oracle</b>：每天一次免费（DAY/TON），然后选择 Enter/Wait/Skip。</div>
-      <div class="sec"><b>Gate</b>：通过 Risk Gate 后跳转 ref 链接。</div>
-      <div class="sec"><b>注意：</b>演示/游戏化界面，不构成金融建议。</div>
-    `;
-  }
-
-  function openRules(){
-    $('rulesBody').innerHTML = rulesHTML();
-    $('rulesBack').style.display = 'flex';
-  }
-  function closeRules(){ $('rulesBack').style.display = 'none'; }
-
-  // ---------- Paywall ----------
-  function openPaywall(){
-    const ru = state.lang==='ru';
-    const en = state.lang==='en';
-    const zh = state.lang==='zh';
-
-    $('payBody').innerHTML = ru ? `
-      <div class="sec"><b>Бесплатный лимит на сегодня исчерпан.</b></div>
-      <div class="sec">“Золотой алтарь” даёт ещё 1 указ за 1 TON (пока Mock).</div>
-    ` : en ? `
-      <div class="sec"><b>Free daily limit reached.</b></div>
-      <div class="sec">“Golden Altar” grants 1 more oracle for 1 TON (Mock for now).</div>
-    ` : `
-      <div class="sec"><b>今日免费次数已用完。</b></div>
-      <div class="sec">“黄金祭坛”以 1 TON 获得额外一次（当前 Mock）。</div>
-    `;
-
-    $('payBack').style.display = 'flex';
-  }
-  function closePaywall(){ $('payBack').style.display = 'none'; }
-
-  // ---------- Risk Gate ----------
-  let riskConfirmed = false;
-
-  function openRiskGate(){
-    riskConfirmed = false;
-
-    const ru = state.lang==='ru';
-    const en = state.lang==='en';
-
-    $('riskBody').innerHTML = ru ? `
-      <div class="sec"><b>Подтверди осознанность:</b> риск-аура и личная ответственность.</div>
-      <div class="sec">Откроется внешняя ссылка (твой ref).</div>
-      <div class="sec">
-        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
-          Risk Aura: <b>${state.risk}</b>
-        </span>
-      </div>
-      <div class="sec">
-        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
-          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
-          <span>Я понимаю риск</span>
-        </label>
-      </div>
-    ` : en ? `
-      <div class="sec"><b>Confirm:</b> Risk Aura & your own judgment.</div>
-      <div class="sec">You will open an external link (your ref).</div>
-      <div class="sec">
-        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
-          Risk Aura: <b>${state.risk}</b>
-        </span>
-      </div>
-      <div class="sec">
-        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
-          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
-          <span>I understand the risk</span>
-        </label>
-      </div>
-    ` : `
-      <div class="sec"><b>进入前确认：</b>风险光环与自我判断。</div>
-      <div class="sec">将打开外部链接（你的 ref）。</div>
-      <div class="sec">
-        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
-          Risk Aura: <b>${state.risk}</b>
-        </span>
-      </div>
-      <div class="sec">
-        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
-          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
-          <span>我已理解风险</span>
-        </label>
-      </div>
-    `;
-
-    $('riskBack').style.display = 'flex';
-
-    setTimeout(()=>{
-      const cb = $('riskCheck');
-      if(cb) cb.addEventListener('change', ()=> riskConfirmed = cb.checked);
-    },0);
-  }
-  function closeRiskGate(){ $('riskBack').style.display = 'none'; }
-
-  function openGateFlow(){
-    if(!state.oracle.last){
-      openRules();
-      return;
-    }
-    openRiskGate();
-  }
-  function goGate(){
-    if(!riskConfirmed) return;
-    closeRiskGate();
-    flash();
-    setTimeout(()=> window.open(state.gate.refUrl, "_blank"), 520);
-  }
-
-  // ---------- Oracle ----------
+  /* ===== Oracle ===== */
   const oracleBank = {
-    zh: {
-      dayPos:[
-        "恭喜發財。今天适合把复杂的事做简单：先完成一件最重要的事，福气会顺势而来。",
-        "瑞气盈门。今天的节奏偏稳，别急，稳就是赢。",
-        "顺风顺水。用“少而精”的策略：少做但做对。"
-      ],
-      dayCaution:[
-        "今日宜守不宜攻。少做冲动决定，晚上再复盘会更清晰。",
-        "谨慎为上。避免与人争辩，留面子，福气不散。"
-      ],
-      tonPos:[
-        "财源广进。TON 今日气场平稳：若要行动，以小仓位、分批为佳。",
-        "瑞气盈门。先看风险光环：LOW/MED 时可小步进入，HIGH 时先等待。"
-      ],
-      tonCaution:[
-        "今日宜观望。若 Risk Aura 为 HIGH，建议只记录不操作。",
-        "气场偏乱。避免重仓与频繁进出，等待更好的窗口。"
-      ]
-    },
-    en: {
-      dayPos:[
-        "Prosperity is near. Keep it simple: finish one top task — momentum follows.",
-        "Stable day. Don’t rush. Steady is winning.",
-        "Less but better: do fewer things, do them right."
-      ],
-      dayCaution:[
-        "Better to hold than push today. Avoid impulsive moves; review later.",
-        "Caution wins: avoid conflict, keep the flow."
-      ],
-      tonPos:[
-        "Wealth flow is steady. If you act: small size, split entries.",
-        "Check Risk Aura first: LOW/MED → small steps. HIGH → wait."
-      ],
-      tonCaution:[
-        "Better to observe. If Risk Aura is HIGH, record notes — no action.",
-        "Flow is noisy: avoid heavy size and over-trading."
-      ]
-    },
     ru: {
       dayPos:[
         "Удача рядом. Упростишь день — выиграешь: сделай одну главную задачу и получишь импульс.",
@@ -1733,6 +1831,44 @@
       tonCaution:[
         "Лучше наблюдать. Если Risk Aura HIGH — только заметки, без действий.",
         "Шумный поток: без тяжёлого размера и частых входов/выходов."
+      ]
+    },
+    en: {
+      dayPos:[
+        "Prosperity is near. Keep it simple: one top task — momentum follows.",
+        "Stable day. Don’t rush. Steady is winning.",
+        "Less but better: do fewer things, do them right."
+      ],
+      dayCaution:[
+        "Better to hold than push today. Avoid impulsive moves; review later.",
+        "Caution wins: avoid conflict, keep the flow."
+      ],
+      tonPos:[
+        "Wealth flow is steady. If you act: small size, split entries.",
+        "Check Risk Aura first: LOW/MED → small steps. HIGH → wait."
+      ],
+      tonCaution:[
+        "Better to observe. If Risk Aura is HIGH, record notes — no action.",
+        "Flow is noisy: avoid heavy size and over-trading."
+      ]
+    },
+    zh: {
+      dayPos:[
+        "恭喜發財。先完成一件最重要的事，福气会顺势而来。",
+        "节奏偏稳，别急，稳就是赢。",
+        "少做但做对：少而精。"
+      ],
+      dayCaution:[
+        "今日宜守不宜攻。少做冲动决定，晚上复盘更清晰。",
+        "谨慎为上。避免争辩，留面子。"
+      ],
+      tonPos:[
+        "TON 气场平稳：小仓位、分批更佳。",
+        "先看 Risk Aura：LOW/MED 小步进入，HIGH 先等待。"
+      ],
+      tonCaution:[
+        "今日宜观望。Risk Aura HIGH 只记录不操作。",
+        "气场偏乱。避免重仓与频繁进出。"
       ]
     }
   };
@@ -1752,11 +1888,10 @@
   }
 
   function oracleGenerate(){
-    const lang = state.lang;
-    const type = state.oracle.type; // day/ton
+    const bank = oracleBank[state.lang] || oracleBank.en;
+    const type = state.oracle.type;
     const isCaution = Math.random() < 0.10;
 
-    const bank = oracleBank[lang] || oracleBank.en;
     const arr = (type==='day')
       ? (isCaution ? bank.dayCaution : bank.dayPos)
       : (isCaution ? bank.tonCaution : bank.tonPos);
@@ -1781,6 +1916,7 @@
   function setOracleUI(o){
     $('oracleStamp').textContent = o.stamp;
     $('oracleBody').textContent = o.text;
+
     $('chipWeather').textContent = `Market Weather: ${o.weather}`;
     $('chipAura').textContent = `Risk Aura: ${o.aura}`;
     $('chipAura').classList.toggle('ok', o.aura === 'LOW' && !o.isCaution);
@@ -1789,8 +1925,7 @@
     const fw = (o.aura === 'LOW') ? "OPEN" : (o.aura === 'MED' ? "NARROW" : "CLOSED");
     $('chipFlow').textContent = `Flow Window: ${fw}`;
 
-    const head = t('oracleHead');
-    $('oracleHead').textContent = `${head} • ${o.suggested}`;
+    $('oracleHead').textContent = `${t('oracleHead')} • ${o.suggested}`;
   }
 
   function runOracle(){
@@ -1798,7 +1933,6 @@
       openPaywall();
       return;
     }
-
     const o = oracleGenerate();
     state.oracle.last = o;
     state.oracle.decision = null;
@@ -1806,20 +1940,17 @@
     const gain = o.isCaution ? rnd(0.6, 1.8) : rnd(1.2, 3.6);
     state.qk = +(state.qk + gain).toFixed(2);
 
-    if(o.isCaution) state.today.neg += 1;
-    else state.today.pos += 1;
+    if(o.isCaution) state.today.neg += 1; else state.today.pos += 1;
 
     setOracleUI(o);
     enableChoicesIfOracleReady();
-
     flash();
-    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:o.isCaution ? "Caution" : "Positive" });
 
+    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:o.isCaution ? t('caution') : "Positive" });
     saveState();
     renderHUD();
   }
 
-  // ---------- Decisions ----------
   function takeDecision(dec){
     if(!state.oracle.last) return;
     state.oracle.decision = dec;
@@ -1835,21 +1966,14 @@
 
     state.qk = +(state.qk + delta).toFixed(2);
     flash();
-
     pushJournal({ type:"decision", title:`Decision → ${dec}`, detail:`QK ${delta>=0?'+':''}${delta.toFixed(2)}` });
     renderHUD();
     saveState();
   }
 
-  // ---------- Journal ----------
+  /* ===== Journal ===== */
   function pushJournal(entry){
-    const line = {
-      date: state.today.key,
-      time: nowHM(),
-      type: entry.type,
-      title: entry.title,
-      detail: entry.detail
-    };
+    const line = { date: state.today.key, time: nowHM(), type: entry.type, title: entry.title, detail: entry.detail };
     state.journal.unshift(line);
     if(state.journal.length > 7) state.journal.pop();
     renderJournal();
@@ -1857,7 +1981,7 @@
 
   function renderJournal(){
     if(state.journal.length === 0){
-      $('journal').textContent = (state.lang==='ru') ? "Пока нет записей." : (state.lang==='zh' ? "暂无记录。" : "No records yet.");
+      $('journal').textContent = t('noRecords');
       return;
     }
     const lines = state.journal.map(j => {
@@ -1867,18 +1991,18 @@
     $('journal').textContent = lines.join("\n");
   }
 
-  // ---------- HUD ----------
-  const dailySealsZH = ["今日财印","天赐福印","金龙护印","富贵长明","福运相随","招财进宝","瑞气盈门"];
-  const dailySealsEN = ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"];
-  const dailySealsRU = ["ПЕЧАТЬ ДОСТАТКА","ПЕЧАТЬ БЛАГОСЛОВЕНИЯ","ПЕЧАТЬ ДРАКОНА","ВЕЧНАЯ УДАЧА","ПЕЧАТЬ ПОТОКА"];
+  /* ===== HUD ===== */
+  const seals = {
+    ru: ["ПЕЧАТЬ ДОСТАТКА","ПЕЧАТЬ БЛАГОСЛОВЕНИЯ","ПЕЧАТЬ ДРАКОНА","ВЕЧНАЯ УДАЧА","ПЕЧАТЬ ПОТОКА"],
+    en: ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"],
+    zh: ["今日财印","天赐福印","金龙护印","富贵长明","福运相随"]
+  };
 
   function pickDailySeal(){
     const k = state.today.key;
     let hash = 0; for(const c of k) hash = (hash*31 + c.charCodeAt(0))>>>0;
-    const arr = (state.lang==='zh') ? dailySealsZH : (state.lang==='ru' ? dailySealsRU : dailySealsEN);
-    const seal = arr[hash % arr.length];
-    $('dailySeal').textContent = seal;
-    $('sealSub').textContent = (state.lang==='zh') ? "• 已盖章" : (state.lang==='ru' ? "• проставлено" : "• stamped");
+    const arr = seals[state.lang] || seals.en;
+    $('dailySeal').textContent = arr[hash % arr.length];
   }
 
   function renderHUD(){
@@ -1887,11 +2011,11 @@
     $('weather').textContent = state.weather;
 
     const qk = state.qk;
-    $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "Balanced");
+    $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "BALANCED");
 
     $('riskTag').textContent = `Risk Aura: ${state.risk}`;
     $('posCount').textContent = String(state.today.pos);
-    $('negCountTag').textContent = `${(state.lang==='ru')?'Осторожность':(state.lang==='zh'?'谨慎':'Caution')}: ${state.today.neg}`;
+    $('negCountTag').textContent = `${t('caution')}: ${state.today.neg}`;
 
     $('socialA').textContent = state.social.a.toLocaleString();
     $('socialB').textContent = `VIP: ${state.social.vip}`;
@@ -1899,7 +2023,6 @@
     $('streak').textContent = String(state.streak);
     $('cycleTag').textContent = "7/21/49 Path";
 
-    // synthetic pro
     const pulse = (state.flowScore>=60) ? `+${rnd(.2,1.8).toFixed(2)}%` : `-${rnd(.1,1.2).toFixed(2)}%`;
     $('tonPulse').textContent = pulse;
     $('liqPulse').textContent = `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
@@ -1915,7 +2038,7 @@
     renderJournal();
   }
 
-  // ---------- Lucky Hour ----------
+  /* ===== Lucky Hour ===== */
   function isWithinWindow(d, baseHour, windowMinutes){
     const start = new Date(d);
     start.setHours(baseHour,0,0,0);
@@ -1957,7 +2080,38 @@
     setTimeout(tickClock, 250);
   }
 
-  // ---------- Dock icon spin ----------
+  /* ===== Mode + Lang ===== */
+  function setMode(mode){
+    state.mode = mode;
+    $('btnRitual').classList.toggle('active', mode==='ritual');
+    $('btnPro').classList.toggle('active', mode==='pro');
+    $('proCard').style.display = (mode==='pro') ? 'block' : 'none';
+    saveState();
+  }
+
+  function setLang(lang){
+    state.lang = lang;
+    applyI18n();
+    buildOrbits();          // IMPORTANT: planet names translated
+    renderHUD();
+    saveState();
+  }
+
+  function setForecastType(type){
+    state.oracle.type = type;
+    $('btnForecastDay').classList.toggle('active', type==='day');
+    $('btnForecastTON').classList.toggle('active', type==='ton');
+    saveState();
+  }
+
+  function mockPay(){
+    state.today.oraclePaidExtra += 1;
+    closePaywall();
+    flash();
+    saveState();
+  }
+
+  /* ===== Dock icon spin ===== */
   function spinDockIcon(btn, dir='R'){
     const icon = btn.querySelector('.dockIcon');
     if(!icon) return;
@@ -1967,51 +2121,11 @@
     setTimeout(()=>icon.classList.remove('spinL','spinR'), 1100);
   }
 
-  // ---------- Mode ----------
-  function setMode(mode){
-    state.mode = mode;
-    $('btnRitual').classList.toggle('active', mode==='ritual');
-    $('btnPro').classList.toggle('active', mode==='pro');
-    $('proCard').style.display = (mode==='pro') ? 'block' : 'none';
-    saveState();
-  }
-
-  // ---------- Language ----------
-  function setLang(lang){
-    state.lang = lang;
-    $('btnZH').classList.toggle('active', lang==='zh');
-    $('btnEN').classList.toggle('active', lang==='en');
-    $('btnRU').classList.toggle('active', lang==='ru');
-    applyI18n();
-    renderHUD();
-    saveState();
-  }
-
-  // ---------- Forecast type ----------
-  function setForecastType(type){
-    state.oracle.type = type;
-    $('btnForecastDay').classList.toggle('active', type==='day');
-    $('btnForecastTON').classList.toggle('active', type==='ton');
-    saveState();
-  }
-
-  // ---------- Pay mock ----------
-  function mockPay(){
-    state.today.oraclePaidExtra += 1;
-    closePaywall();
-    flash();
-    saveState();
-  }
-
-  // ---------- Events (FIXED: RULES x2 + ? button) ----------
+  /* ===== Events ===== */
   function bindEvents(){
-    // “Чёлка”
     $('btnBang').addEventListener('click', toggleBang);
 
-    // help (?) => rules
     $('helpBtn').addEventListener('click', openRules);
-
-    // rules: top button + dock button -> same handler
     $('btnRules').addEventListener('click', openRules);
     $('dockRules').addEventListener('click', ()=>{ spinDockIcon($('dockRules'),'L'); openRules(); });
 
@@ -2019,30 +2133,27 @@
     $('rulesOk').addEventListener('click', closeRules);
     $('rulesBack').addEventListener('click', (e)=>{ if(e.target.id==='rulesBack') closeRules(); });
 
-    // mode
     $('btnRitual').addEventListener('click', ()=> setMode('ritual'));
     $('btnPro').addEventListener('click', ()=> setMode('pro'));
 
-    // language
     $('btnZH').addEventListener('click', ()=> setLang('zh'));
     $('btnEN').addEventListener('click', ()=> setLang('en'));
     $('btnRU').addEventListener('click', ()=> setLang('ru'));
 
-    // forecast
     $('btnForecastDay').addEventListener('click', ()=> setForecastType('day'));
     $('btnForecastTON').addEventListener('click', ()=> setForecastType('ton'));
 
-    // wheel / oracle / gate
     $('btnSpin').addEventListener('click', startSpin);
     $('btnOracle').addEventListener('click', runOracle);
-    $('btnGate').addEventListener('click', openGateFlow);
+    $('btnGate').addEventListener('click', ()=>{
+      if(!state.oracle.last){ openRules(); return; }
+      openRiskGate();
+    });
 
-    // decisions
     $('btnEnter').addEventListener('click', ()=> takeDecision('ENTER'));
     $('btnWait').addEventListener('click', ()=> takeDecision('WAIT'));
     $('btnSkip').addEventListener('click', ()=> takeDecision('SKIP'));
 
-    // dock navigation
     $('dockRitual').addEventListener('click', ()=>{
       spinDockIcon($('dockRitual'),'R');
       window.scrollTo({top:0, behavior:'smooth'});
@@ -2059,29 +2170,26 @@
     });
     $('dockGate').addEventListener('click', ()=>{
       spinDockIcon($('dockGate'),'R');
-      openGateFlow();
+      if(!state.oracle.last){ openRules(); return; }
+      openRiskGate();
     });
 
-    // paywall
     $('payClose').addEventListener('click', closePaywall);
     $('payLater').addEventListener('click', closePaywall);
     $('payMock').addEventListener('click', mockPay);
     $('payBack').addEventListener('click', (e)=>{ if(e.target.id==='payBack') closePaywall(); });
 
-    // risk gate
     $('riskClose').addEventListener('click', closeRiskGate);
     $('riskCancel').addEventListener('click', closeRiskGate);
     $('riskGo').addEventListener('click', goGate);
     $('riskBack').addEventListener('click', (e)=>{ if(e.target.id==='riskBack') closeRiskGate(); });
 
-    // resize
     window.addEventListener('resize', resizeWheel);
   }
 
-  // ---------- Init ----------
+  /* ===== Init ===== */
   loadState();
 
-  // ensure daily stats always positive-dominant
   if(state.today.key !== dayKey()){
     state.today.key = dayKey();
     state.today.pos = irnd(6,12);
@@ -2091,20 +2199,21 @@
     state.wheel.usedToday = false;
   }
 
-  // apply UI initials
   setMode(state.mode || 'ritual');
-  setLang(state.lang || 'zh');
-  setForecastType(state.oracle.type || 'day');
+  applyNarrativeFromFlow();
+
+  applyI18n();
+  buildOrbits();
 
   resizeWheel();
-  applyNarrativeFromFlow();
   renderHUD();
   bindEvents();
   tickClock();
   wheelTick();
+
   </script>
 
-  <!-- Three.js temple layer (behind UI). Safe: pointer-events none. -->
+  <!-- Three.js background (optional, behind UI and not clickable) -->
   <script type="module">
     import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
