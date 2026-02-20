@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TON Temple — Desktop</title>
+  <title>TON Temple — Fa Cai Supreme AI</title>
 
   <style>
     :root{
       --bg0:#050505;
       --bg1:#0a0704;
-
       --gold:#FFD36A;
       --gold2:#B8860B;
       --red:#B8001D;
       --warm:#FFF3D1;
 
+      /* glass — плотнее, чтобы текст не сливался */
       --glassA: rgba(10,10,12,0.72);
       --glassB: rgba(10,10,12,0.62);
       --line: rgba(255,211,106,.22);
@@ -30,21 +30,8 @@
       --safeTop: env(safe-area-inset-top, 0px);
       --safeBottom: env(safe-area-inset-bottom, 0px);
 
-      --topbarH: 58px;
-
-      /* Desktop LOCKED: 50/50 */
-      --leftW: 50vw;
-      --rightW: 50vw;
-
-      /* Right column max width (keeps premium) */
-      --rightMax: 720px;
-
-      /* Make Daily Ritual nearly “no card” */
-      --ritualBg1: rgba(0,0,0,.18);
-      --ritualBg2: rgba(0,0,0,.06);
-
-      --uiText: rgba(255,255,255,.92);
-      --uiText2: rgba(255,255,255,.76);
+      --topbarH: 56px;
+      --dockPad: 78px;
     }
 
     *{box-sizing:border-box}
@@ -57,32 +44,237 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    /* =========================
-       TOPBAR (LOCKED)
-       ========================= */
-    .topbar{
+    /* ===== Background Cosmos pinned ===== */
+    #cosmos{
       position:fixed;
-      top:0; left:0; right:0;
-      z-index:2000;
-      padding-top: var(--safeTop);
-      backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(0,0,0,.78), rgba(0,0,0,.42));
-      border-bottom: 1px solid rgba(255,211,106,.14);
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 900px at 50% 18%, rgba(255,211,106,.12), transparent 55%),
+        radial-gradient(900px 700px at 15% 65%, rgba(184,0,29,.10), transparent 60%),
+        radial-gradient(900px 700px at 85% 70%, rgba(184,0,29,.10), transparent 60%),
+        radial-gradient(1200px 900px at 50% 85%, rgba(255,211,106,.06), transparent 60%);
     }
-    .topbar-inner{
-      height: var(--topbarH);
-      max-width: 1400px;
-      margin:0 auto;
-      padding: 10px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:nowrap;
+
+    #dragonWrap{
+      position:absolute;
+      filter: drop-shadow(0 35px 70px rgba(0,0,0,.75));
+      opacity:.94;
+      width:min(720px, 112vw);
+      aspect-ratio: 1/1;
+      transform-style: preserve-3d;
+    }
+
+    #dragonGlow{
+      position:absolute;
+      inset:-18%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,211,106,.20), transparent 55%),
+        radial-gradient(circle at 52% 58%, rgba(184,0,29,.10), transparent 62%);
+      opacity:.95;
+      filter: blur(1px);
+    }
+
+    /* 3D-like float */
+    #dragon3d{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      animation: dragonFloat 7.2s ease-in-out infinite;
+    }
+    @keyframes dragonFloat{
+      0%,100%{ transform: rotateX(9deg) rotateY(-10deg) rotateZ(0deg) translateY(0px) translateZ(0px) }
+      50%{ transform: rotateX(12deg) rotateY(-2deg) rotateZ(1.2deg) translateY(-10px) translateZ(14px) }
+    }
+
+    #dragonImg{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter:
+        drop-shadow(0 0 22px rgba(255,211,106,.18))
+        drop-shadow(0 0 54px rgba(184,0,29,.06));
+      opacity:1;
+    }
+
+    #orbits{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      opacity:.95;
+    }
+
+    .orbit{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--d);
+      height: var(--d);
+      margin-left: calc(var(--d)/-2);
+      margin-top: calc(var(--d)/-2);
+      border-radius:50%;
+      border: 1px solid rgba(255,211,106,.10);
+      transform:
+        translateZ(var(--z))
+        rotateX(var(--rx))
+        rotateY(var(--ry));
+      opacity:.85;
+    }
+
+    .spinWrap{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      animation: orbitSpin var(--t) linear infinite;
+    }
+    @keyframes orbitSpin{
+      from{transform: translateZ(0) rotateZ(0deg)}
+      to{transform: translateZ(0) rotateZ(360deg)}
+    }
+
+    /* ===== “3D” PLANET (объёмнее) ===== */
+    .planet{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--p);
+      height: var(--p);
+      border-radius:50%;
+      transform-style: preserve-3d;
+      transform:
+        rotate(var(--a))
+        translateX(calc(var(--d)/2))
+        translateZ(var(--pz));
+
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,.42), rgba(255,255,255,0) 38%),
+        radial-gradient(circle at 68% 74%, rgba(0,0,0,.55), rgba(0,0,0,0) 55%),
+        linear-gradient(145deg, var(--c1), var(--c2));
+
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.14),
+        0 16px 36px rgba(0,0,0,.55),
+        inset 0 0 0 1px rgba(255,255,255,.10);
+
+      filter: saturate(1.12) contrast(1.04);
+    }
+
+    .planet:after{
+      content:"";
+      position:absolute;
+      inset:-10%;
+      border-radius:50%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,211,106,.18), rgba(255,211,106,0) 60%);
+      filter: blur(2px);
+      opacity:.75;
+      pointer-events:none;
+    }
+
+    .planet:before{
+      content:"";
+      position:absolute;
+      inset:14%;
+      border-radius:50%;
+      background:
+        radial-gradient(6px 6px at 35% 40%, rgba(0,0,0,.28), rgba(0,0,0,0) 70%),
+        radial-gradient(7px 7px at 62% 56%, rgba(0,0,0,.22), rgba(0,0,0,0) 70%),
+        radial-gradient(6px 6px at 48% 68%, rgba(0,0,0,.20), rgba(0,0,0,0) 70%),
+        radial-gradient(9px 9px at 55% 35%, rgba(255,255,255,.10), rgba(255,255,255,0) 70%);
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .planet[data-ring="1"]:after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      width: 150%;
+      height: 55%;
+      transform: translate(-50%,-50%) rotate(-18deg);
+      border-radius:50%;
+      border: 1px solid rgba(255,211,106,.14);
+      background: linear-gradient(90deg, rgba(255,211,106,0), rgba(255,211,106,.12), rgba(255,211,106,0));
+      opacity:.82;
+      filter: blur(.2px);
+      pointer-events:none;
+    }
+
+    .pName{
+      position:absolute;
+      left:50%;
+      top: calc(100% + 10px);
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.72);
+      padding: 5px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,211,106,.14);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
       white-space:nowrap;
     }
 
-    .brand{display:flex;align-items:center;gap:10px;min-width: 240px;white-space:nowrap;}
+    /* ===== FX layers never catch clicks ===== */
+    #fxDust, #fxMeteors, #fxCoins{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:2;
+    }
+    #fxMeteors{opacity:.84; mix-blend-mode: screen;}
+    #fxCoins{opacity:1; z-index:55;}
+
+    .flash{
+      position:fixed; inset:0;
+      z-index:60; pointer-events:none;
+      opacity:0;
+      background:
+        radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.38), transparent 60%),
+        radial-gradient(900px 700px at 50% 60%, rgba(184,0,29,.18), transparent 65%);
+      transition: opacity .15s ease;
+      mix-blend-mode: screen;
+    }
+    .flash.on{opacity:1}
+
+    /* ===== App layout ===== */
+    .app{
+      position:relative;
+      z-index:10;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* TOPBAR fixed, fixed height, no wrap */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:100;
+      padding-top: var(--safeTop);
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(0,0,0,.78), rgba(0,0,0,.40));
+      border-bottom: 1px solid rgba(255,211,106,.14);
+    }
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 14px;
+      height: var(--topbarH);
+      max-width:1100px;
+      margin:0 auto;
+    }
+
+    .brand{display:flex;align-items:center;gap:10px;min-width: 210px;white-space:nowrap;}
     .sigil{
       width:38px;height:38px;border-radius:14px;
       background:
@@ -91,7 +283,6 @@
       box-shadow: 0 0 0 1px rgba(255,211,106,.28), 0 18px 50px rgba(255,211,106,.12);
       position:relative; overflow:hidden;
       user-select:none;
-      flex:0 0 auto;
     }
     .sigil:after{
       content:"財";
@@ -107,12 +298,23 @@
     .top-controls{
       display:flex;
       align-items:center;
-      justify-content:flex-end;
       gap:8px;
       flex-wrap:nowrap;
+      justify-content:flex-end;
       white-space:nowrap;
-      min-width: 520px;
     }
+
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,211,106,.18);
+      box-shadow: 0 10px 30px rgba(0,0,0,.30);
+    }
+    .pill b{color: rgba(255,211,106,.96)}
+    .pill .small{font-size:12px;color:rgba(255,255,255,.74)}
+    .muted{color: rgba(255,255,255,.74)}
 
     .btn{
       appearance:none;
@@ -142,7 +344,6 @@
       border:1px solid rgba(255,255,255,.14);
       box-shadow:none;
       font-weight:900;
-      padding: 12px 12px;
     }
     .btn.danger{
       color:#fff;
@@ -157,7 +358,7 @@
       background: rgba(255,255,255,.08);
       border:1px solid rgba(255,211,106,.18);
     }
-    .small{font-size:12px;color:rgba(255,255,255,.74)}
+
     .seg{
       display:flex;border-radius:999px;overflow:hidden;
       border:1px solid rgba(255,255,255,.12);
@@ -171,252 +372,65 @@
       color: rgba(255,255,255,.78);
       background: transparent;
       letter-spacing:.06em;
-      white-space:nowrap;
     }
     .seg button.active{
       color:#1a1406;
       background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
     }
 
-    .premiumBadge{
-      display:none;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
+    /* INFO “i” icon */
+    .iBtn{
+      width:22px;height:22px;
       border-radius:999px;
       border:1px solid rgba(255,211,106,.24);
-      background: rgba(255,211,106,.10);
-      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.32);
+      color: rgba(255,211,106,.94);
       font-weight:1000;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      box-shadow: 0 18px 55px rgba(255,211,106,.10);
-    }
-    .premiumBadge b{color: rgba(255,211,106,.98)}
-    body.premium .premiumBadge{display:flex}
-
-    /* =========================
-       DESKTOP GRID (LOCKED 50/50)
-       ========================= */
-    .desktopGrid{
-      position:relative;
-      z-index:1;
-      width:100%;
-      min-height:100vh;
       display:grid;
-      grid-template-columns: var(--leftW) var(--rightW);
-      padding-top: calc(var(--topbarH) + var(--safeTop));
-    }
-
-    /* LEFT: fixed scene (never scroll) */
-    #sceneLeft{
-      position:relative;
-      height: calc(100vh - (var(--topbarH) + var(--safeTop)));
-      overflow: visible; /* IMPORTANT: never clip dragon */
-    }
-    .sceneFixed{
-      position:fixed;
-      top: calc(var(--topbarH) + var(--safeTop));
-      left:0;
-      width: var(--leftW);
-      height: calc(100vh - (var(--topbarH) + var(--safeTop)));
-      pointer-events:none;
-      overflow: visible;
-    }
-
-    /* Cosmos background for LEFT only */
-    #cosmos{
-      position:absolute;
-      inset:0;
-      overflow: hidden; /* OK here: stars layer only */
-      background:
-        radial-gradient(1200px 900px at 50% 18%, rgba(255,211,106,.12), transparent 55%),
-        radial-gradient(900px 700px at 15% 65%, rgba(184,0,29,.10), transparent 60%),
-        radial-gradient(900px 700px at 85% 70%, rgba(184,0,29,.10), transparent 60%),
-        radial-gradient(1200px 900px at 50% 85%, rgba(255,211,106,.06), transparent 60%);
-    }
-
-    /* Dragon: fully visible, centered within LEFT column */
-    #dragonWrap{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform: translate(-50%,-52%);
-      width: min(860px, calc(var(--leftW) * 0.94));
-      aspect-ratio: 1/1;
-      opacity:.96;
-      filter: drop-shadow(0 35px 70px rgba(0,0,0,.75));
-      transform-style: preserve-3d;
-      overflow: visible; /* IMPORTANT: no clip */
-    }
-
-    #dragonGlow{
-      position:absolute;
-      inset:-18%;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,211,106,.20), transparent 55%),
-        radial-gradient(circle at 52% 58%, rgba(184,0,29,.10), transparent 62%);
-      opacity:.95;
-      filter: blur(1px);
-    }
-
-    #dragon3d{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      animation: dragonFloat 7.2s ease-in-out infinite;
-    }
-    @keyframes dragonFloat{
-      0%,100%{ transform: rotateX(9deg) rotateY(-10deg) rotateZ(0deg) translateY(0px) translateZ(0px) }
-      50%{ transform: rotateX(12deg) rotateY(-2deg) rotateZ(1.2deg) translateY(-10px) translateZ(14px) }
-    }
-
-    #dragonImg{
-      width:100%;
-      height:100%;
-      object-fit:contain;
+      place-items:center;
+      cursor:pointer;
       user-select:none;
-      -webkit-user-drag:none;
-      filter:
-        drop-shadow(0 0 22px rgba(255,211,106,.18))
-        drop-shadow(0 0 54px rgba(184,0,29,.06));
+      flex:0 0 auto;
     }
+    .iBtn:active{transform: translateY(1px) scale(.99)}
 
-    /* Planets orbits layer (PNG planets) */
-    #orbits{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      opacity:.98;
-      pointer-events:none;
-    }
-
-    .orbit{
-      position:absolute;
-      left:50%; top:50%;
-      width: var(--d);
-      height: var(--d);
-      margin-left: calc(var(--d)/-2);
-      margin-top: calc(var(--d)/-2);
-      border-radius:50%;
-      border: 1px solid rgba(255,211,106,.10);
-      transform:
-        translateZ(var(--z))
-        rotateX(var(--rx))
-        rotateY(var(--ry));
-      opacity:.85;
-      pointer-events:none;
-    }
-    .spinWrap{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      animation: orbitSpin var(--t) linear infinite;
-    }
-    @keyframes orbitSpin{
-      from{transform: translateZ(0) rotateZ(0deg)}
-      to{transform: translateZ(0) rotateZ(360deg)}
-    }
-
-    .planetWrap{
-      position:absolute;
-      left:50%; top:50%;
-      transform-style: preserve-3d;
-      transform:
-        rotate(var(--a))
-        translateX(calc(var(--d)/2))
-        translateZ(var(--pz));
-      width: var(--p);
-      height: var(--p);
-      border-radius: 50%;
-      pointer-events:none;
-      filter: drop-shadow(0 14px 28px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(255,211,106,.10));
-    }
-    .planetImg{
+    /* spacer for fixed topbar + first scene */
+    .sceneSpacer{
+      height: 78vh;
       width:100%;
-      height:100%;
-      object-fit:contain;
-      border-radius: 50%;
-      user-select:none;
-      -webkit-user-drag:none;
-    }
-    .pName{
-      position:absolute;
-      left:50%;
-      top: calc(100% + 10px);
-      transform: translateX(-50%);
-      font-size: 11px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.72);
-      padding: 5px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,211,106,.14);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-      white-space:nowrap;
-      pointer-events:none;
     }
 
-    /* Left FX canvases (never catch clicks) */
-    #fxDust, #fxMeteors{
-      position:absolute;
-      inset:0;
+    .wrap{
+      max-width:1100px;
       width:100%;
-      height:100%;
-      pointer-events:none;
-      z-index:8;
-    }
-    #fxMeteors{opacity:.92; mix-blend-mode: screen;}
-
-    /* RIGHT: scroll UI (cards only in right half) */
-    #uiRight{
-      position:relative;
-      min-height: calc(100vh - (var(--topbarH) + var(--safeTop)));
-      overflow-x: hidden;
-      overflow-y: auto;
-      padding: 14px 14px calc(28px + var(--safeBottom));
-    }
-    /* Keep UI centered within right half for premium */
-    .uiStack{
-      max-width: var(--rightMax);
-      margin: 0 auto;
+      margin:0 auto;
+      padding: calc(var(--topbarH) + var(--safeTop) + 14px) 14px calc(120px + var(--safeBottom));
       display:flex;
       flex-direction:column;
-      gap:14px;
+      gap:16px;
     }
 
-    /* Cards (general) */
+    /* Cards now must NOT clip wheel/beam */
     .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.045));
+      border:1px solid rgba(255,211,106,.18);
       border-radius: var(--radiusCard);
       box-shadow: var(--shadow);
       position:relative;
-      overflow: visible; /* IMPORTANT: never clip wheel/reveal */
+      overflow: visible;
       backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,211,106,.18);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.045));
     }
     .card .inner{padding:16px; overflow: visible;}
     .card:before{
       content:"";
       position:absolute; inset:-1px;
-      border-radius: var(--radiusCard);
       background:
-        radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.14), transparent 60%),
-        radial-gradient(400px 280px at 85% 20%, rgba(184,0,29,.09), transparent 60%);
+        radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.16), transparent 55%),
+        radial-gradient(400px 280px at 85% 20%, rgba(184,0,29,.10), transparent 55%);
       pointer-events:none;
       opacity:.78;
     }
-    .card .inner{position:relative; z-index:2}
-
-    /* Daily Ritual: nearly transparent, “single wheel” feel */
-    .card.ritual{
-      background: linear-gradient(180deg, var(--ritualBg1), var(--ritualBg2));
-      border-color: rgba(255,211,106,.14);
-      box-shadow: 0 18px 60px rgba(0,0,0,.55);
-    }
-    .card.ritual:before{opacity:.40}
+    .card .inner, .card .row, .card .grid{position:relative; z-index:2}
 
     .hline{
       display:flex;
@@ -434,20 +448,39 @@
       color: rgba(255,211,106,.92);
     }
 
-    /* i button */
-    .iBtn{
-      width:22px;height:22px;
-      border-radius:999px;
-      border:1px solid rgba(255,211,106,.24);
-      background: rgba(0,0,0,.32);
-      color: rgba(255,211,106,.94);
-      font-weight:1000;
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      user-select:none;
-      flex:0 0 auto;
+    .grid{display:grid;grid-template-columns: repeat(3, 1fr);gap:10px;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .tile{
+      border-radius: var(--radiusTile);
+      padding:12px 12px;
+      background: rgba(0,0,0,.26);
+      border:1px solid rgba(255,255,255,.14);
     }
+    .tileHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:6px;
+    }
+    .tile .k{
+      font-size:11px;
+      color: rgba(255,255,255,.70);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .tile .v{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+    .tile .v .big{font-size:22px;font-weight:1000;letter-spacing:.02em;color: rgba(255,211,106,.96);}
+    .tile .v .tag{
+      font-size:12px;padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,211,106,.24);
+      background: rgba(255,211,106,.10);
+      color: rgba(255,255,255,.90);
+    }
+    .tiny{font-size:12px; color: rgba(255,255,255,.72)}
+    .hr{height:1px;background: rgba(255,255,255,.14);margin: 10px 0}
 
     /* Stage */
     .stage{
@@ -458,10 +491,8 @@
       justify-items:center;
       padding-top: 2px;
     }
-
-    /* SVG wheel wrapper */
     .wheelWrap{
-      width:min(460px, 100%);
+      width:min(460px, 92vw);
       aspect-ratio: 1/1;
       position:relative;
       display:grid;
@@ -469,14 +500,19 @@
       margin: 6px auto 0;
       overflow: visible;
       padding: 10px 0 6px;
-      isolation: isolate; /* OK: local */
     }
-    #wheelSvg{
+    canvas#wheel{
       width:100%;
       height:100%;
+      border-radius:50%;
+      box-shadow:
+        0 0 0 1px rgba(255,211,106,.22),
+        0 25px 70px rgba(0,0,0,.55),
+        0 0 90px rgba(184,0,29,.08);
+      background:
+        radial-gradient(circle at 50% 45%, rgba(255,211,106,.14), transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.75));
       display:block;
-      filter: drop-shadow(0 25px 70px rgba(0,0,0,.55)) drop-shadow(0 0 90px rgba(184,0,29,.08));
-      user-select:none;
     }
 
     /* Beam pointer */
@@ -492,7 +528,6 @@
       filter: blur(.2px);
       opacity:.95;
       pointer-events:none;
-      z-index:3;
     }
     .beam:after{
       content:"";
@@ -522,7 +557,6 @@
       display:grid;
       place-items:center;
       pointer-events:none;
-      z-index:4;
     }
     .centerMedal span{
       font-size: clamp(34px, 6vw, 56px);
@@ -535,7 +569,7 @@
     }
 
     .wheelControls{
-      width:min(560px, 100%);
+      width:min(560px, 94vw);
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -549,34 +583,16 @@
       max-width: 520px;
     }
 
-    /* Oracle box */
-    .oracleBox{display:flex;flex-direction:column;gap:10px; width:min(560px,100%);}
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-
-    .pill{
-      display:flex; align-items:center; gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,211,106,.18);
-      box-shadow: 0 10px 30px rgba(0,0,0,.30);
-      flex:1;
-      justify-content:space-between;
-    }
-    .pill b{color: rgba(255,211,106,.96)}
-    .tiny{font-size:12px; color: rgba(255,255,255,.72)}
-
+    .oracleBox{display:flex;flex-direction:column;gap:10px}
     .oracleText{
       border-radius:18px;
       padding:12px 12px;
-      background: rgba(0,0,0,.26);
+      background: rgba(0,0,0,.28);
       border:1px solid rgba(255,255,255,.14);
-      min-height: 118px;
+      min-height: 110px;
       display:flex;
       flex-direction:column;
       gap:6px;
-      position:relative;
-      overflow: visible;
     }
     .oracleText .headline{
       display:flex;align-items:center;justify-content:space-between;
@@ -607,158 +623,83 @@
     .meta .chip.ok{background: rgba(67,255,179,.12);border-color: rgba(67,255,179,.28);}
 
     .choices{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-    .choices .btn{min-width: 160px}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 
-    .hr{height:1px;background: rgba(255,255,255,.14);margin: 10px 0}
-
-    /* HUD grid */
-    .grid{display:grid;grid-template-columns: repeat(3, 1fr);gap:10px;}
-    .tile{
-      border-radius: var(--radiusTile);
-      padding:12px 12px;
-      background: rgba(0,0,0,.26);
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .tileHead{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom:6px;
-    }
-    .k{
-      font-size:11px;
-      color: rgba(255,255,255,.70);
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      display:flex;
-      gap:8px;
+    /* Premium badge */
+    .premiumBadge{
+      display:none;
       align-items:center;
-      flex-wrap:wrap;
-    }
-    .v{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-    .big{font-size:22px;font-weight:1000;letter-spacing:.02em;color: rgba(255,211,106,.96);}
-    .tag{
-      font-size:12px;padding:6px 10px;border-radius:999px;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius:999px;
       border:1px solid rgba(255,211,106,.24);
       background: rgba(255,211,106,.10);
-      color: rgba(255,255,255,.90);
-    }
-
-    /* PRO card toggle */
-    #proCard{display:none}
-
-    /* =========================
-       REVEAL LAYER (Hongbao → Paper → Seal)
-       ========================= */
-    #revealLayer{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      z-index:10;
-    }
-
-    .revealWrap{
-      position:absolute;
-      left:50%;
-      top: 56%;
-      transform: translate(-50%,-50%);
-      width: min(520px, 98%);
-      aspect-ratio: 1/1;
-      display:grid;
-      place-items:center;
-      overflow: visible;
-    }
-
-    .hongbao{
-      position:absolute;
-      width: 46%;
-      transform: translateX(0) translateY(0) rotate(0deg) scale(0.98);
-      opacity:0;
-      filter: drop-shadow(0 26px 55px rgba(0,0,0,.55)) drop-shadow(0 0 22px rgba(255,211,106,.10));
-      transform-origin: 40% 60%;
-    }
-    .paper{
-      position:absolute;
-      width: 58%;
-      transform: translateY(26px) scale(0.96);
-      opacity:0;
-      filter: drop-shadow(0 22px 50px rgba(0,0,0,.50));
-    }
-    .seal{
-      position:absolute;
-      width: 20%;
-      transform: translateY(110px) scale(0.86);
-      opacity:0;
-      filter: drop-shadow(0 18px 40px rgba(0,0,0,.45)) drop-shadow(0 0 18px rgba(255,211,106,.10));
-    }
-
-    .wishText{
-      position:absolute;
-      width: 52%;
-      left:50%;
-      top: 44%;
-      transform: translate(-50%,-50%);
-      opacity:0;
-      font-weight: 900;
-      color: rgba(25,16,6,.92);
-      text-align:center;
-      line-height:1.22;
-      letter-spacing:.02em;
-      padding: 18px 16px;
-      user-select:none;
-      text-shadow: 0 1px 0 rgba(255,255,255,.35);
-      font-size: 14px;
-    }
-    .wishSmall{
-      display:block;
-      margin-top:8px;
-      font-size: 12px;
-      font-weight: 800;
-      color: rgba(25,16,6,.70);
-      letter-spacing:.10em;
+      color: rgba(255,255,255,.92);
+      font-weight:1000;
+      letter-spacing:.08em;
       text-transform:uppercase;
+      box-shadow: 0 18px 55px rgba(255,211,106,.10);
+    }
+    .premiumBadge b{color: rgba(255,211,106,.98)}
+    body.premium .premiumBadge{display:flex}
+    body.premium .topbar{
+      border-bottom-color: rgba(255,211,106,.22);
+      box-shadow: 0 10px 40px rgba(255,211,106,.05);
     }
 
-    /* Reveal animations (imperial feel) */
-    .reveal-on .hongbao{
-      animation: hongbaoOut 620ms cubic-bezier(.12,.82,.14,1.02) forwards;
+    /* Bottom Dock smaller border area, icons unchanged */
+    .bottomDock{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:40;
+      padding: 6px 10px calc(8px + var(--safeBottom));
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.72));
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,211,106,.10);
     }
-    .reveal-on .paper{
-      animation: paperOut 680ms cubic-bezier(.12,.82,.14,1.02) 260ms forwards;
+    .dockInner{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
     }
-    .reveal-on .wishText{
-      animation: inkIn 520ms ease 520ms forwards;
+    .dockBtn{
+      flex:1;min-width:0;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:5px;
+      padding:6px 6px;
+      background: transparent;border:none;color:#fff;
+      cursor:pointer;user-select:none;
     }
-    .reveal-on .seal{
-      animation: sealStamp 540ms cubic-bezier(.08,.90,.18,1.08) 700ms forwards;
+    .dockIcon{
+      width: 54px;height: 54px;
+      display:grid;place-items:center;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), transparent 55%),
+        linear-gradient(135deg, rgba(255,211,106,.16), rgba(184,0,29,.06));
+      box-shadow:
+        0 0 0 1px rgba(255,211,106,.14),
+        0 16px 45px rgba(0,0,0,.35);
+      transition: transform .25s ease;
     }
+    .dockIcon span{font-size: 22px;filter: drop-shadow(0 10px 16px rgba(0,0,0,.45)); letter-spacing:.06em}
+    .dockBtn small{
+      font-size: 11px;
+      letter-spacing:.10em;
+      color: rgba(255,255,255,.74);
+      text-transform:uppercase;
+      text-align:center;
+    }
+    .dockBtn:active .dockIcon{transform: translateY(1px) scale(.98)}
 
-    @keyframes hongbaoOut{
-      0%{opacity:0; transform: translateX(180px) translateY(8px) rotate(8deg) scale(.92)}
-      65%{opacity:1; transform: translateX(18px) translateY(0px) rotate(-2deg) scale(1.02)}
-      100%{opacity:1; transform: translateX(0px) translateY(0px) rotate(0deg) scale(1.00)}
-    }
-    @keyframes paperOut{
-      0%{opacity:0; transform: translateY(34px) scale(.94)}
-      70%{opacity:1; transform: translateY(-6px) scale(1.00)}
-      100%{opacity:1; transform: translateY(0px) scale(1.00)}
-    }
-    @keyframes inkIn{
-      from{opacity:0; filter: blur(1px)}
-      to{opacity:1; filter: blur(0)}
-    }
-    @keyframes sealStamp{
-      0%{opacity:0; transform: translateY(140px) scale(.70) rotate(-6deg)}
-      55%{opacity:1; transform: translateY(104px) scale(1.12) rotate(2deg)}
-      100%{opacity:1; transform: translateY(110px) scale(1.00) rotate(0deg)}
-    }
-
-    /* =========================
-       MODALS / TOAST
-       ========================= */
+    /* Modals */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,.70);
       backdrop-filter: blur(10px);
-      z-index:3000;
+      z-index:120;
       display:none;
       align-items:center;
       justify-content:center;
@@ -805,10 +746,11 @@
     }
     .mFoot{margin-top: 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 
+    /* Toast */
     .toast{
       position:fixed;
       left:50%;
-      bottom: 22px;
+      bottom: calc(92px + var(--safeBottom));
       transform: translateX(-50%);
       background: rgba(0,0,0,.62);
       border:1px solid rgba(255,211,106,.18);
@@ -822,34 +764,12 @@
       opacity:0;
       pointer-events:none;
       transition: opacity .18s ease, transform .18s ease;
-      z-index:4000;
+      z-index:200;
       max-width: min(92vw, 720px);
       text-align:center;
     }
     .toast.on{opacity:1; transform: translateX(-50%) translateY(-2px);}
 
-    /* Flash */
-    .flash{
-      position:fixed; inset:0;
-      z-index:3500; pointer-events:none;
-      opacity:0;
-      background:
-        radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.34), transparent 60%),
-        radial-gradient(900px 700px at 50% 60%, rgba(184,0,29,.16), transparent 65%);
-      transition: opacity .15s ease;
-      mix-blend-mode: screen;
-    }
-    .flash.on{opacity:1}
-
-    /* Desktop only – hide mobile dock if any */
-    .bottomDock{display:none}
-
-    /* Keep right column scrollbars clean */
-    #uiRight::-webkit-scrollbar{width: 10px;}
-    #uiRight::-webkit-scrollbar-thumb{background: rgba(255,255,255,.10); border-radius: 999px; border: 2px solid rgba(0,0,0,.35);}
-    #uiRight::-webkit-scrollbar-track{background: rgba(0,0,0,.20);}
-
-    /* Lucky hour accent */
     body.luckyHour .sigil{
       box-shadow: 0 0 0 1px rgba(255,211,106,.34), 0 22px 62px rgba(255,211,106,.18);
     }
@@ -858,328 +778,335 @@
       box-shadow: 0 0 45px rgba(255,211,106,.20);
     }
 
-    /* Safety: if window too narrow, still show (not mobile) */
-    @media (max-width: 1080px){
-      :root{ --leftW: 46vw; --rightW: 54vw; }
-      .top-controls{min-width: 420px;}
-      #dragonWrap{ width: min(760px, calc(var(--leftW) * 0.98)); }
+    @media (max-width: 420px){
+      .pill{display:none}
+      .wheelWrap{width:min(420px, 94vw)}
+      .brand{min-width:auto}
+    }
+
+    /* ===== RESPONSIVE: DRAGON POSITION ===== */
+    /* Mobile: center, fully visible */
+    @media (max-width: 980px){
+      #dragonWrap{
+        left:50%;
+        top:42%;
+        transform: translate(-50%,-50%);
+        width: 92vw;
+        max-width: 420px;
+      }
+      .sceneSpacer{ height: 78vh; }
+    }
+
+    /* Desktop: left, fully visible */
+    @media (min-width: 981px){
+      #dragonWrap{
+        left: 22%;
+        top: 50%;
+        transform: translate(-50%,-52%);
+        width: min(820px, 62vw);
+        max-width: 820px;
+      }
+      .sceneSpacer{ height: 56vh; } /* меньше, чтобы контент начинался раньше */
     }
   </style>
 </head>
 
 <body>
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="sigil" id="sigil"></div>
-        <div class="brand-text">
-          <div class="t1" id="tBrand1">TON TEMPLE</div>
-          <div class="t2" id="tBrand2">福流神殿</div>
-        </div>
-      </div>
-
-      <div class="top-controls">
-        <button class="btn secondary" id="btnHelp" type="button">?</button>
-
-        <div class="toggle">
-          <span class="small" id="tModeLabel">模式</span>
-          <div class="seg" role="tablist" aria-label="Mode">
-            <button id="btnRitual" class="active" type="button">RITUAL</button>
-            <button id="btnPro" type="button">PRO</button>
-          </div>
-        </div>
-
-        <div class="toggle">
-          <span class="small" id="tLangLabel">语言</span>
-          <div class="seg" role="tablist" aria-label="Language">
-            <button id="btnZH" class="active" type="button">中文</button>
-            <button id="btnEN" type="button">EN</button>
-          </div>
-        </div>
-
-        <div class="premiumBadge" id="premiumBadge">
-          <b id="tPremium">PREMIUM</b>
-          <span id="premiumLeft">—</span>
-        </div>
+  <!-- Cosmos background pinned -->
+  <div id="cosmos" aria-hidden="true">
+    <div id="dragonWrap">
+      <div id="dragonGlow"></div>
+      <div id="orbits"></div>
+      <div id="dragon3d">
+        <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
       </div>
     </div>
   </div>
 
-  <!-- Global FX -->
+  <!-- FX -->
+  <canvas id="fxDust"></canvas>
+  <canvas id="fxMeteors"></canvas>
+  <canvas id="fxCoins"></canvas>
   <div class="flash" id="flash"></div>
   <div class="toast" id="toast">—</div>
 
-  <div class="desktopGrid" id="desktopGrid">
-    <!-- LEFT: Scene -->
-    <section id="sceneLeft" aria-hidden="true">
-      <div class="sceneFixed">
-        <div id="cosmos">
-          <canvas id="fxDust"></canvas>
-          <canvas id="fxMeteors"></canvas>
+  <div class="app">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="sigil" id="sigil"></div>
+          <div class="brand-text">
+            <div class="t1" id="tBrand1">TON TEMPLE</div>
+            <div class="t2" id="tBrand2">福流神殿</div>
+          </div>
+        </div>
 
-          <div id="dragonWrap">
-            <div id="dragonGlow"></div>
-            <div id="orbits"></div>
-            <div id="dragon3d">
-              <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
+        <div class="top-controls">
+          <button class="btn secondary" id="btnHelp" type="button">?</button>
+
+          <div class="toggle">
+            <span class="small" id="tModeLabel">模式</span>
+            <div class="seg" role="tablist" aria-label="Mode">
+              <button id="btnRitual" class="active" type="button">RITUAL</button>
+              <button id="btnPro" type="button">PRO</button>
+            </div>
+          </div>
+
+          <div class="toggle">
+            <span class="small" id="tLangLabel">语言</span>
+            <div class="seg" role="tablist" aria-label="Language">
+              <button id="btnZH" class="active" type="button">中文</button>
+              <button id="btnEN" type="button">EN</button>
+            </div>
+          </div>
+
+          <div class="premiumBadge" id="premiumBadge">
+            <b>PREMIUM</b>
+            <span id="premiumLeft">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE spacer (first screen) -->
+    <div class="sceneSpacer" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <!-- RITUAL CARD -->
+      <div class="card" id="ritualCard">
+        <div class="inner">
+          <div class="hline">
+            <h2 id="tRitualTitle">Daily Ritual</h2>
+            <button class="iBtn" type="button" data-info="ritual">i</button>
+          </div>
+
+          <div class="stage">
+            <div class="wheelWrap" aria-label="Fortune wheel">
+              <canvas id="wheel"></canvas>
+              <div class="beam" aria-hidden="true"></div>
+              <div class="centerMedal" aria-hidden="true"><span>財</span></div>
+            </div>
+
+            <div class="wheelControls">
+              <button class="btn" id="btnSpin" type="button">ACTIVATE FLOW</button>
+              <button class="btn secondary" id="btnOracle" type="button">ORACLE</button>
+              <button class="btn ghost" id="btnGate" type="button">TEMPLE GATE</button>
+            </div>
+
+            <div class="oracleBox" style="width:min(560px,94vw)">
+              <div class="row">
+                <div class="toggle" style="flex:1; justify-content:space-between">
+                  <span class="small" id="tForecastType">FORECAST</span>
+                  <div class="seg">
+                    <button id="btnForecastDay" class="active" type="button">DAY</button>
+                    <button id="btnForecastTON" type="button">TON</button>
+                  </div>
+                </div>
+                <div class="pill" style="flex:1; justify-content:space-between">
+                  <span class="small" id="tLimitLabel">LIMIT</span>
+                  <b id="limitText">0 / 1</b>
+                  <span class="small" id="limitPaywall">• premium: 3/day</span>
+                </div>
+              </div>
+
+              <div class="oracleText" id="oraclePanel">
+                <div class="headline">
+                  <b id="oracleHead">Temple Guidance</b>
+                  <span class="tiny" id="oracleStamp">—</span>
+                </div>
+                <div class="body" id="oracleBody">—</div>
+                <div class="meta" id="oracleMeta">
+                  <span class="chip" id="chipWeather">Market Weather: —</span>
+                  <span class="chip ok" id="chipAura">Risk Aura: —</span>
+                  <span class="chip" id="chipFlow">Flow Window: —</span>
+                </div>
+              </div>
+
+              <div class="choices">
+                <button class="btn" id="btnEnter" type="button" disabled>ENTER</button>
+                <button class="btn secondary" id="btnWait" type="button" disabled>WAIT</button>
+                <button class="btn danger" id="btnSkip" type="button" disabled>SKIP</button>
+              </div>
+
+              <div class="tiny" id="tDisclaimer">Ritualized interface. Not financial advice.</div>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- RIGHT: UI -->
-    <section id="uiRight">
-      <div class="uiStack">
-        <!-- RITUAL -->
-        <div class="card ritual" id="ritualCard">
-          <div class="inner">
-            <div class="hline">
-              <h2 id="tRitualTitle">Daily Ritual</h2>
-              <button class="iBtn" type="button" data-info="ritual">i</button>
-            </div>
-
-            <div class="stage">
-              <div class="wheelWrap" aria-label="Fortune wheel">
-                <!-- SVG Wheel -->
-                <svg id="wheelSvg" viewBox="-210 -210 420 420" aria-label="Wheel" role="img">
-                  <defs>
-                    <radialGradient id="ringGlow" cx="50%" cy="50%" r="60%">
-                      <stop offset="0%" stop-color="rgba(255,211,106,.12)"/>
-                      <stop offset="100%" stop-color="rgba(184,0,29,.10)"/>
-                    </radialGradient>
-                    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="rgba(255,211,106,.98)"/>
-                      <stop offset="100%" stop-color="rgba(184,134,11,.86)"/>
-                    </linearGradient>
-                    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0,0,0,.55)"/>
-                    </filter>
-                  </defs>
-
-                  <circle r="196" fill="url(#ringGlow)" opacity="1"></circle>
-
-                  <!-- petals group rotates -->
-                  <g id="wheelRot" filter="url(#softShadow)"></g>
-
-                  <!-- inner rings -->
-                  <circle r="86" fill="rgba(0,0,0,.35)" stroke="rgba(255,211,106,.20)" stroke-width="1"></circle>
-                  <circle r="34" fill="rgba(0,0,0,.60)" stroke="rgba(255,211,106,.22)" stroke-width="1"></circle>
-                </svg>
-
-                <div class="beam" aria-hidden="true"></div>
-                <div class="centerMedal" aria-hidden="true"><span>財</span></div>
-
-                <!-- Reveal Layer -->
-                <div id="revealLayer">
-                  <div class="revealWrap" id="revealWrap">
-                    <img class="hongbao" id="hongbaoImg" src="hongbao.jpg" alt="Hongbao"/>
-                    <img class="paper" id="paperImg" src="envelope.jpg" alt="Paper"/>
-                    <div class="wishText" id="wishText">—</div>
-                    <img class="seal" id="sealImg" src="royalSeal.jpg" alt="Royal Seal"/>
-                  </div>
-                </div>
-              </div>
-
-              <div class="wheelControls">
-                <button class="btn" id="btnSpin" type="button">ACTIVATE FLOW</button>
-                <button class="btn secondary" id="btnOracle" type="button">ORACLE</button>
-                <button class="btn ghost" id="btnGate" type="button">TEMPLE GATE</button>
-              </div>
-
-              <div class="oracleBox">
-                <div class="row">
-                  <div class="toggle" style="flex:1; justify-content:space-between">
-                    <span class="small" id="tForecastType">FORECAST</span>
-                    <div class="seg">
-                      <button id="btnForecastDay" class="active" type="button">DAY</button>
-                      <button id="btnForecastTON" type="button">TON</button>
-                    </div>
-                  </div>
-                  <div class="pill">
-                    <span class="small" id="tLimitLabel">LIMIT</span>
-                    <b id="limitText">0 / 1</b>
-                    <span class="small" id="limitPaywall">• premium: 3/day</span>
-                  </div>
-                </div>
-
-                <div class="oracleText" id="oraclePanel">
-                  <div class="headline">
-                    <b id="oracleHead">Temple Guidance</b>
-                    <span class="tiny" id="oracleStamp">—</span>
-                  </div>
-                  <div class="body" id="oracleBody">—</div>
-                  <div class="meta" id="oracleMeta">
-                    <span class="chip" id="chipWeather">Market Weather: —</span>
-                    <span class="chip ok" id="chipAura">Risk Aura: —</span>
-                    <span class="chip" id="chipFlow">Flow Window: —</span>
-                  </div>
-                </div>
-
-                <div class="choices">
-                  <button class="btn" id="btnEnter" type="button" disabled>ENTER</button>
-                  <button class="btn secondary" id="btnWait" type="button" disabled>WAIT</button>
-                  <button class="btn danger" id="btnSkip" type="button" disabled>SKIP</button>
-                </div>
-
-                <div class="tiny" id="tDisclaimer">Ritualized interface. Not financial advice.</div>
-              </div>
-            </div>
+      <!-- TEMPLE HUD (moved BELOW ritual) -->
+      <div class="card" id="hudCard">
+        <div class="inner">
+          <div class="hline">
+            <h2 id="tHudTitle">Temple HUD</h2>
           </div>
-        </div>
 
-        <!-- HUD -->
-        <div class="card" id="hudCard">
-          <div class="inner">
-            <div class="hline">
-              <h2 id="tHudTitle">Temple HUD</h2>
-            </div>
-
-            <div class="grid">
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tQKLabel">QK</span></div>
-                  <button class="iBtn" type="button" data-info="qk">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="qk">37.11</div>
-                  <div class="tag" id="qkTag">BALANCED</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tFlowScoreLabel">FLOW</span></div>
-                  <button class="iBtn" type="button" data-info="flow">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="flowScore">73</div>
-                  <div class="tag" id="flowTag">/100</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tWeatherLabel">WEATHER</span></div>
-                  <button class="iBtn" type="button" data-info="weather">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="weather">CALM</div>
-                  <div class="tag" id="riskTag">Risk: LOW</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hr"></div>
-
-            <div class="grid">
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tDailySealLabel">SEAL</span></div>
-                  <button class="iBtn" type="button" data-info="seal">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="dailySeal">—</div>
-                  <div class="tag" id="sealSub">—</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tStreakLabel">STREAK</span></div>
-                  <button class="iBtn" type="button" data-info="streak">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="streak">3</div>
-                  <div class="tag" id="cycleTag">7/21/49</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tPulseLabel">PULSE</span></div>
-                  <button class="iBtn" type="button" data-info="pulse">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="socialA">3,482</div>
-                  <div class="tag" id="socialB">VIP: 117</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="height:10px"></div>
-
+          <div class="grid">
             <div class="tile">
-              <div class="row">
-                <div class="k" style="margin:0"><span id="tStatsLabel">TODAY</span></div>
-                <button class="iBtn" type="button" data-info="today">i</button>
+              <div class="tileHead">
+                <div class="k"><span id="tQKLabel">QK</span></div>
+                <button class="iBtn" type="button" data-info="qk">i</button>
               </div>
               <div class="v">
-                <div class="big"><span id="posCount">8</span></div>
-                <div class="tag" id="negCountTag">Caution: 1</div>
+                <div class="big" id="qk">37.11</div>
+                <div class="tag" id="qkTag">BALANCED</div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- PRO TERMINAL -->
-        <div class="card" id="proCard">
-          <div class="inner">
-            <div class="hline">
-              <h2 id="tProTitle">PRO TERMINAL</h2>
-              <button class="iBtn" type="button" data-info="pro">i</button>
-            </div>
-
-            <div class="grid">
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tTonPulse">TON PULSE</span></div>
-                  <button class="iBtn" type="button" data-info="pulseMetric">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="tonPulse">+0.84%</div>
-                  <div class="tag" id="liqPulse">Liquidity: Steady</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tVol">VOLATILITY</span></div>
-                  <button class="iBtn" type="button" data-info="vol">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="vol">12.4</div>
-                  <div class="tag" id="trend">Trend: Up</div>
-                </div>
-              </div>
-
-              <div class="tile">
-                <div class="tileHead">
-                  <div class="k"><span id="tWindow">FLOW WINDOW</span></div>
-                  <button class="iBtn" type="button" data-info="window">i</button>
-                </div>
-                <div class="v">
-                  <div class="big" id="flowWindow">OPEN</div>
-                  <div class="tag" id="windowTimer">Next: 00:00:00</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hr"></div>
-
-            <div class="hline">
-              <h2 id="tJournalTitle">JOURNAL</h2>
-              <button class="iBtn" type="button" data-info="journal">i</button>
             </div>
 
             <div class="tile">
-              <div class="tiny" id="journal"></div>
+              <div class="tileHead">
+                <div class="k"><span id="tFlowScoreLabel">FLOW</span></div>
+                <button class="iBtn" type="button" data-info="flow">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="flowScore">73</div>
+                <div class="tag" id="flowTag">/100</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tWeatherLabel">WEATHER</span></div>
+                <button class="iBtn" type="button" data-info="weather">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="weather">CALM</div>
+                <div class="tag" id="riskTag">Risk: LOW</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="grid">
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tDailySealLabel">SEAL</span></div>
+                <button class="iBtn" type="button" data-info="seal">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="dailySeal">—</div>
+                <div class="tag" id="sealSub">—</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tStreakLabel">STREAK</span></div>
+                <button class="iBtn" type="button" data-info="streak">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="streak">3</div>
+                <div class="tag" id="cycleTag">7/21/49</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tPulseLabel">PULSE</span></div>
+                <button class="iBtn" type="button" data-info="pulse">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="socialA">3,482</div>
+                <div class="tag" id="socialB">VIP: 117</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="tile">
+            <div class="row">
+              <div class="k" style="margin:0"><span id="tStatsLabel">TODAY</span></div>
+              <button class="iBtn" type="button" data-info="today">i</button>
+            </div>
+            <div class="v">
+              <div class="big"><span id="posCount">8</span></div>
+              <div class="tag" id="negCountTag">Caution: 1</div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+
+      <!-- PRO TERMINAL (full width, only in PRO) -->
+      <div class="card" id="proCard" style="display:none">
+        <div class="inner">
+          <div class="hline">
+            <h2 id="tProTitle">PRO TERMINAL</h2>
+            <button class="iBtn" type="button" data-info="pro">i</button>
+          </div>
+
+          <div class="grid">
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tTonPulse">TON PULSE</span></div>
+                <button class="iBtn" type="button" data-info="pulseMetric">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="tonPulse">+0.84%</div>
+                <div class="tag" id="liqPulse">Liquidity: Steady</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tVol">VOLATILITY</span></div>
+                <button class="iBtn" type="button" data-info="vol">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="vol">12.4</div>
+                <div class="tag" id="trend">Trend: Up</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="tileHead">
+                <div class="k"><span id="tWindow">FLOW WINDOW</span></div>
+                <button class="iBtn" type="button" data-info="window">i</button>
+              </div>
+              <div class="v">
+                <div class="big" id="flowWindow">OPEN</div>
+                <div class="tag" id="windowTimer">Next: 00:00:00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="hline">
+            <h2 id="tJournalTitle">JOURNAL</h2>
+            <button class="iBtn" type="button" data-info="journal">i</button>
+          </div>
+
+          <div class="tile">
+            <div class="tiny" id="journal"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dock -->
+    <div class="bottomDock" role="navigation" aria-label="Temple Dock">
+      <div class="dockInner">
+        <button class="dockBtn" id="dockRitual" type="button">
+          <div class="dockIcon"><span>殿</span></div>
+          <small id="dRitual">Ritual</small>
+        </button>
+        <button class="dockBtn" id="dockWheel" type="button">
+          <div class="dockIcon"><span>轮</span></div>
+          <small id="dWheel">Wheel</small>
+        </button>
+        <button class="dockBtn" id="dockOracle" type="button">
+          <div class="dockIcon"><span>谕</span></div>
+          <small id="dOracle">Oracle</small>
+        </button>
+        <button class="dockBtn" id="dockGate" type="button">
+          <div class="dockIcon"><span>门</span></div>
+          <small id="dGate">Gate</small>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- HELP / INFO MODAL -->
@@ -1224,13 +1151,7 @@
 
   <script>
   /*****************************************************************
-   * TON TEMPLE — DESKTOP BUILD (LOCKED 50/50)
-   * Assets used:
-   * - dragon.jpg
-   * - planet_*.png (8)
-   * - meteor_chunk_01/02/03.png, meteor_comet_01.png
-   * - hongbao.jpg, envelope.jpg, royalSeal.jpg
-   * - coin.wav, zen.mp3
+   * TON TEMPLE — unified build (MOBILE+DESKTOP) — Gate = PAY
    *****************************************************************/
 
   const $ = (id) => document.getElementById(id);
@@ -1247,6 +1168,7 @@
     f.classList.add('on');
     setTimeout(()=>f.classList.remove('on'), 140);
   }
+
   function toast(msg){
     const el = $('toast');
     el.textContent = msg;
@@ -1255,14 +1177,25 @@
     toast._t = setTimeout(()=>el.classList.remove('on'), 1600);
   }
 
-  // Audio: start on first user gesture (desktop safe)
+  // Telegram haptics (safe)
+  function haptic(type){
+    try{
+      const tg = window.Telegram?.WebApp;
+      if(!tg) return;
+      if(type==='heavy') tg.HapticFeedback.impactOccurred('heavy');
+      else if(type==='light') tg.HapticFeedback.impactOccurred('light');
+      else if(type==='success') tg.HapticFeedback.notificationOccurred('success');
+    }catch(e){}
+  }
+
+  // Audio (iOS/TG safe): start on first user gesture
   const audio = {
     started:false,
     init(){
       this.zen = $('bgZen');
       this.coin = $('sfxCoin');
       if(this.zen) this.zen.volume = 0.22;
-      if(this.coin) this.coin.volume = 0.85;
+      if(this.coin) this.coin.volume = 0.70;
     },
     startZen(){
       if(this.started) return;
@@ -1294,7 +1227,7 @@
     risk: 'LOW',
     streak: 3,
 
-    today: { key: dayKey(), wheelUsed: false, oracleUses: 0 },
+    today: { key: dayKey(), wheelUsed: false, oracleUses: 0 }, // oracleUses = used attempts today
     oracle: { type:'day', last:null, decision:null },
 
     lucky: { morningHour:7, eveningHour:19, windowMinutes:120, isLuckyNow:false, nextLuckyIn:0 },
@@ -1306,7 +1239,7 @@
     lastPaymentTxHash: null
   };
 
-  const LS_KEY = 'ton_temple_desktop_v1';
+  const LS_KEY = 'ton_temple_unified_v2';
   function loadState(){
     try{
       const raw = localStorage.getItem(LS_KEY);
@@ -1314,22 +1247,24 @@
       const saved = JSON.parse(raw);
       Object.assign(state, saved);
 
-      state.qk = clamp(Number(state.qk)||37.11, 0, 999999);
+      state.qk = clamp(Number(state.qk)||37.11, 0, 9999);
       state.flowScore = clamp(Number(state.flowScore)||73, 0, 100);
       if(!Array.isArray(state.journal)) state.journal = [];
       state.journal = state.journal.slice(0,7);
+
       if(!state.today || !state.today.key) state.today = { key: dayKey(), wheelUsed:false, oracleUses:0 };
       if(typeof state.premiumUntil !== 'number') state.premiumUntil = 0;
-      if(!['zh','en'].includes(state.lang)) state.lang = 'zh';
-      if(!['ritual','pro'].includes(state.mode)) state.mode = 'ritual';
-      if(!['day','ton'].includes(state.oracle?.type)) state.oracle.type = 'day';
     }catch(e){}
   }
   function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 
   // ===== Premium
-  function premiumActive(){ return Date.now() < (state.premiumUntil || 0); }
-  function premiumLeftMs(){ return Math.max(0, (state.premiumUntil||0) - Date.now()); }
+  function premiumActive(){
+    return Date.now() < (state.premiumUntil || 0);
+  }
+  function premiumLeftMs(){
+    return Math.max(0, (state.premiumUntil||0) - Date.now());
+  }
   function fmtLeft(ms){
     const s = Math.floor(ms/1000);
     const hh = Math.floor(s/3600);
@@ -1340,45 +1275,25 @@
   function updatePremiumState(){
     const on = premiumActive();
     document.body.classList.toggle('premium', on);
-    $('premiumLeft').textContent = on ? fmtLeft(premiumLeftMs()) : '—';
-    $('btnGate').textContent = t('gate');
+
+    const left = premiumLeftMs();
+    $('premiumLeft').textContent = on ? fmtLeft(left) : '—';
+
+    // Gate button text
+    if(on){
+      $('btnGate').textContent = `PREMIUM ACTIVE • ${fmtLeft(left)}`;
+    } else {
+      $('btnGate').textContent = (state.lang==='zh') ? 'TEMPLE GATE' : 'TEMPLE GATE';
+    }
   }
 
-  // ===== i18n (ZH must have zero EN leftovers except TON + EN label)
+  // ===== i18n (ZH default + EN secondary)
   const I18N = {
     en: {
       brand1:"TON TEMPLE",
       brand2:"Fa Cai Supreme AI",
       modeLabel:"MODE",
       langLabel:"LANG",
-
-      ritualTitle:"DAILY RITUAL",
-      activateFlow:"ACTIVATE FLOW",
-      oracle:"ORACLE",
-      gate:"TEMPLE GATE",
-
-      forecast:"FORECAST",
-      limit:"LIMIT",
-      limitPay:"• premium: 3/day",
-
-      oracleHead:"Temple Guidance",
-      oracleTap:"Tap ORACLE to receive guidance. Then choose: ENTER / WAIT / SKIP.",
-      disclaimer:"Ritualized interface. Not financial advice.",
-
-      hudTitle:"TEMPLE HUD",
-      qk:"QK",
-      flow:"FLOW",
-      weather:"WEATHER",
-      seal:"SEAL",
-      streak:"STREAK",
-      pulse:"PULSE",
-      today:"TODAY",
-
-      proTitle:"PRO TERMINAL",
-      journal:"JOURNAL",
-
-      close:"Close",
-      ok:"OK",
       helpTitle:"Guide",
       helpBody:
 `3 steps:
@@ -1387,7 +1302,29 @@
 3) Choose: ENTER / WAIT / SKIP (affects QK)
 
 Words:
-Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Daily Seal`,
+Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Golden Altar / Daily Seal`,
+      hudTitle:"TEMPLE HUD",
+      ritualTitle:"DAILY RITUAL",
+      activateFlow:"ACTIVATE FLOW",
+      oracle:"ORACLE",
+      gate:"TEMPLE GATE",
+      forecast:"FORECAST",
+      limit:"LIMIT",
+      limitPay:"• premium: 3/day",
+      oracleHead:"Temple Guidance",
+      oracleTap:"Tap ORACLE to receive guidance. Then choose: ENTER / WAIT / SKIP.",
+      disclaimer:"Ritualized interface. Not financial advice.",
+      qk:"QK",
+      flow:"FLOW",
+      weather:"WEATHER",
+      seal:"SEAL",
+      streak:"STREAK",
+      pulse:"PULSE",
+      today:"TODAY",
+      proTitle:"PRO TERMINAL",
+      journal:"JOURNAL",
+      close:"Close",
+      ok:"OK",
 
       gateTitle:"Temple Gate",
       gateBody:
@@ -1399,16 +1336,7 @@ This is a ritualized interface. Not financial advice.`,
       donate:"Donate 1 TON",
       alreadyPremium:"Premium already active.",
       paySuccess:"Donation received. Premium unlocked for 24h.",
-      payFail:"Payment canceled or failed.",
-
-      toastWheelUsed:"Wheel already used today.",
-      toastOracleLimit:"Daily Oracle limit reached.",
-      toastOracleFirst:"Oracle first — then decision.",
-      toastWalletFirst:"Connect wallet first.",
-
-      /* Reveal text */
-      wishSeal:"Royal Seal",
-      wishStamp:"Temple Verdict"
+      payFail:"Payment canceled or failed."
     },
 
     zh: {
@@ -1416,21 +1344,26 @@ This is a ritualized interface. Not financial advice.`,
       brand2:"福流神殿",
       modeLabel:"模式",
       langLabel:"语言",
+      helpTitle:"指南",
+      helpBody:
+`三步：
+1）转盘（每天 1 次）
+2）神谕给出指引（DAY / TON）
+3）选择：ENTER / WAIT / SKIP（影响 QK）
 
+词汇：
+Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Golden Altar / Daily Seal`,
+      hudTitle:"神殿 HUD",
       ritualTitle:"每日仪式",
       activateFlow:"启动福流",
       oracle:"神谕",
       gate:"圣殿之门",
-
       forecast:"类型",
       limit:"限制",
       limitPay:"• 高级: 3/天",
-
       oracleHead:"神殿指引",
-      oracleTap:"点击 神谕 获取指引，然后选择：入场 / 静候 / 略过。",
+      oracleTap:"点击 ORACLE 获取指引，然后选择：ENTER / WAIT / SKIP。",
       disclaimer:"仪式化界面。非投资建议。",
-
-      hudTitle:"神殿 HUD",
       qk:"QK",
       flow:"福流",
       weather:"气象",
@@ -1438,21 +1371,10 @@ This is a ritualized interface. Not financial advice.`,
       streak:"连击",
       pulse:"脉冲",
       today:"今日",
-
       proTitle:"PRO 终端",
       journal:"日志",
-
       close:"关闭",
       ok:"好的",
-      helpTitle:"指南",
-      helpBody:
-`三步：
-1）转盘（每天 1 次）
-2）神谕给出指引（DAY / TON）
-3）选择：入场 / 静候 / 略过（影响 QK）
-
-词汇：
-Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门 / 今日印章`,
 
       gateTitle:"圣殿之门",
       gateBody:
@@ -1464,17 +1386,10 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       donate:"供奉 1 TON",
       alreadyPremium:"高级模式已开启。",
       paySuccess:"供奉成功：已解锁 24 小时高级模式。",
-      payFail:"支付取消或失败。",
-
-      toastWheelUsed:"今日转盘已使用。",
-      toastOracleLimit:"今日神谕次数已用完。",
-      toastOracleFirst:"先神谕，再抉择。",
-      toastWalletFirst:"请先连接钱包。",
-
-      wishSeal:"王室封印",
-      wishStamp:"圣殿裁定"
+      payFail:"支付取消或失败。"
     }
   };
+
   const t = (k) => (I18N[state.lang] && I18N[state.lang][k]) || (I18N.en[k] || k);
 
   function applyI18n(){
@@ -1485,6 +1400,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     $('tModeLabel').textContent = t('modeLabel');
     $('tLangLabel').textContent = t('langLabel');
 
+    $('tHudTitle').textContent = t('hudTitle');
     $('tRitualTitle').textContent = t('ritualTitle');
     $('btnSpin').textContent = t('activateFlow');
     $('btnOracle').textContent = t('oracle');
@@ -1498,7 +1414,6 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     if(!state.oracle.last) $('oracleBody').textContent = t('oracleTap');
     $('tDisclaimer').textContent = t('disclaimer');
 
-    $('tHudTitle').textContent = t('hudTitle');
     $('tQKLabel').textContent = t('qk');
     $('tFlowScoreLabel').textContent = t('flow');
     $('tWeatherLabel').textContent = t('weather');
@@ -1519,28 +1434,16 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     $('gateConnect').textContent = t('connectWallet');
     $('gatePay').textContent = t('donate');
 
+    // EN label must always be "EN" (already)
     $('btnZH').classList.toggle('active', state.lang==='zh');
     $('btnEN').classList.toggle('active', state.lang==='en');
-
-    // EN label must always be exactly "EN"
-    $('btnEN').textContent = "EN";
   }
 
-  // ===== Planets (PNG)
+  // ===== Planets
   const PLANETS = {
     en: ["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],
     zh: ["水星","金星","地球","火星","木星","土星","天王星","海王星"]
   };
-  const PLANET_FILES = [
-    "planet_mercury.png",
-    "planet_venus.png",
-    "planet_earth.png",
-    "planet_mars.png",
-    "planet_jupiter.png",
-    "planet_saturn.png",
-    "planet_uranus.png",
-    "planet_neptune.png"
-  ];
 
   function buildOrbits(){
     const root = $('orbits');
@@ -1548,14 +1451,14 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     const names = PLANETS[state.lang] || PLANETS.en;
 
     const cfg = [
-      {d: 300, p: 26, t: 10.0, z: -20, rx:"62deg", ry:"10deg", pz: 10, a:"18deg"},
-      {d: 370, p: 30, t: 13.5, z: -10, rx:"58deg", ry:"-8deg", pz: 12, a:"118deg"},
-      {d: 450, p: 32, t: 17.0, z:  0,  rx:"54deg", ry:"14deg", pz: 14, a:"226deg"},
-      {d: 530, p: 30, t: 20.0, z:  8,  rx:"50deg", ry:"-10deg",pz: 16, a:"308deg"},
-      {d: 640, p: 44, t: 26.0, z: 16,  rx:"46deg", ry:"8deg", pz: 20, a:"68deg"},
-      {d: 740, p: 46, t: 32.0, z: 22,  rx:"44deg", ry:"-12deg",pz: 22, a:"168deg"},
-      {d: 850, p: 40, t: 39.0, z: 28,  rx:"42deg", ry:"10deg",pz: 24, a:"246deg"},
-      {d: 980, p: 40, t: 48.0, z: 34,  rx:"40deg", ry:"-6deg", pz: 26, a:"338deg"},
+      {d: 300, p: 22, t: 10.0, z: -20, rx:"62deg", ry:"10deg", pz: 10, a:"18deg",  c1:"#cbbf86", c2:"#6f5f3a", ring:0},
+      {d: 370, p: 26, t: 13.5, z: -10, rx:"58deg", ry:"-8deg", pz: 12, a:"118deg", c1:"#f5caa2", c2:"#b3764c", ring:0},
+      {d: 450, p: 28, t: 17.0, z:  0,  rx:"54deg", ry:"14deg", pz: 14, a:"226deg", c1:"#43b3ff", c2:"#1b3a8f", ring:0},
+      {d: 530, p: 24, t: 20.0, z:  8,  rx:"50deg", ry:"-10deg",pz: 16, a:"308deg", c1:"#ff834e", c2:"#8f1b10", ring:0},
+      {d: 640, p: 38, t: 26.0, z: 16,  rx:"46deg", ry:"8deg", pz: 20, a:"68deg",  c1:"#f2d27a", c2:"#b07c2b", ring:0},
+      {d: 740, p: 36, t: 32.0, z: 22,  rx:"44deg", ry:"-12deg",pz: 22, a:"168deg", c1:"#ffe8a8", c2:"#a7792b", ring:1},
+      {d: 850, p: 32, t: 39.0, z: 28,  rx:"42deg", ry:"10deg",pz: 24, a:"246deg", c1:"#95e1ff", c2:"#2a7a9b", ring:0},
+      {d: 980, p: 32, t: 48.0, z: 34,  rx:"40deg", ry:"-6deg", pz: 26, a:"338deg", c1:"#6fa8ff", c2:"#2b3f9f", ring:0},
     ];
 
     cfg.forEach((c, i)=>{
@@ -1570,26 +1473,22 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       spin.className = "spinWrap";
       spin.style.setProperty("--t", c.t+"s");
 
-      const pw = document.createElement("div");
-      pw.className = "planetWrap";
-      pw.style.setProperty("--d", c.d+"px");
-      pw.style.setProperty("--p", c.p+"px");
-      pw.style.setProperty("--pz", c.pz+"px");
-      pw.style.setProperty("--a", c.a);
-
-      const img = document.createElement("img");
-      img.className = "planetImg";
-      img.src = PLANET_FILES[i];
-      img.alt = names[i];
+      const planet = document.createElement("div");
+      planet.className = "planet";
+      planet.style.setProperty("--d", c.d+"px");
+      planet.style.setProperty("--p", c.p+"px");
+      planet.style.setProperty("--pz", c.pz+"px");
+      planet.style.setProperty("--a", c.a);
+      planet.style.setProperty("--c1", c.c1);
+      planet.style.setProperty("--c2", c.c2);
+      if(c.ring) planet.setAttribute("data-ring","1");
 
       const name = document.createElement("div");
       name.className = "pName";
       name.textContent = names[i];
 
-      pw.appendChild(img);
-      pw.appendChild(name);
-
-      spin.appendChild(pw);
+      planet.appendChild(name);
+      spin.appendChild(planet);
       orbit.appendChild(spin);
       root.appendChild(orbit);
     });
@@ -1598,8 +1497,8 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
   // ===== Help/info modal
   const INFO = {
     en: {
-      helpTitle: I18N.en.helpTitle,
-      helpBody: I18N.en.helpBody,
+      helpTitle:"Guide",
+      helpBody:I18N.en.helpBody,
       qk:"QK — Quantum Karma.\nStatus value. Grows by Wheel / Oracle / Decisions.",
       flow:"Flow Score (0–100).\nHigher = calmer.",
       weather:"Market Weather.\nNarrative layer (not signals).\nShapes Risk Aura.",
@@ -1615,21 +1514,21 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       journal:"Journal stores last 7 days.\nWheel / Oracle / Decisions."
     },
     zh: {
-      helpTitle: I18N.zh.helpTitle,
-      helpBody: I18N.zh.helpBody,
-      qk:"QK（量子福业值）。\n用于状态与进度。\n来自：转盘 / 神谕 / 抉择。",
+      helpTitle:"指南",
+      helpBody:I18N.zh.helpBody,
+      qk:"QK（量子福业值）。\n用于状态与进度。\n来自：转盘 / 神谕 / 决策。",
       flow:"Flow Score（0–100）。\n越高越稳。",
       weather:"Market Weather（市场气象）。\n叙事层（不是信号）。\n影响 Risk Aura。",
       seal:"Daily Seal（今日印章）。\n每日盖章，形成习惯与身份。",
       streak:"Streak（连击）。\n坚持路径 7/21/49。",
       pulse:"Temple Pulse（神殿脉冲）。\n无聊天的社交证明。",
       today:"今日统计。\n正向次数设计上更多。",
-      ritual:"转盘每天 1 次。\n神谕次数取决于高级模式。\n抉择影响 QK。",
+      ritual:"转盘每天 1 次。\n神谕次数取决于高级模式。\n决策影响 QK。",
       pro:"PRO 模式。\n更严肃的数字与指标。\n终端感。",
       pulseMetric:"合成指标（MVP）。\n用于塑造终端观感。",
       vol:"波动率。\n塑造 Risk Aura。",
       window:"福流窗口。\n与 Lucky Hour 对齐。",
-      journal:"日志保存 7 天。\n记录转盘/神谕/抉择。"
+      journal:"日志保存 7 天。\n记录转盘/神谕/决策。"
     }
   };
 
@@ -1639,6 +1538,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     $('modalBack').style.display = 'flex';
   }
   function closeModal(){ $('modalBack').style.display = 'none'; }
+
   function openHelp(){
     const bank = INFO[state.lang] || INFO.en;
     openModal(bank.helpTitle, bank.helpBody);
@@ -1659,6 +1559,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     const end = new Date(start.getTime() + windowMinutes*60*1000);
     return d >= start && d <= end;
   }
+
   function computeLucky(){
     const d = new Date();
     const {morningHour, eveningHour, windowMinutes} = state.lucky;
@@ -1683,8 +1584,10 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     const hh = Math.floor(diff/3600000);
     const mm = Math.floor((diff%3600000)/60000);
     const ss = Math.floor((diff%60000)/1000);
+
     $('windowTimer').textContent = `Next: ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
   }
+
   function tickClock(){
     computeLucky();
     updatePremiumState();
@@ -1714,19 +1617,22 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     else { state.weather = "STORM"; state.risk = "HIGH"; }
 
     $('weather').textContent = state.weather;
-    $('riskTag').textContent = (state.lang==='zh') ? `风险: ${state.risk}` : `Risk: ${state.risk}`;
+    $('riskTag').textContent = `Risk: ${state.risk}`;
 
     const fw = (state.risk === 'LOW') ? "OPEN" : (state.risk === 'MED' ? "NARROW" : "CLOSED");
-    $('chipWeather').textContent = (state.lang==='zh') ? `市场气象: ${state.weather}` : `Market Weather: ${state.weather}`;
-    $('chipAura').textContent = (state.lang==='zh') ? `风险气场: ${state.risk}` : `Risk Aura: ${state.risk}`;
+    $('chipWeather').textContent = `Market Weather: ${state.weather}`;
+    $('chipAura').textContent = `Risk Aura: ${state.risk}`;
     $('chipAura').classList.toggle('ok', state.risk === 'LOW');
     $('chipAura').classList.toggle('red', state.risk === 'HIGH');
-    $('chipFlow').textContent = (state.lang==='zh') ? `福流窗口: ${fw}` : `Flow Window: ${fw}`;
+    $('chipFlow').textContent = `Flow Window: ${fw}`;
     $('flowWindow').textContent = fw;
   }
 
-  // ===== SVG wheel build + spin
+  // ===== Wheel
+  const wheelCanvas = $('wheel');
+  const wctx = wheelCanvas.getContext('2d');
   const luckSymbols = ["福","禄","寿","喜","财","吉","祥","安","顺","旺","昌","瑞","德","和","兴"];
+
   const wheel = {
     petals: 15,
     angle: 0,
@@ -1737,57 +1643,83 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     resultIndex:null
   };
 
-  function buildWheelSvg(){
-    const g = $('wheelRot');
-    g.innerHTML = "";
+  function resizeWheel(){
+    const rect = wheelCanvas.getBoundingClientRect();
+    const dpr = Math.min(2, Math.max(1, Math.floor(window.devicePixelRatio || 1))); // cap DPR to 2
+    wheelCanvas.width = Math.floor(rect.width * dpr);
+    wheelCanvas.height = Math.floor(rect.height * dpr);
+    wctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function drawWheel(){
+    const rect = wheelCanvas.getBoundingClientRect();
+    const cx = rect.width/2, cy = rect.height/2;
+    const R = Math.min(cx,cy)*0.92;
+    const inner = R*0.18;
+
+    wctx.clearRect(0,0,rect.width,rect.height);
+
+    const ringGrad = wctx.createRadialGradient(cx,cy,R*0.4,cx,cy,R*1.02);
+    ringGrad.addColorStop(0, "rgba(255,211,106,.08)");
+    ringGrad.addColorStop(1, "rgba(184,0,29,.10)");
+    wctx.fillStyle = ringGrad;
+    wctx.beginPath(); wctx.arc(cx,cy,R*1.02,0,Math.PI*2); wctx.fill();
 
     const N = wheel.petals;
     const step = (Math.PI*2)/N;
-    const R = 182;
+    const angle0 = wheel.angle;
 
     for(let i=0;i<N;i++){
-      const a1 = -Math.PI/2 + i*step;
+      const a1 = angle0 + i*step;
       const a2 = a1 + step;
       const alt = (i%2===0);
+      const col1 = alt ? "rgba(184,0,29,.95)" : "rgba(255,43,63,.72)";
+      const col2 = alt ? "rgba(255,43,63,.58)" : "rgba(184,0,29,.86)";
+      const g = wctx.createLinearGradient(
+        cx + Math.cos(a1)*R, cy + Math.sin(a1)*R,
+        cx + Math.cos(a2)*R, cy + Math.sin(a2)*R
+      );
+      g.addColorStop(0, col1); g.addColorStop(1, col2);
 
-      const x1 = Math.cos(a1)*R, y1 = Math.sin(a1)*R;
-      const x2 = Math.cos(a2)*R, y2 = Math.sin(a2)*R;
+      wctx.beginPath();
+      wctx.moveTo(cx,cy);
+      wctx.arc(cx,cy,R,a1,a2);
+      wctx.closePath();
+      wctx.fillStyle = g; wctx.fill();
 
-      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-      const d = `M 0 0 L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${R} ${R} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
-      path.setAttribute("d", d);
-      path.setAttribute("fill", alt ? "rgba(184,0,29,.95)" : "rgba(255,43,63,.72)");
-      path.setAttribute("stroke", "rgba(255,211,106,.30)");
-      path.setAttribute("stroke-width", "1");
-      g.appendChild(path);
+      wctx.strokeStyle = "rgba(255,211,106,.30)";
+      wctx.lineWidth = 1; wctx.stroke();
 
       const mid = (a1+a2)/2;
-      const tx = Math.cos(mid)*(R*0.63);
-      const ty = Math.sin(mid)*(R*0.63);
+      const tx = cx + Math.cos(mid)*R*0.63;
+      const ty = cy + Math.sin(mid)*R*0.63;
 
-      const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-      text.textContent = luckSymbols[i];
-      text.setAttribute("x", tx.toFixed(2));
-      text.setAttribute("y", ty.toFixed(2));
-      text.setAttribute("fill", "rgba(255,211,106,.96)");
-      text.setAttribute("font-size", "30");
-      text.setAttribute("font-weight", "900");
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("dominant-baseline", "middle");
-      text.setAttribute("transform", `rotate(${(mid*180/Math.PI + 90).toFixed(2)} ${tx.toFixed(2)} ${ty.toFixed(2)})`);
-      g.appendChild(text);
+      wctx.save();
+      wctx.translate(tx,ty);
+      wctx.rotate(mid + Math.PI/2);
+      wctx.font = `${Math.floor(R*0.16)}px ui-sans-serif`;
+      wctx.fillStyle = "rgba(255,211,106,.96)";
+      wctx.shadowColor = "rgba(0,0,0,.55)";
+      wctx.shadowBlur = 10;
+      wctx.textAlign = "center";
+      wctx.textBaseline = "middle";
+      wctx.fillText(luckSymbols[i], 0, 0);
+      wctx.restore();
     }
-    applyWheelTransform();
-  }
 
-  function applyWheelTransform(){
-    $('wheelRot').setAttribute("transform", `rotate(${(wheel.angle*180/Math.PI).toFixed(2)})`);
+    wctx.beginPath(); wctx.arc(cx,cy,R*0.40,0,Math.PI*2);
+    wctx.fillStyle = "rgba(0,0,0,.35)"; wctx.fill();
+    wctx.strokeStyle = "rgba(255,211,106,.20)"; wctx.lineWidth = 1; wctx.stroke();
+
+    wctx.beginPath(); wctx.arc(cx,cy,inner,0,Math.PI*2);
+    wctx.fillStyle = "rgba(0,0,0,.60)"; wctx.fill();
+    wctx.strokeStyle = "rgba(255,211,106,.22)"; wctx.lineWidth = 1; wctx.stroke();
   }
 
   function computeWheelIndex(){
     const N = wheel.petals;
     const step = (Math.PI*2)/N;
-    const pointer = 0; // right-side pointer
+    const pointer = 0;
     let a = (pointer - wheel.angle) % (Math.PI*2);
     if(a<0) a += Math.PI*2;
     return Math.floor(a/step);
@@ -1798,50 +1730,12 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     return premiumActive() ? 1.50 : 1.25;
   }
 
-  function clearReveal(){
-    const rw = $('revealWrap');
-    rw.classList.remove('reveal-on');
-    $('wishText').style.opacity = 0;
-  }
-
-  function setWishText(symbol){
-    // Imperial, short, no cringe
-    const bank = {
-      en: [
-        "Prosperity aligns with discipline.\nOne decisive move — no noise.",
-        "Hold the center.\nSmall steps compound into fortune.",
-        "Clarity is power.\nReduce chaos — the flow opens."
-      ],
-      zh: [
-        "福运归于秩序。\n一事到底，勿躁。",
-        "守中得财。\n小步稳进，福自来。",
-        "清明即权。\n减噪增势，福门自开。"
-      ]
-    };
-    const arr = bank[state.lang] || bank.en;
-    const line = arr[irnd(0, arr.length-1)];
-    const stamp = (state.lang==='zh') ? `${t('wishStamp')} · ${symbol}` : `${t('wishStamp')} · ${symbol}`;
-    $('wishText').innerHTML = `${line.replace(/\n/g,'<br>')}<span class="wishSmall">${stamp}</span>`;
-  }
-
-  function triggerReveal(){
-    const rw = $('revealWrap');
-    clearReveal();
-    // slight pause feels “imperial”
-    setTimeout(()=>{
-      rw.classList.add('reveal-on');
-      // show wish text (opacity controlled by animation)
-      $('wishText').style.opacity = 1;
-    }, 220);
-  }
-
   function startSpin(){
     audio.startZen();
     newDayResetIfNeeded();
-    clearReveal();
-
     if(state.today.wheelUsed){
-      toast(t('toastWheelUsed'));
+      toast(state.lang==='zh' ? "今日转盘已使用。" : "Wheel already used today.");
+      haptic('light');
       return;
     }
     if(wheel.spinning) return;
@@ -1855,6 +1749,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     wheel.stopEps = 0.0010;
 
     flash();
+    haptic('heavy');
     saveState();
     renderHUD();
   }
@@ -1873,30 +1768,31 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
         const mult = luckyMultiplier();
         const gain = rnd(3, 12) * mult;
         state.qk = +(state.qk + gain).toFixed(2);
+
         state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +10)), 0, 100);
 
         applyNarrativeFromFlow();
         flash();
+        haptic('success');
 
-        const symbol = luckSymbols[wheel.resultIndex];
-        pushJournal({ type:"wheel", title:`Wheel → ${symbol}`, detail:`+${gain.toFixed(2)} QK`, premium: premiumActive() });
-
-        // Reveal (hongbao → paper → seal)
-        setWishText(symbol);
-        triggerReveal();
-
+        pushJournal({ type:"wheel", title:`Wheel → ${luckSymbols[wheel.resultIndex]}`, detail:`+${gain.toFixed(2)} QK`, premium: premiumActive() });
         enableChoicesIfOracleReady();
         saveState();
         renderHUD();
       }
     }
-    applyWheelTransform();
+    drawWheel();
     requestAnimationFrame(wheelTick);
   }
 
-  // ===== Oracle limits
-  function oracleDailyLimit(){ return premiumActive() ? 3 : 1; }
-  function canUseOracle(){ newDayResetIfNeeded(); return state.today.oracleUses < oracleDailyLimit(); }
+  // ===== Oracle limits (Free 1/day, Premium 3/day)
+  function oracleDailyLimit(){
+    return premiumActive() ? 3 : 1;
+  }
+  function canUseOracle(){
+    newDayResetIfNeeded();
+    return state.today.oracleUses < oracleDailyLimit();
+  }
   function consumeOracleUse(){
     if(!canUseOracle()) return false;
     state.today.oracleUses += 1;
@@ -1935,10 +1831,10 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       ],
       tonPos:[
         "TON 气场平稳：小仓位、分批更佳。",
-        "先看 风险气场：LOW/MED 小步进入，HIGH 先等待。"
+        "先看 Risk Aura：LOW/MED 小步进入，HIGH 先等待。"
       ],
       tonCaution:[
-        "今日宜观望。风险气场 HIGH 只记录不操作。",
+        "今日宜观望。Risk Aura HIGH 只记录不操作。",
         "气场偏乱。避免重仓与频繁进出。"
       ]
     }
@@ -1974,13 +1870,13 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     $('oracleStamp').textContent = o.stamp;
     $('oracleBody').textContent = o.text;
 
-    $('chipWeather').textContent = (state.lang==='zh') ? `市场气象: ${o.weather}` : `Market Weather: ${o.weather}`;
-    $('chipAura').textContent = (state.lang==='zh') ? `风险气场: ${o.aura}` : `Risk Aura: ${o.aura}`;
+    $('chipWeather').textContent = `Market Weather: ${o.weather}`;
+    $('chipAura').textContent = `Risk Aura: ${o.aura}`;
     $('chipAura').classList.toggle('ok', o.aura === 'LOW' && !o.isCaution);
     $('chipAura').classList.toggle('red', o.aura === 'HIGH' || o.isCaution);
 
     const fw = (o.aura === 'LOW') ? "OPEN" : (o.aura === 'MED' ? "NARROW" : "CLOSED");
-    $('chipFlow').textContent = (state.lang==='zh') ? `福流窗口: ${fw}` : `Flow Window: ${fw}`;
+    $('chipFlow').textContent = `Flow Window: ${fw}`;
 
     $('oracleHead').textContent = `${t('oracleHead')} • ${o.suggested}`;
   }
@@ -1988,7 +1884,9 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
   function runOracle(){
     audio.startZen();
     if(!consumeOracleUse()){
-      toast(t('toastOracleLimit'));
+      // show calm toast: limit reached
+      toast(state.lang==='zh' ? "今日神谕次数已用完。" : "Daily Oracle limit reached.");
+      haptic('light');
       return;
     }
 
@@ -2003,6 +1901,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     setOracleUI(o);
     enableChoicesIfOracleReady();
     flash();
+    haptic('light');
 
     pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:`+${gain.toFixed(2)} QK`, premium: premiumActive() });
     saveState();
@@ -2012,7 +1911,8 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
   function takeDecision(dec){
     audio.startZen();
     if(!state.oracle.last){
-      toast(t('toastOracleFirst'));
+      toast(state.lang==='zh' ? "先神谕，再决策。" : "Oracle first — then decision.");
+      haptic('light');
       return;
     }
     state.oracle.decision = dec;
@@ -2025,10 +1925,14 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     } else {
       delta = rnd(0.5, 2.0);
     }
+
     if(state.lucky.isLuckyNow) delta *= luckyMultiplier();
+
     state.qk = +(state.qk + delta).toFixed(2);
 
+    // FX + sound + haptic
     flash();
+    haptic('light');
     audio.playCoin();
     coinsBurst(dec);
 
@@ -2052,7 +1956,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       return;
     }
     const lines = state.journal.map(j => {
-      const icon = (j.type==='wheel') ? "轮" : (j.type==='oracle' ? "谕" : "印");
+      const icon = (j.type==='wheel') ? "轮" : (j.type==='oracle' ? "谕" : "门");
       return `${icon} ${j.date} ${j.time} — ${j.title} • ${j.detail}`;
     });
     $('journal').textContent = lines.join("\n");
@@ -2079,29 +1983,25 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
 
     const qk = state.qk;
     $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "BALANCED");
-    $('riskTag').textContent = (state.lang==='zh') ? `风险: ${state.risk}` : `Risk: ${state.risk}`;
+    $('riskTag').textContent = `Risk: ${state.risk}`;
 
     $('socialA').textContent = state.social.a.toLocaleString();
-    $('socialB').textContent = (state.lang==='zh') ? `VIP: ${state.social.vip}` : `VIP: ${state.social.vip}`;
+    $('socialB').textContent = `VIP: ${state.social.vip}`;
 
     $('streak').textContent = String(state.streak);
     $('cycleTag').textContent = "7/21/49";
 
-    // synthetic today
+    // "today" synthetic
     const pos = irnd(6,12), neg = irnd(0,2);
     $('posCount').textContent = String(pos);
-    $('negCountTag').textContent = (state.lang==='zh') ? `谨慎: ${neg}` : `Caution: ${neg}`;
+    $('negCountTag').textContent = `${state.lang==='zh' ? '谨慎' : 'Caution'}: ${neg}`;
 
     // Pro metrics
     const pulse = (state.flowScore>=60) ? `+${rnd(.2,1.8).toFixed(2)}%` : `-${rnd(.1,1.2).toFixed(2)}%`;
     $('tonPulse').textContent = pulse;
-    $('liqPulse').textContent = (state.lang==='zh')
-      ? `流动性: ${(state.risk==='HIGH')?'偏薄':'稳定'}`
-      : `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
+    $('liqPulse').textContent = `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
     $('vol').textContent = (state.risk==='HIGH') ? rnd(16,28).toFixed(1) : rnd(7,15).toFixed(1);
-    $('trend').textContent = (state.lang==='zh')
-      ? `趋势: ${(state.flowScore>55)?'向上':'混合'}`
-      : `Trend: ${(state.flowScore>55)?'Up':'Mixed'}`;
+    $('trend').textContent = `Trend: ${(state.flowScore>55)?'Up':'Mixed'}`;
     $('flowWindow').textContent = (state.risk==='LOW')?'OPEN':(state.risk==='MED')?'NARROW':'CLOSED';
 
     // Oracle limit text
@@ -2170,6 +2070,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       buttonRootId: null
     });
 
+    // restore wallet state if possible
     try{
       const wallet = tonUI.wallet;
       if(wallet?.account?.address){
@@ -2183,6 +2084,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
         state.wallet.connected = true;
         state.wallet.address = wallet.account.address;
         toast("Wallet connected");
+        haptic('success');
       } else {
         state.wallet.connected = false;
         state.wallet.address = null;
@@ -2206,7 +2108,7 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
 
   async function sendPayment(amountTon=1, toAddress=RECEIVER_TONKEEPER){
     if(!tonUI || !state.wallet.connected){
-      toast(t('toastWalletFirst'));
+      toast(state.lang==='zh' ? "请先连接钱包。" : "Connect wallet first.");
       return;
     }
     const amountNano = String(Math.floor(amountTon * 1e9));
@@ -2218,6 +2120,8 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     try{
       $('gatePay').disabled = true;
       await tonUI.sendTransaction(tx);
+
+      // MVP: accept success locally
       onPaymentSuccess(null);
     }catch(e){
       $('gatePay').disabled = false;
@@ -2233,94 +2137,73 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     closeGateModal();
 
     flash();
+    haptic('success');
     toast(t('paySuccess'));
 
-    // richer FX
+    // richer FX briefly
     dustBurst();
     meteorsBurst();
 
     updatePremiumState();
     renderHUD();
+
     $('gatePay').disabled = false;
   }
 
-  // ===== FX: Dust + Meteors (left scene) + Coins (right overlay via same canvases)
+  // ===== FX: Dust + Meteors + Coins
   const dustC = $('fxDust');
   const metC = $('fxMeteors');
+  const coinC = $('fxCoins');
+
   const dctx = dustC.getContext('2d');
   const mctx = metC.getContext('2d');
-
-  // Right overlay coins canvas (global, fixed)
-  const coinC = document.createElement('canvas');
-  coinC.id = 'fxCoins';
-  coinC.style.position = 'fixed';
-  coinC.style.inset = '0';
-  coinC.style.width = '100%';
-  coinC.style.height = '100%';
-  coinC.style.pointerEvents = 'none';
-  coinC.style.zIndex = '2600';
-  document.body.appendChild(coinC);
   const cctx = coinC.getContext('2d');
 
-  function resizeLeftFX(){
-    const el = document.querySelector('.sceneFixed');
-    const rect = el.getBoundingClientRect();
+  function resizeFX(){
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-
-    [dustC, metC].forEach(c=>{
-      c.width = Math.floor(rect.width * dpr);
-      c.height = Math.floor(rect.height * dpr);
-      c.style.width = rect.width+"px";
-      c.style.height = rect.height+"px";
+    [dustC, metC, coinC].forEach(c=>{
+      c.width = Math.floor(innerWidth * dpr);
+      c.height = Math.floor(innerHeight * dpr);
+      c.style.width = innerWidth+"px";
+      c.style.height = innerHeight+"px";
       const ctx = c.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0);
     });
   }
 
-  function resizeCoins(){
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    coinC.width = Math.floor(innerWidth * dpr);
-    coinC.height = Math.floor(innerHeight * dpr);
-    coinC.style.width = innerWidth+"px";
-    coinC.style.height = innerHeight+"px";
-    cctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-
-  // Dust (premium subtle)
+  // Dust
   let dust = [];
   let dustBurstBoost = 0;
 
   function initDust(){
     dust = [];
-    const el = document.querySelector('.sceneFixed');
-    const rect = el.getBoundingClientRect();
-
     const lucky = state.lucky.isLuckyNow;
     const prem = premiumActive();
-    const base = lucky ? irnd(190,240) : irnd(120,160);
-    const add = prem ? Math.floor(base*0.10) : 0;
+    const base = lucky ? irnd(180,220) : irnd(110,140);
+    const add = prem ? Math.floor(base*0.10) : 0; // subtle richer
     const count = base + add;
 
     for(let i=0;i<count;i++){
       dust.push({
-        x: Math.random()*rect.width,
-        y: Math.random()*rect.height,
-        r: rnd(0.7, 2.4),
-        a: rnd(0.10, 0.42),
+        x: Math.random()*innerWidth,
+        y: Math.random()*innerHeight,
+        r: rnd(0.6, 2.2),
+        a: rnd(0.10, 0.44),
         vx: rnd(-0.05, 0.05),
         vy: rnd(-0.18, -0.04),
         tw: rnd(0, Math.PI*2),
-        streak: Math.random() < 0.12
+        streak: Math.random() < 0.11
       });
     }
   }
-  function dustBurst(){ dustBurstBoost = 0.9; }
+
+  function dustBurst(){
+    dustBurstBoost = 0.9; // 0.9s boost
+  }
 
   function drawDust(){
-    const el = document.querySelector('.sceneFixed');
-    const rect = el.getBoundingClientRect();
+    dctx.clearRect(0,0,innerWidth,innerHeight);
 
-    dctx.clearRect(0,0,rect.width,rect.height);
     if(dustBurstBoost > 0) dustBurstBoost *= 0.92;
 
     for(const p of dust){
@@ -2329,9 +2212,9 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       p.x += p.vx + rnd(-0.03,0.03)*0.2;
       p.y += p.vy;
 
-      if(p.y < -20) p.y = rect.height + 20;
-      if(p.x < -20) p.x = rect.width + 20;
-      if(p.x > rect.width+20) p.x = -20;
+      if(p.y < -20) p.y = innerHeight + 20;
+      if(p.x < -20) p.x = innerWidth + 20;
+      if(p.x > innerWidth+20) p.x = -20;
 
       const boost = 1 + (dustBurstBoost>0 ? 0.30 : 0);
       const alpha = p.a*tw*boost;
@@ -2355,78 +2238,58 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     }
   }
 
-  // Meteors (PNG sprites)
-  const meteorImgs = {
-    chunk: [
-      new Image(), new Image(), new Image()
-    ],
-    comet: new Image()
-  };
-  meteorImgs.chunk[0].src = "meteor_chunk_01.png";
-  meteorImgs.chunk[1].src = "meteor_chunk_02.png";
-  meteorImgs.chunk[2].src = "meteor_chunk_03.png";
-  meteorImgs.comet.src = "meteor_comet_01.png";
-
+  // Meteors (gold chunks)
   let meteors = [];
   let meteorBurstBoost = 0;
 
-  function meteorsBurst(){ meteorBurstBoost = 1.1; }
+  function meteorsBurst(){
+    meteorBurstBoost = 1.1;
+  }
 
   function spawnMeteor(kind="chunk"){
-    const el = document.querySelector('.sceneFixed');
-    const rect = el.getBoundingClientRect();
-
     const fromLeft = Math.random() < 0.5;
-    const baseSpeed = kind==="comet" ? rnd(1.0, 1.8) : rnd(0.35, 0.85);
+    const baseSpeed = kind==="comet" ? rnd(0.9, 1.6) : rnd(0.28, 0.62);
     const vx = (fromLeft ? 1 : -1) * baseSpeed;
-    const vy = kind==="comet" ? rnd(-0.25,0.25) : rnd(-0.10,0.10);
+    const vy = kind==="comet" ? rnd(-0.35,0.35) : rnd(-0.12,0.12);
 
-    const scale = (kind==="comet") ? rnd(0.95, 1.35) : rnd(0.85, 1.55);
-    const img = (kind==="comet")
-      ? meteorImgs.comet
-      : meteorImgs.chunk[irnd(0,2)];
-
-    const w = (kind==="comet" ? 320 : 240) * scale;
-    const h = (kind==="comet" ? 90  : 140) * scale;
+    const scale = (Math.random() < 0.22) ? rnd(1.25, 1.75) : rnd(0.85, 1.15);
+    const len = (kind==="comet" ? rnd(180, 360) : rnd(130, 280)) * scale;
+    const thick = (kind==="comet" ? rnd(2, 5) : rnd(6, 14)) * (0.85 + 0.3*Math.random());
 
     meteors.push({
       kind,
-      img,
-      x: fromLeft ? -w : rect.width + w,
-      y: rnd(0, rect.height),
+      x: fromLeft ? -len : innerWidth + len,
+      y: rnd(0, innerHeight),
       vx, vy,
-      w, h,
+      len, thick,
       life: 1.0,
-      rot: Math.atan2(vy, vx),
-      a: rnd(0.65, 0.95)
+      rot: Math.atan2(vy, vx)
     });
 
-    if(meteors.length > 26) meteors.shift();
+    if(meteors.length > 28) meteors.shift();
   }
 
   function drawMeteors(){
-    const el = document.querySelector('.sceneFixed');
-    const rect = el.getBoundingClientRect();
-    mctx.clearRect(0,0,rect.width,rect.height);
+    mctx.clearRect(0,0,innerWidth,innerHeight);
 
     if(meteorBurstBoost > 0) meteorBurstBoost *= 0.92;
 
     const lucky = state.lucky.isLuckyNow;
     const prem = premiumActive();
+
     let baseSpawn = lucky ? 0.010 : 0.006;
-    if(prem) baseSpawn *= 1.10;
+    if(prem) baseSpawn *= 1.08; // subtle richer
     if(meteorBurstBoost > 0) baseSpawn += 0.012;
 
     if(Math.random() < baseSpawn){
       spawnMeteor("chunk");
     }
-    const cometSpawn = (lucky ? 0.0030 : 0.0016) * (prem ? 1.15 : 1.0);
+
+    const cometSpawn = (lucky ? 0.0032 : 0.0018) * (prem ? 1.10 : 1.0);
     if(Math.random() < cometSpawn){
       spawnMeteor("comet");
     }
 
-    // draw
-    mctx.globalCompositeOperation = 'screen';
     for(const m of meteors){
       m.x += m.vx;
       m.y += m.vy;
@@ -2436,44 +2299,73 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       mctx.translate(m.x, m.y);
       mctx.rotate(m.rot);
 
-      const alpha = m.a * Math.min(1, Math.max(0.25, m.life));
-      mctx.globalAlpha = alpha;
+      const g = mctx.createLinearGradient(-m.len,0, 0,0);
+      g.addColorStop(0.00, "rgba(255,211,106,0)");
+      g.addColorStop(0.40, "rgba(184,134,11,.38)");
+      g.addColorStop(0.62, "rgba(255,211,106,.72)");
+      g.addColorStop(0.76, "rgba(255,243,209,.95)");
+      g.addColorStop(0.88, "rgba(255,211,106,.55)");
+      g.addColorStop(1.00, "rgba(184,134,11,.22)");
 
-      // glow underlay (imperial gold)
-      mctx.filter = 'blur(6px)';
-      mctx.drawImage(m.img, -m.w/2, -m.h/2, m.w, m.h);
+      mctx.fillStyle = g;
+      mctx.beginPath();
+      mctx.roundRect(-m.len, -m.thick/2, m.len, m.thick, m.thick/2);
+      mctx.fill();
 
-      // crisp layer
-      mctx.filter = 'none';
-      mctx.globalAlpha = alpha * 0.92;
-      mctx.drawImage(m.img, -m.w/2, -m.h/2, m.w, m.h);
+      // rim edge (premium)
+      mctx.strokeStyle = "rgba(255,243,209,.22)";
+      mctx.lineWidth = Math.max(1, m.thick*0.10);
+      mctx.beginPath();
+      mctx.roundRect(-m.len, -m.thick/2, m.len, m.thick, m.thick/2);
+      mctx.stroke();
+
+      // tail sparks
+      const sparks = irnd(2,6);
+      for(let i=0;i<sparks;i++){
+        const sx = -rnd(m.len*0.35, m.len*0.95);
+        const sy = rnd(-m.thick*1.4, m.thick*1.4);
+        mctx.fillStyle = `rgba(255,243,209,${rnd(0.14,0.38)})`;
+        mctx.beginPath();
+        mctx.arc(sx, sy, rnd(1.2, 2.8), 0, Math.PI*2);
+        mctx.fill();
+      }
+
+      // micro scratches
+      if(m.kind==="chunk"){
+        mctx.strokeStyle = "rgba(0,0,0,.20)";
+        mctx.lineWidth = 1;
+        for(let i=0;i<4;i++){
+          const y = rnd(-m.thick/2, m.thick/2);
+          mctx.beginPath();
+          mctx.moveTo(-m.len*rnd(0.18,0.45), y);
+          mctx.lineTo(-m.len*rnd(0.55,0.95), y + rnd(-1,1));
+          mctx.stroke();
+        }
+      }
 
       mctx.restore();
     }
-    mctx.globalCompositeOperation = 'source-over';
 
-    meteors = meteors.filter(m => (m.x > -m.w*2 && m.x < rect.width+m.w*2 && m.y > -200 && m.y < rect.height+200 && m.life > 0.22));
+    meteors = meteors.filter(m => (m.x > -m.len*2 && m.x < innerWidth+m.len*2 && m.y > -200 && m.y < innerHeight+200 && m.life > 0.25));
   }
 
-  // Coins (bigger, readable, “imperial”)
+  // Coins (premium look) — fall full screen
   let coins = [];
   function coinsBurst(dec){
-    const count = (dec==='ENTER') ? 34 : (dec==='WAIT' ? 24 : 18);
-    const strength = (dec==='ENTER') ? 1.0 : (dec==='WAIT' ? 0.90 : 0.82);
+    const count = (dec==='ENTER') ? 26 : (dec==='WAIT' ? 18 : 14);
+    const strength = (dec==='ENTER') ? 1.0 : (dec==='WAIT' ? 0.85 : 0.75);
 
     for(let i=0;i<count;i++){
-      const r = rnd(9.0, 16.5); // BIGGER
       coins.push({
-        x: rnd(innerWidth*0.10, innerWidth*0.90),
-        y: -rnd(60, 560),
-        vx: rnd(-1.2, 1.2) * strength,
-        vy: rnd(5.5, 10.5) * strength,
-        r,
+        x: rnd(innerWidth*0.08, innerWidth*0.92),
+        y: -rnd(40, 520),
+        vx: rnd(-0.8, 0.8) * strength,
+        vy: rnd(4.0, 7.8) * strength,
+        r: rnd(4.2, 7.8),
         rot: rnd(0, Math.PI*2),
-        vr: rnd(-0.18, 0.18),
+        vr: rnd(-0.22, 0.22),
         a: rnd(0.78, 1.0),
-        life: 1.0,
-        stamp: Math.random() < 0.55 ? "財" : "福"
+        life: 1.0
       });
     }
   }
@@ -2493,52 +2385,47 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
       cctx.translate(k.x, k.y);
       cctx.rotate(k.rot);
 
-      // coin body
+      // metallic coin shading
       const g = cctx.createRadialGradient(-k.r*0.25,-k.r*0.35, 1, 0,0, k.r*2.0);
-      g.addColorStop(0, `rgba(255,255,255,${0.72*k.a})`);
-      g.addColorStop(0.22, `rgba(255,243,209,${0.98*k.a})`);
-      g.addColorStop(0.52, `rgba(255,211,106,${0.92*k.a})`);
-      g.addColorStop(0.78, `rgba(184,134,11,${0.78*k.a})`);
-      g.addColorStop(1, `rgba(40,20,6,${0.26*k.a})`);
+      g.addColorStop(0, `rgba(255,255,255,${0.65*k.a})`);
+      g.addColorStop(0.25, `rgba(255,243,209,${0.95*k.a})`);
+      g.addColorStop(0.55, `rgba(255,211,106,${0.88*k.a})`);
+      g.addColorStop(0.80, `rgba(184,134,11,${0.70*k.a})`);
+      g.addColorStop(1, `rgba(40,20,6,${0.25*k.a})`);
 
       cctx.fillStyle = g;
       cctx.beginPath();
-      cctx.ellipse(0,0, k.r*1.18, k.r, 0, 0, Math.PI*2);
+      cctx.ellipse(0,0, k.r*1.25, k.r, 0, 0, Math.PI*2);
       cctx.fill();
 
-      // rim + inner rim
-      cctx.strokeStyle = `rgba(255,243,209,${0.32*k.a})`;
-      cctx.lineWidth = 2;
+      // rim
+      cctx.strokeStyle = `rgba(255,243,209,${0.25*k.a})`;
+      cctx.lineWidth = 1;
       cctx.beginPath();
-      cctx.ellipse(0,0, k.r*1.10, k.r*0.92, 0, 0, Math.PI*2);
+      cctx.ellipse(0,0, k.r*1.18, k.r*0.95, 0, 0, Math.PI*2);
       cctx.stroke();
 
-      cctx.strokeStyle = `rgba(0,0,0,${0.22*k.a})`;
-      cctx.lineWidth = 2;
+      // inner stamp hint
+      cctx.strokeStyle = `rgba(0,0,0,${0.20*k.a})`;
+      cctx.lineWidth = 1;
       cctx.beginPath();
-      cctx.ellipse(0,0, k.r*0.78, k.r*0.66, 0, 0, Math.PI*2);
+      cctx.ellipse(0,0, k.r*0.85, k.r*0.70, 0, 0, Math.PI*2);
       cctx.stroke();
-
-      // stamp
-      cctx.fillStyle = `rgba(25,16,6,${0.34*k.a})`;
-      cctx.font = `${Math.floor(k.r*1.0)}px ui-sans-serif`;
-      cctx.textAlign = "center";
-      cctx.textBaseline = "middle";
-      cctx.fillText(k.stamp, 0, 0);
 
       cctx.restore();
     }
-    coins = coins.filter(k => k.y < innerHeight+220 && k.life > 0.30);
+
+    coins = coins.filter(k => k.y < innerHeight+180 && k.life > 0.35);
   }
 
   function fxLoop(){
+    // adapt dust count on lucky/premium shifts
     const lucky = state.lucky.isLuckyNow;
     const prem = premiumActive();
 
-    // adapt dust when premium/lucky shifts
-    if(lucky && dust.length < 180) initDust();
-    if(!lucky && dust.length > 180) initDust();
-    if(prem && dust.length < 130) initDust();
+    if(lucky && dust.length < 170) initDust();
+    if(!lucky && dust.length > 170) initDust();
+    if(prem && dust.length < 120) initDust();
 
     drawDust();
     drawMeteors();
@@ -2546,13 +2433,19 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     requestAnimationFrame(fxLoop);
   }
 
-  // ===== Gate + info events
+  // ===== Gate modal / info events
   function openGate(){ openGateModal(); }
+
+  // ===== Dock helpers
+  function scrollToEl(el){
+    const y = el.getBoundingClientRect().top + window.scrollY - (56 + 18);
+    window.scrollTo({top:y, behavior:'smooth'});
+  }
 
   // ===== Bind events
   function bindEvents(){
-    // start audio on first user gesture
-    ['pointerdown','mousedown','keydown','touchstart'].forEach(evt=>{
+    // start audio on any user gesture
+    ['pointerdown','touchstart','mousedown'].forEach(evt=>{
       window.addEventListener(evt, ()=>audio.startZen(), {once:true, passive:true});
     });
 
@@ -2583,15 +2476,20 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
     $('btnWait').addEventListener('click', ()=> takeDecision('WAIT'));
     $('btnSkip').addEventListener('click', ()=> takeDecision('SKIP'));
 
-    // Gate modal
+    $('dockRitual').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+    $('dockWheel').addEventListener('click', ()=> scrollToEl($('wheel')));
+    $('dockOracle').addEventListener('click', ()=> scrollToEl($('oraclePanel')));
+    $('dockGate').addEventListener('click', openGate);
+
+    // Gate modal buttons
     $('gateClose').addEventListener('click', closeGateModal);
     $('gateBack').addEventListener('click', (e)=>{ if(e.target.id==='gateBack') closeGateModal(); });
     $('gateConnect').addEventListener('click', connectWallet);
     $('gatePay').addEventListener('click', ()=> sendPayment(GATE_PRICE_TON, RECEIVER_TONKEEPER));
 
     window.addEventListener('resize', ()=>{
-      resizeLeftFX();
-      resizeCoins();
+      resizeWheel();
+      resizeFX();
       initDust();
     });
   }
@@ -2599,30 +2497,26 @@ Flow Window / 神殿指引 / 市场气象 / 风险气场 / 神谕 / 圣殿之门
   // ===== Init
   loadState();
 
+  // force allowed langs
+  if(!['zh','en'].includes(state.lang)) state.lang = 'zh';
+
   newDayResetIfNeeded();
   applyNarrativeFromFlow();
 
   applyI18n();
   buildOrbits();
 
-  buildWheelSvg();
-  clearReveal();
+  resizeWheel();
+  resizeFX();
+  initDust();
 
   // placeholder oracle
   $('oracleBody').textContent = t('oracleTap');
   $('oracleStamp').textContent = `— • ${state.oracle.type.toUpperCase()}`;
   enableChoicesIfOracleReady();
 
-  // mode
-  setMode(state.mode);
-
   renderHUD();
   bindEvents();
-
-  resizeLeftFX();
-  resizeCoins();
-  initDust();
-
   tickClock();
   wheelTick();
   fxLoop();
