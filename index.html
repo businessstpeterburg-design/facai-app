@@ -11,15 +11,11 @@
       --bg1:#0a0704;
       --gold:#ffd36a;
       --gold2:#b8860b;
-      --gold3:#7a5a10;
       --red:#b4001d;
       --red2:#ff2b3f;
-      --obs:#0b0b0d;
       --glass: rgba(255,255,255,.06);
-      --glass2: rgba(255,255,255,.10);
       --line: rgba(255,211,106,.22);
       --muted: rgba(255,255,255,.70);
-      --muted2: rgba(255,255,255,.50);
       --danger:#ff4d4d;
       --ok:#43ffb3;
       --shadow: 0 20px 70px rgba(0,0,0,.55);
@@ -40,7 +36,9 @@
       overflow-x:hidden;
     }
 
-    /* Canvas layers */
+    /* =========================
+       FIX: layers + click safety
+       ========================= */
     #fxDust, #fxMeteors{
       position:fixed;
       inset:0;
@@ -52,41 +50,58 @@
     }
     #fxMeteors{opacity:.75; mix-blend-mode: screen;}
 
-    /* WebGL layer behind UI */
+    /* WebGL behind UI - never catches clicks */
     #webglRoot{
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
     }
     #webgl{
-      width: 100%;
-      height: 100%;
+      width:100%;
+      height:100%;
       display:block;
     }
     #webglVignette{
       position:absolute;
       inset:0;
+      pointer-events:none;
       background:
         radial-gradient(60% 50% at 50% 30%, rgba(255,211,106,.10), rgba(0,0,0,0) 55%),
         radial-gradient(80% 60% at 50% 70%, rgba(255,43,63,.06), rgba(0,0,0,0) 60%),
         linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.65));
       mix-blend-mode: screen;
-      opacity: .85;
+      opacity:.85;
     }
 
-    /* App shell (scrollable) */
+    .flash{
+      position:fixed;
+      inset:0;
+      z-index:60;
+      pointer-events:none;
+      opacity:0;
+      background:
+        radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.35), transparent 60%),
+        radial-gradient(900px 700px at 50% 60%, rgba(255,43,63,.18), transparent 65%);
+      transition: opacity .15s ease;
+      mix-blend-mode: screen;
+    }
+    .flash.on{opacity:1}
+
+    /* App shell */
     .app{
       position:relative;
-      z-index:2;
+      z-index:10; /* UI above everything */
       min-height:100vh;
       display:flex;
       flex-direction:column;
     }
+
+    /* TOPBAR */
     .topbar{
       position:sticky;
       top:0;
-      z-index:5;
+      z-index:30;
       backdrop-filter: blur(12px);
       background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.35));
       border-bottom: 1px solid rgba(255,211,106,.14);
@@ -126,9 +141,7 @@
       font-size:20px;
       text-shadow: 0 1px 0 rgba(255,255,255,.25);
     }
-    .brand-text{
-      display:flex; flex-direction:column; line-height:1.05;
-    }
+    .brand-text{display:flex;flex-direction:column;line-height:1.05}
     .brand-text .t1{
       font-size:12px;
       letter-spacing:.38em;
@@ -290,12 +303,8 @@
       text-transform:uppercase;
       color: rgba(255,211,106,.92);
     }
-    .sub{
-      font-size:12px;
-      color: rgba(255,255,255,.68);
-    }
+    .sub{font-size:12px;color:rgba(255,255,255,.68)}
 
-    /* HUD tiles */
     .grid{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
@@ -338,7 +347,6 @@
       color: rgba(255,255,255,.85);
     }
 
-    /* Wheel stage */
     .stage{
       display:grid;
       grid-template-columns: 1fr;
@@ -366,7 +374,6 @@
         radial-gradient(circle at 50% 45%, rgba(255,211,106,.14), transparent 45%),
         radial-gradient(circle at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.75));
     }
-
     .centerMedal{
       position:absolute;
       width: 34%;
@@ -388,7 +395,6 @@
       color: #1a1406;
       text-shadow: 0 1px 0 rgba(255,255,255,.22);
     }
-
     .beam{
       position:absolute;
       right:-2%;
@@ -423,12 +429,7 @@
       margin-top:8px;
     }
 
-    /* Oracle panel */
-    .oracleBox{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .oracleBox{display:flex;flex-direction:column;gap:10px}
     .oracleText{
       border-radius:18px;
       padding:12px 12px;
@@ -452,11 +453,7 @@
       text-transform:uppercase;
       font-size:12px;
     }
-    .oracleText .body{
-      font-size:14px;
-      color: rgba(255,255,255,.85);
-      line-height:1.35;
-    }
+    .oracleText .body{font-size:14px;color:rgba(255,255,255,.85);line-height:1.35}
     .oracleText .meta{
       margin-top:auto;
       font-size:12px;
@@ -481,17 +478,12 @@
       border-color: rgba(67,255,179,.26);
     }
 
-    .choices{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .choices{display:flex;gap:10px;flex-wrap:wrap}
 
-    /* Bottom Dock */
     .bottomDock{
       position:fixed;
       left:0; right:0; bottom:0;
-      z-index:7;
+      z-index:40;
       padding: 10px 12px 14px;
       background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.65));
       backdrop-filter: blur(12px);
@@ -555,7 +547,7 @@
       position:fixed; inset:0;
       background: rgba(0,0,0,.66);
       backdrop-filter: blur(10px);
-      z-index:20;
+      z-index:80;
       display:none;
       align-items:center;
       justify-content:center;
@@ -612,31 +604,9 @@
       flex-wrap:wrap;
     }
 
-    /* Helpers */
-    .row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     .tiny{font-size:12px; color: rgba(255,255,255,.60)}
-    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0;}
-
-    /* FX flashes */
-    .flash{
-      position:fixed;
-      inset:0;
-      z-index:50;
-      pointer-events:none;
-      opacity:0;
-      background:
-        radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.35), transparent 60%),
-        radial-gradient(900px 700px at 50% 60%, rgba(255,43,63,.18), transparent 65%);
-      transition: opacity .15s ease;
-      mix-blend-mode: screen;
-    }
-    .flash.on{opacity:1}
+    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0}
 
     body.luckyHour .sigil{
       box-shadow: 0 0 0 1px rgba(255,211,106,.32), 0 22px 60px rgba(255,211,106,.18);
@@ -647,109 +617,62 @@
       box-shadow: 0 0 40px rgba(255,211,106,.20);
     }
 
-    /* help button */
-    .helpBtn{
-      position: fixed;
-      right: 14px;
-      top: 14px;
-      z-index: 60;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,211,106,.22);
-      background: rgba(0,0,0,.28);
+    /* =========================
+       “ЧЁЛКА” (Top curtain) — CLOSED by default, opens by button
+       ========================= */
+    .bangToggle{
+      width:44px;height:44px;
+      border-radius:14px;
+      border:1px solid rgba(255,211,106,.22);
+      background: rgba(0,0,0,.22);
       backdrop-filter: blur(10px);
       color: rgba(255,211,106,.95);
-      font-weight: 900;
-      font-size: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      cursor: pointer;
-    }
-
-    /* micro guide overlay */
-    .microGuide{
-      position: fixed;
-      inset:0;
-      z-index: 65;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 22px;
-      background: rgba(0,0,0,.78);
-    }
-    .microGuideInner{
-      width: min(520px, 92vw);
-      border-radius: 22px;
-      border: 1px solid rgba(255,211,106,.18);
-      background: rgba(10,10,12,.55);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 30px 80px rgba(0,0,0,.55);
-      padding: 18px 18px 14px;
-    }
-    .mgTitle{
-      font-weight: 900;
-      letter-spacing: .18em;
-      color: rgba(255,211,106,.95);
-      text-align:center;
-      margin: 6px 0 10px;
-    }
-    .mgList{
-      margin: 0;
-      padding-left: 18px;
-      color: rgba(255,255,255,.86);
-      line-height: 1.45;
-    }
-    .mgOk{
-      width:100%;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: none;
-      background: linear-gradient(135deg, rgba(255,211,106,1), rgba(184,134,11,1));
-      color: #0b0b0c;
-      font-weight: 900;
+      font-weight: 1000;
+      font-size: 14px;
       cursor:pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
-
-    .microcopy{
-      font-size: 11px;
-      opacity: .74;
-      text-align:center;
-      margin-top: 6px;
-      width: 100%;
+    #bang{
+      position:fixed;
+      left:0; right:0;
+      top:0;
+      height: 52vh;                 /* не “пол-экрана вниз” по умолчанию, потому что закрыто */
+      z-index:70;
+      pointer-events:none;          /* важно: когда закрыто — не ловит клики */
+      transform: translateY(-110%); /* спрятано */
+      transition: transform .28s cubic-bezier(.2,0,.2,1);
+      background:
+        radial-gradient(900px 420px at 50% 30%, rgba(255,211,106,.22), transparent 60%),
+        radial-gradient(900px 520px at 50% 70%, rgba(255,43,63,.12), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,0));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,211,106,.14);
+    }
+    #bang.open{
+      transform: translateY(0);
+      pointer-events:auto; /* когда открыто — можно кликнуть по “внутренним” элементам (если добавишь) */
     }
   </style>
 </head>
 
 <body>
-  <!-- Behind everything -->
+  <!-- FX layers -->
   <canvas id="fxDust"></canvas>
   <canvas id="fxMeteors"></canvas>
+  <div class="flash" id="flash"></div>
 
+  <!-- WebGL behind UI -->
   <div id="webglRoot" aria-hidden="true">
     <canvas id="webgl"></canvas>
     <div id="webglVignette"></div>
   </div>
 
-  <div class="flash" id="flash"></div>
-
-  <!-- Quick Help -->
-  <button id="helpBtn" class="helpBtn" type="button" title="Rules / Guide">?</button>
-
-  <!-- Micro guide -->
-  <div id="microGuide" class="microGuide" style="display:none">
-    <div class="microGuideInner">
-      <div class="mgTitle">3 Steps</div>
-      <ol class="mgList">
-        <li><b>Spin</b> the wheel (1×/day)</li>
-        <li><b>Oracle</b> gives Temple Guidance</li>
-        <li>Choose <b>Enter / Wait / Skip</b> → get QK</li>
-      </ol>
-      <button id="microGuideOk" class="mgOk" type="button">Enter Temple</button>
-    </div>
-  </div>
+  <!-- “ЧЁЛКА” overlay -->
+  <div id="bang" aria-hidden="true"></div>
 
   <div class="app">
+
+    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-inner">
         <div class="brand">
@@ -761,6 +684,12 @@
         </div>
 
         <div class="top-controls">
+          <!-- “Чёлка” button -->
+          <button class="bangToggle" id="btnBang" type="button" title="Чёлка">〣</button>
+
+          <!-- help button (?) — opens RULES -->
+          <button class="bangToggle" id="helpBtn" type="button" title="Rules / Guide">?</button>
+
           <div class="pill" title="Local time / Lucky Hour schedule">
             <div class="small" id="tTimeLabel">LOCAL TIME</div>
             <b id="localTime">--:--</b>
@@ -780,15 +709,18 @@
             <div class="seg" role="tablist" aria-label="Language">
               <button id="btnZH" class="active" type="button">中文</button>
               <button id="btnEN" type="button">EN</button>
+              <button id="btnRU" type="button">RU</button>
             </div>
           </div>
 
+          <!-- Rules button #1 -->
           <button class="btn secondary" id="btnRules" type="button">RULES</button>
         </div>
       </div>
     </div>
 
     <div class="wrap">
+      <!-- HERO -->
       <div class="hero">
         <!-- LEFT: HUD -->
         <div class="card">
@@ -867,7 +799,6 @@
                 <div class="tiny" id="tSocialHint">Social proof without chat (safe & clean).</div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -886,7 +817,7 @@
                 <div class="centerMedal" aria-hidden="true"><span>財</span></div>
               </div>
 
-              <div class="wheelControls" id="mainControls">
+              <div class="wheelControls">
                 <button class="btn" id="btnSpin" type="button">ACTIVATE FLOW</button>
                 <button class="btn secondary" id="btnOracle" type="button">ORACLE</button>
                 <button class="btn ghost" id="btnGate" type="button">OPEN GATE</button>
@@ -903,7 +834,7 @@
                   </div>
                   <div class="pill" style="flex:1; justify-content:space-between">
                     <span class="small" id="tLimitLabel">LIMIT</span>
-                    <b id="limitText">0 / day</b>
+                    <b id="limitText">1 / day</b>
                     <span class="small" id="limitPaywall">• extra: 1 TON</span>
                   </div>
                 </div>
@@ -933,7 +864,6 @@
                   This is a ritualized UI. Not financial advice. Use your judgment.
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -989,6 +919,7 @@
         </div>
       </div>
 
+      <!-- EXTRA -->
       <div class="card">
         <div class="inner">
           <div class="hline">
@@ -1002,7 +933,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- Bottom Dock -->
@@ -1024,13 +954,13 @@
           <div class="dockIcon"><span>⟠</span></div>
           <small id="dGate">Gate</small>
         </button>
+        <!-- Rules button #2 (dock) -->
         <button class="dockBtn" id="dockRules" type="button">
           <div class="dockIcon"><span>❖</span></div>
           <small id="dRules">Rules</small>
         </button>
       </div>
     </div>
-
   </div>
 
   <!-- RULES MODAL -->
@@ -1083,33 +1013,20 @@
     </div>
   </div>
 
-  <!-- CORE JS (NON-MODULE) -->
   <script>
   /*****************************************************************
-   * TON TEMPLE — Core JS (cleaned)
+   * TON TEMPLE — CLEAN V5 (single file, click-safe)
    *****************************************************************/
 
+  // ---------- Helpers ----------
   const $ = (id) => document.getElementById(id);
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const rnd = (a=0, b=1) => a + Math.random()*(b-a);
   const irnd = (a,b) => Math.floor(rnd(a,b+1));
   const pad2 = (n) => String(n).padStart(2,'0');
   const dayKey = (d=new Date()) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  const nowHM  = (d=new Date()) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const nowHM = (d=new Date()) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   const nowHMS = (d=new Date()) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-
-  function softHaptic(type){
-    try{
-      if (window.Telegram?.WebApp?.HapticFeedback){
-        const h = window.Telegram.WebApp.HapticFeedback;
-        if(type==='spin') h.impactOccurred('heavy');
-        if(type==='hold') h.impactOccurred('medium');
-        if(type==='hongbao') h.impactOccurred('light');
-        if(type==='success') h.notificationOccurred('success');
-        if(type==='error') h.notificationOccurred('error');
-      }
-    }catch(e){}
-  }
 
   function flash(){
     const f = $('flash');
@@ -1126,7 +1043,6 @@
     weather: 'CALM',
     risk: 'LOW',
     streak: 3,
-    social: {a:3482, vip:117},
     today: {
       key: dayKey(),
       oracleUsed: false,
@@ -1134,39 +1050,25 @@
       pos: 8,
       neg: 1,
     },
-    oracle: {
-      type: 'day',
-      last: null,
-      decision: null,
-    },
+    oracle: { type:'day', last:null, decision:null },
     wheel: {
       petals: 15,
       angle: 0,
       spinning: false,
       usedToday: false,
       velocity: 0,
-      friction: 0.985,
-      stopEps: 0.0009,
+      friction: 0.987,
+      stopEps: 0.0010,
       resultIndex: null,
     },
-    gate: {
-      refUrl: "https://example.com",
-    },
-    lucky: {
-      morningHour: 9,
-      eveningHour: 21,
-      windowMinutes: 45,
-      isLuckyNow: false,
-      nextLuckyIn: 0
-    },
+    gate: { refUrl: "https://example.com" },
+    lucky: { morningHour:9, eveningHour:21, windowMinutes:45, isLuckyNow:false, nextLuckyIn:0 },
+    social: {a:3482, vip:117},
     journal: []
   };
 
-  // expose for module
-  window.state = state;
-
   // ---------- Persistence ----------
-  const LS_KEY = 'ton_temple_v5_state';
+  const LS_KEY = 'ton_temple_v5_state_clean';
 
   function loadState(){
     try{
@@ -1176,22 +1078,16 @@
       const k = dayKey();
 
       if(saved?.today?.key !== k){
-        const prevKey = saved?.today?.key;
-        const prevDate = prevKey ? new Date(prevKey+'T00:00:00') : null;
-        const todayDate = new Date(k+'T00:00:00');
-        if(prevDate){
-          const diffDays = Math.round((todayDate-prevDate)/(1000*60*60*24));
-          state.streak = (diffDays === 1) ? (saved.streak||1)+1 : 1;
-        }
-
+        // day rollover
         state.today.key = k;
         state.today.oracleUsed = false;
         state.today.oraclePaidExtra = 0;
-        state.today.neg = irnd(0,2);
         state.today.pos = irnd(6,12);
+        state.today.neg = irnd(0,2);
         state.wheel.usedToday = false;
         state.oracle.last = null;
         state.oracle.decision = null;
+        state.streak = (saved?.streak && saved?.today?.key) ? (saved.streak + 1) : 1;
       } else {
         Object.assign(state, saved);
       }
@@ -1199,15 +1095,14 @@
       state.qk = clamp(Number(state.qk)||37.11, 0, 9999);
       state.flowScore = clamp(Number(state.flowScore)||73, 0, 100);
       if(!Array.isArray(state.journal)) state.journal = [];
-      if(state.journal.length > 7) state.journal = state.journal.slice(0,7);
+      state.journal = state.journal.slice(0,7);
     }catch(e){}
   }
-
   function saveState(){
     try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
   }
 
-  // ---------- i18n ----------
+  // ---------- i18n (ZH/EN/RU) ----------
   const I18N = {
     zh: {
       brand1:"TON TEMPLE",
@@ -1259,15 +1154,9 @@
       day:"日常",
       ton:"TON",
       paywallTitle:"黄金祭坛",
-      paywallLine1:"今日免费次数已用完。",
-      paywallLine2:"「再接再厉」— 以 1 TON 清理福流并获得新的指引。",
-      paywallHint:"现在先做“演示版”：支付按钮为 Mock。后续接 TON Connect。",
       payLater:"稍后",
       payNow:"供奉 1 TON（Mock）",
       riskTitle:"风险之门",
-      riskBody1:"进入前确认：风险光环 & 自我判断。",
-      riskBody2:"你将跳转到外部交易/钱包链接（你的 ref）。",
-      riskCheck:"我已理解风险",
       cancel:"取消",
       go:"进入之门",
       rulesTitle:"规则 / 指标解释",
@@ -1322,20 +1211,72 @@
       day:"DAY",
       ton:"TON",
       paywallTitle:"Golden Altar",
-      paywallLine1:"Free daily limit reached.",
-      paywallLine2:"「再接再厉」— donate 1 TON to cleanse the flow and receive new guidance.",
-      paywallHint:"MVP demo: payment button is Mock. Later integrate TON Connect.",
       payLater:"Later",
       payNow:"Donate 1 TON (Mock)",
       riskTitle:"Risk Gate",
-      riskBody1:"Confirm before entering: Risk Aura & your own judgment.",
-      riskBody2:"You will open an external trading/wallet link (your ref).",
-      riskCheck:"I understand the risk",
       cancel:"Cancel",
       go:"Enter Gate",
       rulesTitle:"Rules / Indicator Guide",
+    },
+    ru: {
+      brand1:"TON TEMPLE",
+      brand2:"Имперский ритуал квантового потока",
+      timeLabel:"МЕСТНОЕ ВРЕМЯ",
+      modeLabel:"РЕЖИМ",
+      langLabel:"ЯЗЫК",
+      rules:"ПРАВИЛА",
+      hudTitle:"HUD ХРАМА",
+      hudSub:"Всё объяснено. Подходит с первого запуска.",
+      qkLabel:"QK — Квантовая карма",
+      qkHint:"Ежедневная энергия ритуала: статус, прогресс, разблокировки.",
+      flowScoreLabel:"FLOW SCORE",
+      flowHint:"Индикатор 0–100. Чем выше — тем спокойнее решения.",
+      weatherLabel:"Погода рынка",
+      weatherHint:"Нарратив “как терминал”, а не “сигналы”.",
+      dailySeal:"Печать дня",
+      streak:"Серия",
+      streakHint:"Разблокировки через регулярность, не только донат.",
+      stats:"Статистика дня",
+      statsHint:"Дизайн-правило: позитив всегда доминирует.",
+      social:"Пульс храма",
+      socialHint:"Соц.доказательство без чата (чисто и безопасно).",
+      ritualTitle:"Ежедневный ритуал",
+      ritualSub:"Один медленный спин в день. Лепестки видны. Без блюра.",
+      activateFlow:"АКТИВИРОВАТЬ ПОТОК",
+      oracle:"ОРАКУЛ",
+      gate:"ОТКРЫТЬ ВРАТА",
+      forecast:"ПРОГНОЗ",
+      limit:"ЛИМИТ",
+      disclaimer:"Это ритуализированный UI. Не финсовет. Решение за тобой.",
+      proTitle:"PRO-ТЕРМИНАЛ",
+      proSub:"Цифры “для статуса”: серьёзно, чисто, как терминал.",
+      journalTitle:"ЖУРНАЛ ХРАМА",
+      journalSub:"Последние 7 дней (память решений).",
+      extraTitle:"СЛОЙ ХРАМА",
+      extraSub:"Скролл (не один экран).",
+      extraBody:"Зарезервировано: трофеи 7/21/49, скины, VIP зал, будущий TON Connect.",
+      dockRitual:"Ритуал",
+      dockWheel:"Колесо",
+      dockOracle:"Оракул",
+      dockGate:"Врата",
+      dockRules:"Правила",
+      oracleHead:"Указ храма",
+      oracleTap:"Нажми ORACLE для указа. Затем выбери: Enter / Wait / Skip.",
+      enter:"ENTER",
+      wait:"WAIT",
+      skip:"SKIP",
+      day:"DAY",
+      ton:"TON",
+      paywallTitle:"Золотой алтарь",
+      payLater:"Позже",
+      payNow:"Пожертвовать 1 TON (Mock)",
+      riskTitle:"Врата риска",
+      cancel:"Отмена",
+      go:"Войти",
+      rulesTitle:"Правила / Гайд по индикаторам",
     }
   };
+
   function t(key){ return I18N[state.lang]?.[key] ?? I18N.en[key] ?? key; }
 
   function applyI18n(){
@@ -1393,7 +1334,6 @@
     $('btnEnter').textContent = t('enter');
     $('btnWait').textContent = t('wait');
     $('btnSkip').textContent = t('skip');
-
     $('btnForecastDay').textContent = t('day');
     $('btnForecastTON').textContent = t('ton');
 
@@ -1407,6 +1347,12 @@
     $('riskTitle').textContent = t('riskTitle');
     $('riskCancel').textContent = t('cancel');
     $('riskGo').textContent = t('go');
+  }
+
+  // ---------- “Чёлка” toggle ----------
+  function toggleBang(){
+    const b = $('bang');
+    b.classList.toggle('open');
   }
 
   // ---------- Wheel ----------
@@ -1447,7 +1393,6 @@
     for(let i=0;i<N;i++){
       const a1 = angle0 + i*step;
       const a2 = a1 + step;
-
       const alt = (i%2===0);
       const col1 = alt ? "rgba(180,0,29,.95)" : "rgba(255,43,63,.70)";
       const col2 = alt ? "rgba(255,43,63,.55)" : "rgba(180,0,29,.85)";
@@ -1473,6 +1418,7 @@
       const mid = (a1+a2)/2;
       const tx = cx + Math.cos(mid)*R*0.63;
       const ty = cy + Math.sin(mid)*R*0.63;
+
       wctx.save();
       wctx.translate(tx,ty);
       wctx.rotate(mid + Math.PI/2);
@@ -1494,23 +1440,6 @@
     wctx.lineWidth = 1;
     wctx.stroke();
 
-    wctx.save();
-    wctx.globalAlpha = 0.10;
-    wctx.strokeStyle = "rgba(255,255,255,.25)";
-    wctx.lineWidth = 1;
-    for(let i=0;i<12;i++){
-      const a = angle0*0.6 + i*0.55;
-      const x1 = cx + Math.cos(a)*R*0.08;
-      const y1 = cy + Math.sin(a)*R*0.08;
-      const x2 = cx + Math.cos(a)*R*0.95;
-      const y2 = cy + Math.sin(a)*R*0.95;
-      wctx.beginPath();
-      wctx.moveTo(x1,y1);
-      wctx.lineTo(x2,y2);
-      wctx.stroke();
-    }
-    wctx.restore();
-
     wctx.beginPath();
     wctx.arc(cx,cy,inner,0,Math.PI*2);
     wctx.fillStyle = "rgba(0,0,0,.60)";
@@ -1529,7 +1458,6 @@
     return Math.floor(a/step);
   }
 
-  // ---------- Narrative ----------
   function applyNarrativeFromFlow(){
     const fs = state.flowScore;
     if(fs >= 78){ state.weather = "CALM"; state.risk = "LOW"; }
@@ -1549,36 +1477,99 @@
     $('flowWindow').textContent = fw;
   }
 
-  // ---------- Daily Seal ----------
-  const dailySealsZH = ["今日财印","天赐福印","金龙护印","富贵长明","福运相随","招财进宝","瑞气盈门"];
-  const dailySealsEN = ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"];
+  function startSpin(){
+    const tk = dayKey();
+    if(state.wheel.usedToday && state.today.key === tk){
+      openRules("SPIN_LIMIT");
+      return;
+    }
+    if(state.wheel.spinning) return;
 
-  function pickDailySeal(){
-    const k = state.today.key;
-    let hash = 0; for(const c of k) hash = (hash*31 + c.charCodeAt(0))>>>0;
-    const arr = (state.lang==='zh') ? dailySealsZH : dailySealsEN;
-    const seal = arr[hash % arr.length];
-    $('dailySeal').textContent = seal;
-    $('sealSub').textContent = (state.lang==='zh') ? "• 已盖章" : "• stamped";
+    state.wheel.usedToday = true;
+    state.wheel.spinning = true;
+    state.wheel.resultIndex = null;
+
+    state.wheel.velocity = rnd(0.14, 0.18);
+    state.wheel.friction = 0.987;
+    state.wheel.stopEps = 0.0010;
+
+    flash();
+    saveState();
+  }
+
+  function wheelTick(){
+    if(state.wheel.spinning){
+      state.wheel.angle += state.wheel.velocity;
+      state.wheel.velocity *= state.wheel.friction;
+      state.wheel.velocity = clamp(state.wheel.velocity, 0, 0.22);
+
+      if(state.wheel.velocity < state.wheel.stopEps){
+        state.wheel.spinning = false;
+        state.wheel.velocity = 0;
+        state.wheel.resultIndex = computeWheelIndex();
+
+        const gain = rnd(2.2, 6.6);
+        state.qk = +(state.qk + gain).toFixed(2);
+        state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +8)), 0, 100);
+
+        applyNarrativeFromFlow();
+        flash();
+
+        pushJournal({ type:"wheel", title:`Wheel → ${luckSymbols[state.wheel.resultIndex]}`, detail:`+${gain.toFixed(2)} QK` });
+        enableChoicesIfOracleReady();
+        saveState();
+        renderHUD();
+      }
+    }
+    drawWheel();
+    requestAnimationFrame(wheelTick);
   }
 
   // ---------- Rules ----------
   function rulesHTML(){
     const zh = state.lang==='zh';
+    const en = state.lang==='en';
+    const ru = state.lang==='ru';
+
+    if(ru){
+      return `
+        <div class="sec"><b>Одна строка:</b> Это “ритуализированный UI”. Мы продаём ритм/уверенность/статус, а не “сигналы”.</div>
+        <div class="sec"><b>QK</b> — энергия статуса. Даётся колесом/оракулом/решением. Нужна для прогресса и VIP.</div>
+        <div class="sec"><b>Flow Score (0–100)</b> — терминальный индикатор спокойствия решений.</div>
+        <div class="sec"><b>Market Weather</b> — нарратив: CALM / BREEZE / HEAVY / STORM.</div>
+        <div class="sec"><b>Risk Aura</b> — LOW / MED / HIGH. Перед Gate всегда подтверждение.</div>
+        <div class="sec"><b>Wheel</b> — 1 раз в день. Медленно, без блюра. Лёгкий апдейт QK/Flow.</div>
+        <div class="sec"><b>Oracle</b> — 1 раз в день бесплатно (DAY/TON). Потом выбор: Enter / Wait / Skip.</div>
+        <div class="sec"><b>Gate</b> — сначала Risk Gate (осознанность), потом открываем ref-ссылку.</div>
+        <div class="sec"><b>Важно:</b> Это демо/геймификация, не финсовет.</div>
+      `;
+    }
+
+    if(en){
+      return `
+        <div class="sec"><b>One-liner:</b> Ritualized UI. You sell rhythm/confidence/status — not “signals”.</div>
+        <div class="sec"><b>QK</b> status energy from Wheel/Oracle/Decisions (progress + VIP).</div>
+        <div class="sec"><b>Flow Score (0–100)</b> terminal-like calm indicator.</div>
+        <div class="sec"><b>Market Weather</b> narrative: CALM / BREEZE / HEAVY / STORM.</div>
+        <div class="sec"><b>Risk Aura</b> LOW / MED / HIGH used in Risk Gate confirmation.</div>
+        <div class="sec"><b>Wheel</b> 1/day slow spin, slight QK/Flow shift.</div>
+        <div class="sec"><b>Oracle</b> 1/day free (DAY/TON), then Enter/Wait/Skip.</div>
+        <div class="sec"><b>Gate</b> requires Risk Gate, then opens your ref link.</div>
+        <div class="sec"><b>Note:</b> Demo/gamified UI. Not financial advice.</div>
+      `;
+    }
+
+    // zh default
     return `
-      <div class="sec"><b>${zh?'一句话':'One-liner'}：</b>${zh?'这是“神殿仪式化 UI”。我们卖的是“节奏、信心、状态”，不是“信号”。':'This is a ritualized temple UI. You sell rhythm, confidence and status — not “signals”.'}</div>
-      <div class="sec"><b>QK</b> — ${zh?'量子福业值':'Quantum Karma'}<br>
-      ${zh?'你的“状态能量”。来自转盘、神谕、选择。用于 VIP、奖杯、循环。':'Your “status energy”. Earned via Wheel, Oracle, Decisions. Drives VIP/trophies/cycles.'}</div>
-      <div class="sec"><b>Flow Score (0–100)</b><br>
-      ${zh?'单一指标，让界面看起来像终端而不是玄学。越高：越适合冷静决策。':'A single terminal-like indicator. Higher = calmer decision environment.'}</div>
-      <div class="sec"><b>Market Weather</b><br>
-      ${zh?'用“天气”表达环境：CALM / BREEZE / HEAVY / STORM。':'Narrative environment: CALM / BREEZE / HEAVY / STORM.'}</div>
-      <div class="sec"><b>Risk Aura</b><br>
-      ${zh?'风险光环：LOW / MED / HIGH。用于 Gate 前的确认（更可信、更安全）。':'Risk layer: LOW / MED / HIGH. Used in Risk Gate confirmation.'}</div>
-      <div class="sec"><b>Lucky Hour</b><br>
-      ${zh?'每天两次固定窗口（早/晚），粒子更强、氛围更“金”。用于 Retention。':'Two fixed windows/day (AM/PM). Stronger particles, richer vibe. Retention engine.'}</div>
-      <div class="sec"><b>${zh?'注意':'Note'}</b><br>
-      ${zh?'这里是演示/游戏化界面，不构成金融建议。':'This is a gamified UI. Not financial advice.'}</div>
+      <div class="sec"><b>一句话：</b>这是“神殿仪式化 UI”。我们卖的是“节奏、信心、状态”，不是“信号”。</div>
+      <div class="sec"><b>QK</b> — 量子福业值：来自转盘、神谕、选择，用于进度与 VIP。</div>
+      <div class="sec"><b>Flow Score (0–100)</b>：终端感指标，越高越冷静。</div>
+      <div class="sec"><b>Market Weather</b>：CALM / BREEZE / HEAVY / STORM。</div>
+      <div class="sec"><b>Risk Aura</b>：LOW / MED / HIGH，用于 Gate 前确认。</div>
+      <div class="sec"><b>Wheel</b>：每天一次慢转，轻微更新 QK/Flow。</div>
+      <div class="sec"><b>Oracle</b>：每天一次免费（DAY/TON），然后选择 Enter/Wait/Skip。</div>
+      <div class="sec"><b>Gate</b>：通过 Risk Gate 后跳转 ref 链接。</div>
+      <div class="sec"><b>注意：</b>演示/游戏化界面，不构成金融建议。</div>
     `;
   }
 
@@ -1588,48 +1579,80 @@
   }
   function closeRules(){ $('rulesBack').style.display = 'none'; }
 
-  // expose to module
-  window.openRules = openRules;
-
-  // ---------- Paywall (Mock) ----------
+  // ---------- Paywall ----------
   function openPaywall(){
-    $('payBody').innerHTML = `
-      <div class="sec"><b>${t('paywallLine1')}</b></div>
-      <div class="sec">${t('paywallLine2')}</div>
-      <div class="sec" style="opacity:.85">${t('paywallHint')}</div>
+    const ru = state.lang==='ru';
+    const en = state.lang==='en';
+    const zh = state.lang==='zh';
+
+    $('payBody').innerHTML = ru ? `
+      <div class="sec"><b>Бесплатный лимит на сегодня исчерпан.</b></div>
+      <div class="sec">“Золотой алтарь” даёт ещё 1 указ за 1 TON (пока Mock).</div>
+    ` : en ? `
+      <div class="sec"><b>Free daily limit reached.</b></div>
+      <div class="sec">“Golden Altar” grants 1 more oracle for 1 TON (Mock for now).</div>
+    ` : `
+      <div class="sec"><b>今日免费次数已用完。</b></div>
+      <div class="sec">“黄金祭坛”以 1 TON 获得额外一次（当前 Mock）。</div>
     `;
+
     $('payBack').style.display = 'flex';
   }
   function closePaywall(){ $('payBack').style.display = 'none'; }
-
-  window.openPaywall = openPaywall;
 
   // ---------- Risk Gate ----------
   let riskConfirmed = false;
 
   function openRiskGate(){
     riskConfirmed = false;
-    const auraText = state.risk;
-    $('riskBody').innerHTML = `
-      <div class="sec"><b>${t('riskBody1')}</b></div>
-      <div class="sec">${t('riskBody2')}</div>
+
+    const ru = state.lang==='ru';
+    const en = state.lang==='en';
+
+    $('riskBody').innerHTML = ru ? `
+      <div class="sec"><b>Подтверди осознанность:</b> риск-аура и личная ответственность.</div>
+      <div class="sec">Откроется внешняя ссылка (твой ref).</div>
       <div class="sec">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
-            Risk Aura: <b>${auraText}</b>
-          </span>
-          <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18)">
-            Market Weather: <b>${state.weather}</b>
-          </span>
-        </div>
+        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
+          Risk Aura: <b>${state.risk}</b>
+        </span>
       </div>
       <div class="sec">
-        <label style="display:flex;gap:10px;align-items:center;user-select:none;cursor:pointer">
+        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
           <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
-          <span>${t('riskCheck')}</span>
+          <span>Я понимаю риск</span>
+        </label>
+      </div>
+    ` : en ? `
+      <div class="sec"><b>Confirm:</b> Risk Aura & your own judgment.</div>
+      <div class="sec">You will open an external link (your ref).</div>
+      <div class="sec">
+        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
+          Risk Aura: <b>${state.risk}</b>
+        </span>
+      </div>
+      <div class="sec">
+        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
+          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
+          <span>I understand the risk</span>
+        </label>
+      </div>
+    ` : `
+      <div class="sec"><b>进入前确认：</b>风险光环与自我判断。</div>
+      <div class="sec">将打开外部链接（你的 ref）。</div>
+      <div class="sec">
+        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
+          Risk Aura: <b>${state.risk}</b>
+        </span>
+      </div>
+      <div class="sec">
+        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
+          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
+          <span>我已理解风险</span>
         </label>
       </div>
     `;
+
     $('riskBack').style.display = 'flex';
 
     setTimeout(()=>{
@@ -1639,66 +1662,80 @@
   }
   function closeRiskGate(){ $('riskBack').style.display = 'none'; }
 
-  // ---------- Oracle (base) ----------
-  const oracleDayZH_Pos = [
-    "恭喜發財。今天适合把复杂的事做简单：先完成一件最重要的事，福气会顺势而来。",
-    "金玉滿堂。你会收到一个对你有利的消息，保持礼貌与克制，机会更大。",
-    "大吉大利。今天适合整理环境与计划，越干净越有好运。",
-    "财源广进。你与贵人缘分强，主动问一句、走一步，会打开新通道。",
-    "瑞气盈门。今天的节奏偏稳，别急，稳就是赢。",
-    "福运相随。适合学习与练习：你投入的时间会回报得很快。",
-    "顺风顺水。用“少而精”的策略：少做但做对。",
-    "旺气上升。适合谈合作与沟通，语气柔一点，结果更好。",
-    "喜上眉梢。小事会带来快乐，保持好心情就是加持。",
-  ];
-  const oracleDayZH_Caution = [
-    "今日宜守不宜攻。少做冲动决定，晚上再复盘会更清晰。",
-    "谨慎为上。避免与人争辩，留面子，福气不散。",
-    "今日波动较大。把注意力放回家庭与身体，别强求。",
-  ];
+  function openGateFlow(){
+    if(!state.oracle.last){
+      openRules();
+      return;
+    }
+    openRiskGate();
+  }
+  function goGate(){
+    if(!riskConfirmed) return;
+    closeRiskGate();
+    flash();
+    setTimeout(()=> window.open(state.gate.refUrl, "_blank"), 520);
+  }
 
-  const oracleTonZH_Pos = [
-    "财源广进。TON 今日“气场平稳”：若要行动，以小仓位、分批为佳。",
-    "金龙护主。Flow Window 较开阔，适合“轻触市场”，不必追涨。",
-    "大吉大利。更像“顺势日”：只做你理解的交易，别加戏。",
-    "瑞气盈门。先看风险光环：LOW/MED 时可小步进入，HIGH 时先等待。",
-    "恭喜發財。今日适合“守纪律”：设置止损/止盈，心更稳。",
-  ];
-  const oracleTonZH_Caution = [
-    "今日宜观望。若 Risk Aura 为 HIGH，建议只记录不操作。",
-    "气场偏乱。避免重仓与频繁进出，等待更好的窗口。",
-    "谨慎交易。先做准备：计划、指标、复盘，比下单更重要。",
-  ];
-
-  const oracleDayEN_Pos = [
-    "Prosperity is near. Keep today simple: finish one most important thing — momentum follows.",
-    "Gold fills the hall. A favorable message may arrive. Stay calm and polite; doors open wider.",
-    "Great luck. Clean your space and your plan — clarity attracts fortune.",
-    "Wealth flows in. Ask one question, take one step — a new channel appears.",
-    "A stable day. Don’t rush. Steady is winning.",
-    "Learn and practice today. Your time investment returns fast.",
-    "Smooth sailing. Use a “less but better” strategy.",
-    "Good for partnerships. Softer tone → stronger outcome.",
-    "Small joy brings big energy. Keep your vibe clean.",
-  ];
-  const oracleDayEN_Caution = [
-    "Today is better for holding than pushing. Avoid impulsive decisions; review later.",
-    "Caution wins. Don’t argue. Save face, keep the flow.",
-    "Higher noise day. Prioritize health and loved ones; don’t force outcomes.",
-  ];
-
-  const oracleTonEN_Pos = [
-    "Wealth flow is steady. If you act: small size, split entries.",
-    "Dragon favors patience. Window is open — touch the market lightly.",
-    "A trend day. Only trade what you truly understand.",
-    "Check Risk Aura first: LOW/MED → small steps. HIGH → wait.",
-    "Discipline is fortune. Plan exits; calm mind wins.",
-  ];
-  const oracleTonEN_Caution = [
-    "Better to observe. If Risk Aura is HIGH, record notes — no action.",
-    "Flow is noisy. Avoid heavy size and over-trading. Wait for a cleaner window.",
-    "Cautious day. Preparation beats execution: plan, measure, review.",
-  ];
+  // ---------- Oracle ----------
+  const oracleBank = {
+    zh: {
+      dayPos:[
+        "恭喜發財。今天适合把复杂的事做简单：先完成一件最重要的事，福气会顺势而来。",
+        "瑞气盈门。今天的节奏偏稳，别急，稳就是赢。",
+        "顺风顺水。用“少而精”的策略：少做但做对。"
+      ],
+      dayCaution:[
+        "今日宜守不宜攻。少做冲动决定，晚上再复盘会更清晰。",
+        "谨慎为上。避免与人争辩，留面子，福气不散。"
+      ],
+      tonPos:[
+        "财源广进。TON 今日气场平稳：若要行动，以小仓位、分批为佳。",
+        "瑞气盈门。先看风险光环：LOW/MED 时可小步进入，HIGH 时先等待。"
+      ],
+      tonCaution:[
+        "今日宜观望。若 Risk Aura 为 HIGH，建议只记录不操作。",
+        "气场偏乱。避免重仓与频繁进出，等待更好的窗口。"
+      ]
+    },
+    en: {
+      dayPos:[
+        "Prosperity is near. Keep it simple: finish one top task — momentum follows.",
+        "Stable day. Don’t rush. Steady is winning.",
+        "Less but better: do fewer things, do them right."
+      ],
+      dayCaution:[
+        "Better to hold than push today. Avoid impulsive moves; review later.",
+        "Caution wins: avoid conflict, keep the flow."
+      ],
+      tonPos:[
+        "Wealth flow is steady. If you act: small size, split entries.",
+        "Check Risk Aura first: LOW/MED → small steps. HIGH → wait."
+      ],
+      tonCaution:[
+        "Better to observe. If Risk Aura is HIGH, record notes — no action.",
+        "Flow is noisy: avoid heavy size and over-trading."
+      ]
+    },
+    ru: {
+      dayPos:[
+        "Удача рядом. Упростишь день — выиграешь: сделай одну главную задачу и получишь импульс.",
+        "День ровный. Не спеши: стабильность = победа.",
+        "Стратегия “меньше, но лучше”: меньше действий, больше качества."
+      ],
+      dayCaution:[
+        "Сегодня лучше удержаться, чем давить. Без импульсивных решений — вечером яснее.",
+        "День осторожности: без конфликтов и доказательств — сохраняй поток."
+      ],
+      tonPos:[
+        "Поток ровный. Если действовать — маленький размер, вход частями.",
+        "Смотри Risk Aura: LOW/MED → лёгкий вход. HIGH → ждать."
+      ],
+      tonCaution:[
+        "Лучше наблюдать. Если Risk Aura HIGH — только заметки, без действий.",
+        "Шумный поток: без тяжёлого размера и частых входов/выходов."
+      ]
+    }
+  };
 
   function canUseOracle(){
     if(state.today.key !== dayKey()){
@@ -1715,38 +1752,24 @@
   }
 
   function oracleGenerate(){
-    const zh = state.lang==='zh';
-    const type = state.oracle.type;
+    const lang = state.lang;
+    const type = state.oracle.type; // day/ton
     const isCaution = Math.random() < 0.10;
 
-    let text = "";
-    if(zh){
-      if(type==='day'){
-        text = isCaution ? oracleDayZH_Caution[irnd(0, oracleDayZH_Caution.length-1)]
-                         : oracleDayZH_Pos[irnd(0, oracleDayZH_Pos.length-1)];
-      } else {
-        text = isCaution ? oracleTonZH_Caution[irnd(0, oracleTonZH_Caution.length-1)]
-                         : oracleTonZH_Pos[irnd(0, oracleTonZH_Pos.length-1)];
-      }
-    } else {
-      if(type==='day'){
-        text = isCaution ? oracleDayEN_Caution[irnd(0, oracleDayEN_Caution.length-1)]
-                         : oracleDayEN_Pos[irnd(0, oracleDayEN_Pos.length-1)];
-      } else {
-        text = isCaution ? oracleTonEN_Caution[irnd(0, oracleTonEN_Caution.length-1)]
-                         : oracleTonEN_Pos[irnd(0, oracleTonEN_Pos.length-1)];
-      }
-    }
+    const bank = oracleBank[lang] || oracleBank.en;
+    const arr = (type==='day')
+      ? (isCaution ? bank.dayCaution : bank.dayPos)
+      : (isCaution ? bank.tonCaution : bank.tonPos);
+
+    const text = arr[irnd(0, arr.length-1)];
 
     let suggested = "WAIT";
     if(state.risk === "LOW" && !isCaution) suggested = "ENTER";
     else if(state.risk === "HIGH" || isCaution) suggested = "SKIP";
 
     const stamp = `${state.today.key} • ${nowHM()} • ${type.toUpperCase()}`;
-    return { text, isCaution, suggested, stamp, aura: state.risk, weather: state.weather, type };
+    return { text, isCaution, suggested, stamp, aura:state.risk, weather:state.weather, type };
   }
-
-  window.oracleGenerate = oracleGenerate;
 
   function enableChoicesIfOracleReady(){
     const ok = !!state.oracle.last;
@@ -1758,7 +1781,6 @@
   function setOracleUI(o){
     $('oracleStamp').textContent = o.stamp;
     $('oracleBody').textContent = o.text;
-
     $('chipWeather').textContent = `Market Weather: ${o.weather}`;
     $('chipAura').textContent = `Risk Aura: ${o.aura}`;
     $('chipAura').classList.toggle('ok', o.aura === 'LOW' && !o.isCaution);
@@ -1767,13 +1789,12 @@
     const fw = (o.aura === 'LOW') ? "OPEN" : (o.aura === 'MED' ? "NARROW" : "CLOSED");
     $('chipFlow').textContent = `Flow Window: ${fw}`;
 
-    const head = (state.lang==='zh') ? "神殿指引" : "Temple Guidance";
+    const head = t('oracleHead');
     $('oracleHead').textContent = `${head} • ${o.suggested}`;
   }
 
   function runOracle(){
     if(!canUseOracle() || !consumeOracleUse()){
-      softHaptic('error');
       openPaywall();
       return;
     }
@@ -1792,14 +1813,11 @@
     enableChoicesIfOracleReady();
 
     flash();
-    softHaptic('success');
-    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:o.isCaution ? "Caution aura" : "Positive blessing", decision:null });
+    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:o.isCaution ? "Caution" : "Positive" });
 
     saveState();
     renderHUD();
   }
-
-  window.runOracle = runOracle;
 
   // ---------- Decisions ----------
   function takeDecision(dec){
@@ -1816,50 +1834,11 @@
     }
 
     state.qk = +(state.qk + delta).toFixed(2);
-    softHaptic('success');
     flash();
 
-    pushJournal({
-      type:"decision",
-      title:`Decision → ${dec}`,
-      detail:`QK ${delta>=0?'+':''}${delta.toFixed(2)}`,
-      decision: dec
-    });
-
+    pushJournal({ type:"decision", title:`Decision → ${dec}`, detail:`QK ${delta>=0?'+':''}${delta.toFixed(2)}` });
     renderHUD();
     saveState();
-  }
-
-  // ---------- Gate flow ----------
-  function openGateFlow(){
-    if(!state.oracle.last){
-      softHaptic('error');
-      openRules();
-      return;
-    }
-    openRiskGate();
-  }
-
-  function goGate(){
-    if(!riskConfirmed){
-      softHaptic('error');
-      return;
-    }
-    closeRiskGate();
-    flash();
-    softHaptic('spin');
-
-    setTimeout(()=>{ window.open(state.gate.refUrl, "_blank"); }, 520);
-  }
-
-  // ---------- Mock payment unlock ----------
-  function mockPay(){
-    state.today.oraclePaidExtra += 1;
-    closePaywall();
-    flash();
-    softHaptic('success');
-    saveState();
-    renderHUD();
   }
 
   // ---------- Journal ----------
@@ -1869,8 +1848,7 @@
       time: nowHM(),
       type: entry.type,
       title: entry.title,
-      detail: entry.detail,
-      decision: entry.decision
+      detail: entry.detail
     };
     state.journal.unshift(line);
     if(state.journal.length > 7) state.journal.pop();
@@ -1879,27 +1857,41 @@
 
   function renderJournal(){
     if(state.journal.length === 0){
-      $('journal').textContent = (state.lang==='zh') ? "暂无记录。" : "No records yet.";
+      $('journal').textContent = (state.lang==='ru') ? "Пока нет записей." : (state.lang==='zh' ? "暂无记录。" : "No records yet.");
       return;
     }
     const lines = state.journal.map(j => {
       const icon = (j.type==='wheel') ? "🎡" : (j.type==='oracle' ? "🧿" : "⟠");
-      return `${icon} ${j.date} ${j.time} — ${j.title} • ${j.detail}${j.decision?` • ${j.decision}`:""}`;
+      return `${icon} ${j.date} ${j.time} — ${j.title} • ${j.detail}`;
     });
     $('journal').textContent = lines.join("\n");
   }
 
   // ---------- HUD ----------
+  const dailySealsZH = ["今日财印","天赐福印","金龙护印","富贵长明","福运相随","招财进宝","瑞气盈门"];
+  const dailySealsEN = ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"];
+  const dailySealsRU = ["ПЕЧАТЬ ДОСТАТКА","ПЕЧАТЬ БЛАГОСЛОВЕНИЯ","ПЕЧАТЬ ДРАКОНА","ВЕЧНАЯ УДАЧА","ПЕЧАТЬ ПОТОКА"];
+
+  function pickDailySeal(){
+    const k = state.today.key;
+    let hash = 0; for(const c of k) hash = (hash*31 + c.charCodeAt(0))>>>0;
+    const arr = (state.lang==='zh') ? dailySealsZH : (state.lang==='ru' ? dailySealsRU : dailySealsEN);
+    const seal = arr[hash % arr.length];
+    $('dailySeal').textContent = seal;
+    $('sealSub').textContent = (state.lang==='zh') ? "• 已盖章" : (state.lang==='ru' ? "• проставлено" : "• stamped");
+  }
+
   function renderHUD(){
     $('qk').textContent = state.qk.toFixed(2);
     $('flowScore').textContent = String(state.flowScore);
     $('weather').textContent = state.weather;
 
-    $('qkTag').textContent = (state.qk >= 140) ? "VIP READY" : (state.qk >= 80 ? "RISING" : "Balanced");
-    $('riskTag').textContent = `Risk Aura: ${state.risk}`;
+    const qk = state.qk;
+    $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "Balanced");
 
+    $('riskTag').textContent = `Risk Aura: ${state.risk}`;
     $('posCount').textContent = String(state.today.pos);
-    $('negCountTag').textContent = `${state.lang==='zh'?'谨慎':'Caution'}: ${state.today.neg}`;
+    $('negCountTag').textContent = `${(state.lang==='ru')?'Осторожность':(state.lang==='zh'?'谨慎':'Caution')}: ${state.today.neg}`;
 
     $('socialA').textContent = state.social.a.toLocaleString();
     $('socialB').textContent = `VIP: ${state.social.vip}`;
@@ -1907,6 +1899,7 @@
     $('streak').textContent = String(state.streak);
     $('cycleTag').textContent = "7/21/49 Path";
 
+    // synthetic pro
     const pulse = (state.flowScore>=60) ? `+${rnd(.2,1.8).toFixed(2)}%` : `-${rnd(.1,1.2).toFixed(2)}%`;
     $('tonPulse').textContent = pulse;
     $('liqPulse').textContent = `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
@@ -1964,7 +1957,7 @@
     setTimeout(tickClock, 250);
   }
 
-  // ---------- Dock spin ----------
+  // ---------- Dock icon spin ----------
   function spinDockIcon(btn, dir='R'){
     const icon = btn.querySelector('.dockIcon');
     if(!icon) return;
@@ -1974,7 +1967,7 @@
     setTimeout(()=>icon.classList.remove('spinL','spinR'), 1100);
   }
 
-  // ---------- Mode/lang/forecast ----------
+  // ---------- Mode ----------
   function setMode(mode){
     state.mode = mode;
     $('btnRitual').classList.toggle('active', mode==='ritual');
@@ -1983,15 +1976,18 @@
     saveState();
   }
 
+  // ---------- Language ----------
   function setLang(lang){
     state.lang = lang;
     $('btnZH').classList.toggle('active', lang==='zh');
     $('btnEN').classList.toggle('active', lang==='en');
+    $('btnRU').classList.toggle('active', lang==='ru');
     applyI18n();
     renderHUD();
     saveState();
   }
 
+  // ---------- Forecast type ----------
   function setForecastType(type){
     state.oracle.type = type;
     $('btnForecastDay').classList.toggle('active', type==='day');
@@ -1999,112 +1995,54 @@
     saveState();
   }
 
-  // ---------- Spin ----------
-  function startSpin(){
-    const tk = dayKey();
-    if(state.wheel.usedToday && state.today.key === tk){
-      softHaptic('error');
-      openRules();
-      return;
-    }
-    if(state.wheel.spinning) return;
-
-    state.wheel.usedToday = true;
-    state.wheel.spinning = true;
-    state.wheel.resultIndex = null;
-
-    state.wheel.velocity = rnd(0.14, 0.18);
-    state.wheel.friction = 0.987;
-    state.wheel.stopEps = 0.0010;
-
-    softHaptic('spin');
+  // ---------- Pay mock ----------
+  function mockPay(){
+    state.today.oraclePaidExtra += 1;
+    closePaywall();
     flash();
     saveState();
   }
 
-  window.startSpin = startSpin;
-
-  function wheelTick(){
-    if(state.wheel.spinning){
-      state.wheel.angle += state.wheel.velocity;
-      state.wheel.velocity *= state.wheel.friction;
-      state.wheel.velocity = clamp(state.wheel.velocity, 0, 0.22);
-
-      if(state.wheel.velocity < state.wheel.stopEps){
-        state.wheel.spinning = false;
-        state.wheel.velocity = 0;
-        state.wheel.resultIndex = computeWheelIndex();
-
-        const idx = state.wheel.resultIndex;
-        const sym = luckSymbols[idx];
-
-        const gain = rnd(2.2, 6.6);
-        state.qk = +(state.qk + gain).toFixed(2);
-        state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +8)), 0, 100);
-        applyNarrativeFromFlow();
-
-        flash();
-        softHaptic('success');
-        pushJournal({ type:"wheel", title:`Wheel → ${sym}`, detail:`+${gain.toFixed(2)} QK`, decision: null });
-
-        saveState();
-        renderHUD();
-      }
-    }
-
-    drawWheel();
-    requestAnimationFrame(wheelTick);
-  }
-
-  // ---------- Microguide ----------
-  (function initMicroGuide(){
-    const mg = $('microGuide');
-    const ok = $('microGuideOk');
-    if(!localStorage.getItem("temple_microguide_done")){
-      mg.style.display = "flex";
-    }
-    ok?.addEventListener("click", ()=>{
-      mg.style.display = "none";
-      localStorage.setItem("temple_microguide_done","1");
-    });
-  })();
-
-  // ---------- Microcopy under main controls ----------
-  (function ensureMicrocopy(){
-    const wrap = $('mainControls');
-    if(!wrap) return;
-    if(wrap.querySelector('.microcopy')) return;
-    const d = document.createElement('div');
-    d.className = 'microcopy';
-    d.textContent = "Daily Wheel • 1×/day • Oracle 90% support / 10% caution • Gate = external ref";
-    wrap.appendChild(d);
-  })();
-
-  // ---------- Events ----------
+  // ---------- Events (FIXED: RULES x2 + ? button) ----------
   function bindEvents(){
+    // “Чёлка”
+    $('btnBang').addEventListener('click', toggleBang);
+
+    // help (?) => rules
+    $('helpBtn').addEventListener('click', openRules);
+
+    // rules: top button + dock button -> same handler
     $('btnRules').addEventListener('click', openRules);
     $('dockRules').addEventListener('click', ()=>{ spinDockIcon($('dockRules'),'L'); openRules(); });
+
     $('rulesClose').addEventListener('click', closeRules);
     $('rulesOk').addEventListener('click', closeRules);
     $('rulesBack').addEventListener('click', (e)=>{ if(e.target.id==='rulesBack') closeRules(); });
 
+    // mode
     $('btnRitual').addEventListener('click', ()=> setMode('ritual'));
     $('btnPro').addEventListener('click', ()=> setMode('pro'));
 
+    // language
     $('btnZH').addEventListener('click', ()=> setLang('zh'));
     $('btnEN').addEventListener('click', ()=> setLang('en'));
+    $('btnRU').addEventListener('click', ()=> setLang('ru'));
 
+    // forecast
     $('btnForecastDay').addEventListener('click', ()=> setForecastType('day'));
     $('btnForecastTON').addEventListener('click', ()=> setForecastType('ton'));
 
+    // wheel / oracle / gate
     $('btnSpin').addEventListener('click', startSpin);
     $('btnOracle').addEventListener('click', runOracle);
     $('btnGate').addEventListener('click', openGateFlow);
 
+    // decisions
     $('btnEnter').addEventListener('click', ()=> takeDecision('ENTER'));
     $('btnWait').addEventListener('click', ()=> takeDecision('WAIT'));
     $('btnSkip').addEventListener('click', ()=> takeDecision('SKIP'));
 
+    // dock navigation
     $('dockRitual').addEventListener('click', ()=>{
       spinDockIcon($('dockRitual'),'R');
       window.scrollTo({top:0, behavior:'smooth'});
@@ -2124,26 +2062,26 @@
       openGateFlow();
     });
 
+    // paywall
     $('payClose').addEventListener('click', closePaywall);
     $('payLater').addEventListener('click', closePaywall);
     $('payMock').addEventListener('click', mockPay);
     $('payBack').addEventListener('click', (e)=>{ if(e.target.id==='payBack') closePaywall(); });
 
+    // risk gate
     $('riskClose').addEventListener('click', closeRiskGate);
     $('riskCancel').addEventListener('click', closeRiskGate);
     $('riskGo').addEventListener('click', goGate);
     $('riskBack').addEventListener('click', (e)=>{ if(e.target.id==='riskBack') closeRiskGate(); });
 
+    // resize
     window.addEventListener('resize', resizeWheel);
-
-    // help button -> rules
-    $('helpBtn')?.addEventListener('click', openRules);
   }
 
   // ---------- Init ----------
   loadState();
 
-  // daily rollover safety
+  // ensure daily stats always positive-dominant
   if(state.today.key !== dayKey()){
     state.today.key = dayKey();
     state.today.pos = irnd(6,12);
@@ -2151,25 +2089,22 @@
     state.today.oracleUsed = false;
     state.today.oraclePaidExtra = 0;
     state.wheel.usedToday = false;
-    state.oracle.last = null;
-    state.oracle.decision = null;
   }
 
+  // apply UI initials
   setMode(state.mode || 'ritual');
   setLang(state.lang || 'zh');
   setForecastType(state.oracle.type || 'day');
 
   resizeWheel();
   applyNarrativeFromFlow();
-  applyI18n();
   renderHUD();
   bindEvents();
   tickClock();
   wheelTick();
-  saveState();
   </script>
 
-  <!-- THREE.JS LAYER (MODULE) -->
+  <!-- Three.js temple layer (behind UI). Safe: pointer-events none. -->
   <script type="module">
     import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
@@ -2194,27 +2129,9 @@
     const amb = new THREE.AmbientLight(0x2a1c08, 0.9);
     scene.add(amb);
 
-    const gold = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(0xffd36a),
-      metalness: 1.0,
-      roughness: 0.18,
-      emissive: new THREE.Color(0x1a0f00),
-      emissiveIntensity: 0.25
-    });
-    const obsidian = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(0x040405),
-      metalness: 0.45,
-      roughness: 0.35,
-      emissive: new THREE.Color(0x000000),
-      emissiveIntensity: 0.2
-    });
-    const crimson = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(0xb8001d),
-      metalness: 0.35,
-      roughness: 0.35,
-      emissive: new THREE.Color(0x2a0008),
-      emissiveIntensity: 0.45
-    });
+    const gold = new THREE.MeshStandardMaterial({ color:0xffd36a, metalness:1.0, roughness:0.18, emissive:0x1a0f00, emissiveIntensity:0.25 });
+    const obsidian = new THREE.MeshStandardMaterial({ color:0x040405, metalness:0.45, roughness:0.35, emissive:0x000000, emissiveIntensity:0.2 });
+    const crimson = new THREE.MeshStandardMaterial({ color:0xb8001d, metalness:0.35, roughness:0.35, emissive:0x2a0008, emissiveIntensity:0.45 });
 
     const floor = new THREE.Mesh(new THREE.CircleGeometry(18, 64), obsidian);
     floor.rotation.x = -Math.PI/2;
@@ -2260,7 +2177,7 @@
     }
     const dustGeo = new THREE.BufferGeometry();
     dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-    const dustMat = new THREE.PointsMaterial({ color: 0xffd36a, size: 0.035, transparent:true, opacity: 0.65 });
+    const dustMat = new THREE.PointsMaterial({ color:0xffd36a, size:0.035, transparent:true, opacity:0.65 });
     const dust = new THREE.Points(dustGeo, dustMat);
     scene.add(dust);
 
@@ -2290,10 +2207,6 @@
       core.material.emissiveIntensity = lucky ? 0.85 : 0.45;
     }
 
-    window.templePortalPunch = function(){
-      ring.userData.punch = 1.0;
-    };
-
     let t0 = performance.now();
     function animate(t){
       const dt = Math.min(40, t - t0);
@@ -2322,15 +2235,7 @@
         m.position.y += m.userData.vy * (dt*0.06);
         m.position.z += m.userData.vz * (dt*0.06);
         m.rotation.y += m.userData.spin;
-      }
-
-      if(ring.userData.punch){
-        ring.userData.punch *= 0.92;
-        const k = ring.userData.punch;
-        ring.scale.setScalar(1 + k*0.12);
-        glowPlane.material.opacity = 0.06 + k*0.14;
-      } else {
-        ring.scale.setScalar(1);
+        if(m.position.x < -12 || m.position.x > 12) scene.remove(m);
       }
 
       applyLuckyVisual();
@@ -2344,10 +2249,6 @@
       camera.aspect = window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
     });
-
-    document.getElementById("btnSpin")?.addEventListener("click", ()=> window.templePortalPunch?.(), true);
-    document.getElementById("btnOracle")?.addEventListener("click", ()=> window.templePortalPunch?.(), true);
-    document.getElementById("btnGate")?.addEventListener("click", ()=> window.templePortalPunch?.(), true);
   </script>
 </body>
 </html>
