@@ -1,63 +1,217 @@
 <!doctype html>
-<html lang="ru">
+<html lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TON Temple — Imperial Ritual</title>
+  <title>TON Temple — Fa Cai Supreme AI</title>
 
   <style>
     :root{
-      --bg0:#040404;
+      --bg0:#050505;
       --bg1:#0a0704;
-      --gold:#ffd36a;
-      --gold2:#b8860b;
-      --red:#b4001d;
-      --red2:#ff2b3f;
-      --glass: rgba(255,255,255,.06);
-      --line: rgba(255,211,106,.22);
-      --muted: rgba(255,255,255,.70);
-      --danger:#ff4d4d;
-      --ok:#43ffb3;
+      --gold:#FFD36A;
+      --gold2:#B8860B;
+      --red:#B8001D;
+      --warm:#FFF3D1;
+
+      --glassA: rgba(10,10,12,0.55);
+      --glassB: rgba(10,10,12,0.45);
+      --line: rgba(255,211,106,.18);
+
+      --muted: rgba(255,255,255,.72);
       --shadow: 0 20px 70px rgba(0,0,0,.55);
+      --shadow2: 0 28px 90px rgba(0,0,0,.70);
+
+      --radiusCard: 26px;
+      --radiusTile: 18px;
+      --radiusPill: 999px;
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:#fff;
-      background:
-        radial-gradient(1200px 900px at 50% 20%, rgba(255,211,106,.12), transparent 55%),
-        radial-gradient(900px 700px at 15% 65%, rgba(255,43,63,.10), transparent 60%),
-        radial-gradient(900px 700px at 85% 70%, rgba(180,0,29,.10), transparent 60%),
-        radial-gradient(1200px 900px at 50% 85%, rgba(255,211,106,.06), transparent 60%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
+      background: linear-gradient(180deg, var(--bg1), var(--bg0));
       overflow-x:hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    /* FX layers never catch clicks */
-    #fxDust, #fxMeteors{
-      position:fixed; inset:0; width:100%; height:100%;
-      pointer-events:none; z-index:0;
+    /* ===== Background Cosmos (Dragon + Orbits) — pinned while content scrolls ===== */
+    #cosmos{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 900px at 50% 18%, rgba(255,211,106,.12), transparent 55%),
+        radial-gradient(900px 700px at 15% 65%, rgba(184,0,29,.10), transparent 60%),
+        radial-gradient(900px 700px at 85% 70%, rgba(184,0,29,.10), transparent 60%),
+        radial-gradient(1200px 900px at 50% 85%, rgba(255,211,106,.06), transparent 60%);
+    }
+
+    /* Dragon image pinned and large */
+    #dragonWrap{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform: translate(-50%,-52%);
+      width:min(720px, 112vw);
+      aspect-ratio: 1/1;
+      filter: drop-shadow(0 35px 70px rgba(0,0,0,.75));
+      opacity:.92;
+    }
+
+    #dragonGlow{
+      position:absolute;
+      inset:-18%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,211,106,.20), transparent 55%),
+        radial-gradient(circle at 52% 58%, rgba(184,0,29,.10), transparent 62%);
+      opacity:.95;
+      filter: blur(1px);
+    }
+
+    /* “3D-like” slow rotation */
+    #dragon3d{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      animation: dragonFloat 7.2s ease-in-out infinite;
+    }
+    @keyframes dragonFloat{
+      0%,100%{ transform: rotateX(9deg) rotateY(-10deg) rotateZ(0deg) translateY(0px) translateZ(0px) }
+      50%{ transform: rotateX(12deg) rotateY(-2deg) rotateZ(1.2deg) translateY(-10px) translateZ(14px) }
+    }
+
+    #dragonImg{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter:
+        drop-shadow(0 0 22px rgba(255,211,106,.18))
+        drop-shadow(0 0 54px rgba(184,0,29,.06));
+      opacity:1;
+    }
+
+    /* Orbits + planets “textbook style” */
+    #orbits{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
       opacity:.95;
     }
-    #fxMeteors{opacity:.75; mix-blend-mode: screen;}
 
-    #webglRoot{
-      position:fixed; inset:0;
-      z-index:0; pointer-events:none;
-    }
-    #webgl{width:100%;height:100%;display:block}
-    #webglVignette{
-      position:absolute; inset:0; pointer-events:none;
-      background:
-        radial-gradient(60% 50% at 50% 30%, rgba(255,211,106,.10), rgba(0,0,0,0) 55%),
-        radial-gradient(80% 60% at 50% 70%, rgba(255,43,63,.06), rgba(0,0,0,0) 60%),
-        linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.65));
-      mix-blend-mode: screen;
+    .orbit{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--d);
+      height: var(--d);
+      margin-left: calc(var(--d)/-2);
+      margin-top: calc(var(--d)/-2);
+      border-radius:50%;
+      border: 1px solid rgba(255,211,106,.10);
+      transform:
+        translateZ(var(--z))
+        rotateX(var(--rx))
+        rotateY(var(--ry));
       opacity:.85;
     }
+
+    .spinWrap{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      animation: orbitSpin var(--t) linear infinite;
+    }
+    @keyframes orbitSpin{
+      from{transform: translateZ(0) rotateZ(0deg)}
+      to{transform: translateZ(0) rotateZ(360deg)}
+    }
+
+    /* Planet looks like “textbook” (rings, shading, craters) */
+    .planet{
+      position:absolute;
+      left:50%; top:50%;
+      width: var(--p);
+      height: var(--p);
+      border-radius:50%;
+      transform-style: preserve-3d;
+      transform:
+        rotate(var(--a))
+        translateX(calc(var(--d)/2))
+        translateZ(var(--pz));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.12),
+        0 18px 40px rgba(0,0,0,.50);
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.32), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 60% 70%, rgba(0,0,0,.28), rgba(0,0,0,0) 58%),
+        linear-gradient(135deg, var(--c1), var(--c2));
+      filter: saturate(1.05);
+    }
+    .planet:before{
+      content:"";
+      position:absolute;
+      inset:14%;
+      border-radius:50%;
+      background:
+        radial-gradient(6px 6px at 35% 40%, rgba(0,0,0,.22), rgba(0,0,0,0) 70%),
+        radial-gradient(7px 7px at 62% 56%, rgba(0,0,0,.18), rgba(0,0,0,0) 70%),
+        radial-gradient(6px 6px at 48% 68%, rgba(0,0,0,.16), rgba(0,0,0,0) 70%);
+      opacity:.55;
+    }
+
+    .planet[data-ring="1"]:after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      width: 150%;
+      height: 55%;
+      transform: translate(-50%,-50%) rotate(-18deg);
+      border-radius:50%;
+      border: 1px solid rgba(255,211,106,.12);
+      background: linear-gradient(90deg, rgba(255,211,106,0), rgba(255,211,106,.10), rgba(255,211,106,0));
+      opacity:.8;
+      filter: blur(.2px);
+    }
+
+    .pName{
+      position:absolute;
+      left:50%;
+      top: calc(100% + 10px);
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.70);
+      padding: 5px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,211,106,.12);
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(8px);
+      white-space:nowrap;
+    }
+
+    /* ===== FX layers never catch clicks ===== */
+    #fxDust, #fxMeteors, #fxCoins{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:2;
+    }
+    #fxMeteors{opacity:.78; mix-blend-mode: screen;}
+    #fxCoins{opacity:1; z-index:55;} /* coins go above UI briefly */
 
     .flash{
       position:fixed; inset:0;
@@ -65,12 +219,13 @@
       opacity:0;
       background:
         radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.35), transparent 60%),
-        radial-gradient(900px 700px at 50% 60%, rgba(255,43,63,.18), transparent 65%);
+        radial-gradient(900px 700px at 50% 60%, rgba(184,0,29,.18), transparent 65%);
       transition: opacity .15s ease;
       mix-blend-mode: screen;
     }
     .flash.on{opacity:1}
 
+    /* ===== App layout ===== */
     .app{
       position:relative;
       z-index:10;
@@ -83,9 +238,10 @@
     .topbar{
       position:sticky;
       top:0;
-      z-index:90; /* ALWAYS above bang */
-      backdrop-filter: blur(12px);
-      background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.35));
+      z-index:90;
+      padding-top: var(--safeTop);
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.35));
       border-bottom: 1px solid rgba(255,211,106,.14);
     }
     .topbar-inner{
@@ -98,7 +254,7 @@
       margin:0 auto;
     }
 
-    .brand{display:flex;align-items:center;gap:10px;min-width: 220px;}
+    .brand{display:flex;align-items:center;gap:10px;min-width: 210px;}
     .sigil{
       width:38px;height:38px;border-radius:14px;
       background:
@@ -106,6 +262,8 @@
         linear-gradient(135deg, rgba(255,211,106,.85), rgba(184,134,11,.55));
       box-shadow: 0 0 0 1px rgba(255,211,106,.28), 0 18px 50px rgba(255,211,106,.12);
       position:relative; overflow:hidden;
+      cursor:pointer;
+      user-select:none;
     }
     .sigil:after{
       content:"財";
@@ -115,8 +273,8 @@
       text-shadow: 0 1px 0 rgba(255,255,255,.25);
     }
     .brand-text{display:flex;flex-direction:column;line-height:1.05}
-    .brand-text .t1{font-size:12px;letter-spacing:.38em;color: rgba(255,211,106,.95);text-transform:uppercase;}
-    .brand-text .t2{font-size:12px;color: rgba(255,255,255,.75);}
+    .brand-text .t1{font-size:12px;letter-spacing:.34em;color: rgba(255,211,106,.95);text-transform:uppercase;}
+    .brand-text .t2{font-size:12px;color: rgba(255,255,255,.74);}
 
     .top-controls{
       display:flex;
@@ -136,13 +294,14 @@
     }
     .pill b{color: rgba(255,211,106,.96)}
     .pill .small{font-size:12px;color:rgba(255,255,255,.70)}
+    .muted{color: rgba(255,255,255,.70)}
 
     .btn{
       appearance:none;
       border:none;
       border-radius:14px;
       padding:12px 14px;
-      font-weight:800;
+      font-weight:900;
       color:#170f04;
       background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
       box-shadow: 0 18px 50px rgba(255,211,106,.14);
@@ -157,18 +316,18 @@
       background: rgba(255,255,255,.06);
       border:1px solid rgba(255,211,106,.18);
       box-shadow: 0 18px 50px rgba(0,0,0,.25);
-      font-weight:800;
+      font-weight:900;
     }
     .btn.ghost{
       color: rgba(255,255,255,.88);
       background: transparent;
       border:1px solid rgba(255,255,255,.12);
       box-shadow:none;
-      font-weight:800;
+      font-weight:900;
     }
     .btn.danger{
       color:#fff;
-      background: linear-gradient(135deg, rgba(255,43,63,.92), rgba(180,0,29,.92));
+      background: linear-gradient(135deg, rgba(255,43,63,.92), rgba(184,0,29,.92));
       box-shadow: 0 18px 50px rgba(255,43,63,.10);
     }
     .btn:disabled{opacity:.42;cursor:not-allowed;filter: grayscale(.25);transform:none;}
@@ -179,6 +338,7 @@
       background: rgba(255,255,255,.06);
       border:1px solid rgba(255,211,106,.16);
     }
+
     .seg{
       display:flex;border-radius:999px;overflow:hidden;
       border:1px solid rgba(255,255,255,.10);
@@ -187,213 +347,46 @@
     .seg button{
       border:none;
       padding:9px 10px;
-      font-weight:900;
+      font-weight:1000;
       cursor:pointer;
       color: rgba(255,255,255,.74);
       background: transparent;
+      letter-spacing:.06em;
     }
     .seg button.active{
       color:#1a1406;
       background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
     }
 
+    /* INFO “i” icon */
+    .iBtn{
+      width:22px;height:22px;
+      border-radius:999px;
+      border:1px solid rgba(255,211,106,.22);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,211,106,.92);
+      font-weight:1000;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .iBtn:active{transform: translateY(1px) scale(.99)}
+
     .wrap{
       max-width:1100px;
       width:100%;
       margin:0 auto;
-      padding: 18px 14px 110px;
+      padding: 18px 14px calc(120px + var(--safeBottom));
       display:flex;
       flex-direction:column;
       gap:16px;
     }
 
-    /* ===== Dragon 3D scene (NEW) ===== */
-    .dragonCard{
-      border-radius:26px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
-      border:1px solid rgba(255,211,106,.16);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .dragonCard:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(900px 340px at 50% 20%, rgba(255,211,106,.18), transparent 60%),
-        radial-gradient(900px 520px at 50% 75%, rgba(255,43,63,.10), transparent 62%);
-      pointer-events:none;
-      opacity:.9;
-    }
-    .dragonInner{
-      position:relative;
-      z-index:2;
-      padding:16px;
-    }
-    .dragonHead{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .dragonHead h2{
-      margin:0;
-      font-size:16px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color: rgba(255,211,106,.92);
-    }
-    .sub{font-size:12px;color:rgba(255,255,255,.68)}
-
-    .dragonScene{
-      width:100%;
-      height: min(52vh, 520px);
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      position:relative;
-      overflow:hidden;
-      display:grid;
-      place-items:center;
-      perspective: 1100px;
-    }
-
-    /* subtle star noise */
-    .dragonScene:before{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.22), transparent 60%),
-        radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.16), transparent 60%),
-        radial-gradient(1px 1px at 80% 35%, rgba(255,255,255,.18), transparent 60%),
-        radial-gradient(1px 1px at 60% 85%, rgba(255,255,255,.14), transparent 60%),
-        radial-gradient(1px 1px at 55% 40%, rgba(255,255,255,.10), transparent 60%),
-        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.12), transparent 60%);
-      opacity:.75;
-      pointer-events:none;
-    }
-
-    .dragon3d{
-      position:relative;
-      width: min(360px, 70vw);
-      aspect-ratio: 1/1;
-      transform-style: preserve-3d;
-      transform: rotateX(10deg) rotateY(-12deg);
-      filter: drop-shadow(0 35px 60px rgba(0,0,0,.65));
-      animation: dragonFloat 6.5s ease-in-out infinite;
-      z-index:3;
-    }
-    @keyframes dragonFloat{
-      0%,100%{transform: rotateX(10deg) rotateY(-12deg) translateY(0px) translateZ(0px)}
-      50%{transform: rotateX(12deg) rotateY(-6deg) translateY(-8px) translateZ(10px)}
-    }
-
-    #dragonImg{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      transform: translateZ(22px);
-      filter:
-        drop-shadow(0 0 22px rgba(255,211,106,.18))
-        drop-shadow(0 0 48px rgba(255,43,63,.08));
-      user-select:none;
-      -webkit-user-drag:none;
-      pointer-events:none;
-    }
-
-    .dragonGlow{
-      position:absolute;
-      inset:-18%;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,211,106,.22), transparent 55%),
-        radial-gradient(circle at 50% 55%, rgba(255,43,63,.10), transparent 62%);
-      transform: translateZ(0);
-      filter: blur(1px);
-      opacity:.9;
-      pointer-events:none;
-    }
-
-    /* Orbits */
-    .orbits{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      pointer-events:none;
-      z-index:2;
-    }
-    .orbit{
-      position:absolute;
-      left:50%; top:50%;
-      width: var(--d);
-      height: var(--d);
-      margin-left: calc(var(--d)/-2);
-      margin-top: calc(var(--d)/-2);
-      border-radius:50%;
-      border: 1px solid rgba(255,211,106,.10);
-      transform:
-        translateZ(var(--z))
-        rotateX(var(--rx))
-        rotateY(var(--ry));
-      opacity:.85;
-    }
-
-    .planet{
-      position:absolute;
-      left:50%; top:50%;
-      width: var(--p);
-      height: var(--p);
-      border-radius:50%;
-      transform-style: preserve-3d;
-      transform:
-        rotate(var(--a))
-        translateX(calc(var(--d)/2))
-        translateZ(var(--pz));
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,.10),
-        0 18px 40px rgba(0,0,0,.45);
-      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),
-                  radial-gradient(circle at 60% 70%, rgba(0,0,0,.25), rgba(0,0,0,0) 55%),
-                  linear-gradient(135deg, var(--c1), var(--c2));
-      filter: saturate(1.05);
-    }
-
-    .planet:after{
-      content: attr(data-name);
-      position:absolute;
-      left:50%;
-      top: calc(100% + 10px);
-      transform: translateX(-50%);
-      font-size: 11px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.70);
-      padding: 5px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,211,106,.12);
-      background: rgba(0,0,0,.25);
-      backdrop-filter: blur(8px);
-      white-space:nowrap;
-      pointer-events:none;
-    }
-
-    .spinWrap{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      animation: orbitSpin var(--t) linear infinite;
-    }
-    @keyframes orbitSpin{
-      from{transform: translateZ(0) rotateZ(0deg)}
-      to{transform: translateZ(0) rotateZ(360deg)}
-    }
-
-    /* Content cards */
     .hero{
       display:grid;
-      grid-template-columns: 1.1fr .9fr;
+      grid-template-columns: 1.05fr .95fr;
       gap:14px;
       align-items:stretch;
     }
@@ -402,7 +395,7 @@
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
       border:1px solid rgba(255,211,106,.16);
-      border-radius:26px;
+      border-radius: var(--radiusCard);
       box-shadow: var(--shadow);
       position:relative;
       overflow:hidden;
@@ -412,21 +405,25 @@
       content:"";
       position:absolute; inset:-1px;
       background:
-        radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.18), transparent 55%),
-        radial-gradient(400px 280px at 85% 20%, rgba(255,43,63,.12), transparent 55%);
+        radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.16), transparent 55%),
+        radial-gradient(400px 280px at 85% 20%, rgba(184,0,29,.10), transparent 55%);
       pointer-events:none;
-      opacity:.75;
+      opacity:.78;
     }
     .card .inner, .card .row, .card .grid{position:relative; z-index:2}
 
     .hline{
-      display:flex; align-items:baseline; justify-content:space-between;
-      gap:12px; flex-wrap:wrap; margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
     }
     .hline h2{
       margin:0;
       font-size:16px;
-      letter-spacing:.08em;
+      letter-spacing:.10em;
       text-transform:uppercase;
       color: rgba(255,211,106,.92);
     }
@@ -435,12 +432,25 @@
     @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 
     .tile{
-      border-radius:18px;
+      border-radius: var(--radiusTile);
       padding:12px 12px;
       background: rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.10);
     }
-    .tile .k{font-size:11px;color: rgba(255,255,255,.60);letter-spacing:.12em;text-transform:uppercase;}
+    .tileHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:6px;
+    }
+    .tile .k{
+      font-size:11px;
+      color: rgba(255,255,255,.60);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     .tile .v{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
     .tile .v .big{font-size:22px;font-weight:1000;letter-spacing:.02em;color: rgba(255,211,106,.96);}
     .tile .v .tag{
@@ -449,10 +459,13 @@
       background: rgba(255,211,106,.08);
       color: rgba(255,255,255,.85);
     }
+    .tiny{font-size:12px; color: rgba(255,255,255,.60)}
+    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0}
 
+    /* Stage */
     .stage{display:grid;grid-template-columns: 1fr;gap:10px;align-items:center;justify-items:center;}
     .wheelWrap{
-      width:min(420px, 92vw);
+      width:min(460px, 92vw);
       aspect-ratio: 1/1;
       position:relative;
       display:grid;
@@ -466,35 +479,16 @@
       box-shadow:
         0 0 0 1px rgba(255,211,106,.22),
         0 25px 70px rgba(0,0,0,.55),
-        0 0 90px rgba(255,43,63,.08);
+        0 0 90px rgba(184,0,29,.08);
       background:
         radial-gradient(circle at 50% 45%, rgba(255,211,106,.14), transparent 45%),
         radial-gradient(circle at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.75));
     }
-    .centerMedal{
-      position:absolute;
-      width: 34%;
-      aspect-ratio:1/1;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.30), transparent 45%),
-        radial-gradient(circle at 50% 55%, rgba(255,211,106,.96), rgba(184,134,11,.86));
-      box-shadow:
-        0 0 0 1px rgba(255,211,106,.25),
-        0 25px 70px rgba(255,211,106,.12);
-      display:grid;
-      place-items:center;
-      pointer-events:none;
-    }
-    .centerMedal span{
-      font-size: clamp(22px, 4vw, 34px);
-      font-weight: 1000;
-      color: #1a1406;
-      text-shadow: 0 1px 0 rgba(255,255,255,.22);
-    }
+
+    /* Beam pointer */
     .beam{
       position:absolute;
-      right:-2%;
+      right:-1.5%;
       top: 50%;
       transform: translateY(-50%);
       width: 46%;
@@ -514,7 +508,43 @@
       width: 10px; height: 10px;
       border-radius: 50%;
       background: rgba(255,211,106,.95);
-      box-shadow: 0 0 30px rgba(255,211,106,.65);
+      box-shadow: 0 0 32px rgba(255,211,106,.70);
+    }
+
+    /* Center medal — glossy gold + glowing rune */
+    .centerMedal{
+      position:absolute;
+      width: 36%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.42), transparent 46%),
+        radial-gradient(circle at 55% 65%, rgba(0,0,0,.22), transparent 55%),
+        linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
+      box-shadow:
+        0 0 0 1px rgba(255,211,106,.28),
+        0 25px 70px rgba(255,211,106,.14),
+        inset 0 0 20px rgba(255,255,255,.12);
+      display:grid;
+      place-items:center;
+      pointer-events:none;
+    }
+    .centerMedal span{
+      font-size: clamp(34px, 6vw, 56px); /* bigger */
+      font-weight: 1000;
+      color: #1a1406;
+      text-shadow:
+        0 0 10px rgba(255,243,209,.55),
+        0 0 24px rgba(255,211,106,.35);
+      filter: drop-shadow(0 0 12px rgba(255,211,106,.35));
+    }
+    .centerMedal:after{
+      content:"";
+      position:absolute;
+      inset:12%;
+      border-radius:50%;
+      border:1px solid rgba(255,243,209,.22);
+      box-shadow: inset 0 0 24px rgba(255,243,209,.10);
     }
 
     .wheelControls{
@@ -532,7 +562,7 @@
       padding:12px 12px;
       background: rgba(0,0,0,.20);
       border:1px solid rgba(255,255,255,.10);
-      min-height: 98px;
+      min-height: 110px;
       display:flex;
       flex-direction:column;
       gap:6px;
@@ -546,8 +576,11 @@
       letter-spacing:.08em;
       text-transform:uppercase;
       font-size:12px;
+      display:flex;
+      gap:8px;
+      align-items:center;
     }
-    .oracleText .body{font-size:14px;color:rgba(255,255,255,.85);line-height:1.35}
+    .oracleText .body{font-size:14px;color:rgba(255,255,255,.86);line-height:1.35}
     .oracleText .meta{
       margin-top:auto;
       font-size:12px;
@@ -562,18 +595,16 @@
     .meta .chip.red{background: rgba(255,43,63,.10);border-color: rgba(255,43,63,.26);}
     .meta .chip.ok{background: rgba(67,255,179,.10);border-color: rgba(67,255,179,.26);}
 
-    .choices{display:flex;gap:10px;flex-wrap:wrap}
+    .choices{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
     .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .tiny{font-size:12px; color: rgba(255,255,255,.60)}
-    .hr{height:1px;background: rgba(255,255,255,.10);margin: 10px 0}
 
-    /* Bottom Dock */
+    /* Bottom Dock — Chinese-style icons */
     .bottomDock{
       position:fixed;
       left:0; right:0; bottom:0;
       z-index:40;
-      padding: 10px 12px 14px;
-      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.65));
+      padding: 10px 12px calc(14px + var(--safeBottom));
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.70));
       backdrop-filter: blur(12px);
       border-top: 1px solid rgba(255,211,106,.10);
     }
@@ -598,16 +629,16 @@
       border-radius: 18px;
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), transparent 55%),
-        linear-gradient(135deg, rgba(255,211,106,.16), rgba(255,43,63,.06));
+        linear-gradient(135deg, rgba(255,211,106,.16), rgba(184,0,29,.06));
       box-shadow:
         0 0 0 1px rgba(255,211,106,.14),
         0 16px 45px rgba(0,0,0,.35);
       transition: transform .25s ease;
     }
-    .dockIcon span{font-size: 26px;filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));}
+    .dockIcon span{font-size: 22px;filter: drop-shadow(0 10px 16px rgba(0,0,0,.45)); letter-spacing:.06em}
     .dockBtn small{
       font-size: 11px;
-      letter-spacing:.08em;
+      letter-spacing:.10em;
       color: rgba(255,255,255,.72);
       text-transform:uppercase;
       text-align:center;
@@ -634,7 +665,7 @@
       border-radius: 26px;
       background: linear-gradient(180deg, rgba(20,20,22,.92), rgba(8,8,10,.92));
       border:1px solid rgba(255,211,106,.16);
-      box-shadow: 0 28px 90px rgba(0,0,0,.70);
+      box-shadow: var(--shadow2);
       overflow:hidden;
       position:relative;
     }
@@ -643,8 +674,8 @@
       position:absolute; inset:-1px;
       background:
         radial-gradient(600px 260px at 30% 0%, rgba(255,211,106,.18), transparent 60%),
-        radial-gradient(560px 340px at 95% 20%, rgba(255,43,63,.12), transparent 60%);
-      opacity:.8;
+        radial-gradient(560px 340px at 95% 20%, rgba(184,0,29,.10), transparent 60%);
+      opacity:.85;
       pointer-events:none;
     }
     .modal .mInner{position:relative; z-index:2; padding: 16px}
@@ -666,103 +697,92 @@
       max-height: 68vh;
       overflow:auto;
       padding-right: 6px;
+      white-space: pre-line;
     }
-    .mBody .sec{margin:12px 0}
-    .mBody .sec b{color: rgba(255,211,106,.95)}
     .mFoot{margin-top: 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom: calc(96px + var(--safeBottom));
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,211,106,.16);
+      backdrop-filter: blur(12px);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      color: rgba(255,255,255,.88);
+      font-weight:800;
+      letter-spacing:.06em;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index:95;
+      max-width: min(92vw, 720px);
+      text-align:center;
+    }
+    .toast.on{opacity:1; transform: translateX(-50%) translateY(-2px);}
+
     body.luckyHour .sigil{
-      box-shadow: 0 0 0 1px rgba(255,211,106,.32), 0 22px 60px rgba(255,211,106,.18);
+      box-shadow: 0 0 0 1px rgba(255,211,106,.34), 0 22px 62px rgba(255,211,106,.18);
     }
     body.luckyHour .beam{
       opacity:1;
-      filter: blur(.1px);
-      box-shadow: 0 0 40px rgba(255,211,106,.20);
-    }
-
-    /* ===== CHЁЛКА (FIXED): hidden by default; never huge on phone ===== */
-    .bangToggle{
-      width:40px;height:40px;          /* smaller on phone */
-      border-radius:14px;
-      border:1px solid rgba(255,211,106,.22);
-      background: rgba(0,0,0,.22);
-      backdrop-filter: blur(10px);
-      color: rgba(255,211,106,.95);
-      font-weight: 1000;
-      font-size: 14px;
-      cursor:pointer;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      flex: 0 0 auto;
-    }
-
-    /* bang overlay sits UNDER topbar, so buttons stay clickable */
-    #bang{
-      position:fixed;
-      left:0; right:0;
-      top:0;
-      height: min(42vh, 360px);
-      z-index:50;               /* lower than topbar (90) */
-      pointer-events:none;      /* DOES NOT catch clicks */
-      transform: translateY(-110%);
-      transition: transform .28s cubic-bezier(.2,0,.2,1);
-      background:
-        radial-gradient(900px 420px at 50% 30%, rgba(255,211,106,.22), transparent 60%),
-        radial-gradient(900px 520px at 50% 70%, rgba(255,43,63,.12), transparent 60%),
-        linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,0));
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,211,106,.14);
-    }
-    #bang.open{
-      transform: translateY(0);
-      pointer-events:none; /* keep none always, чтобы не ломало клики */
+      box-shadow: 0 0 45px rgba(255,211,106,.20);
     }
 
     @media (max-width: 420px){
-      .bangToggle{width:38px;height:38px}
-      #bang{height: min(36vh, 300px)}
-      .pill{display:none} /* on tiny screens: remove time pill to avoid crowd */
+      .pill{display:none}
+      .wheelWrap{width:min(420px, 94vw)}
+      #dragonWrap{width:min(620px, 130vw)}
     }
   </style>
 </head>
 
 <body>
-  <canvas id="fxDust"></canvas>
-  <canvas id="fxMeteors"></canvas>
-  <div class="flash" id="flash"></div>
-
-  <div id="webglRoot" aria-hidden="true">
-    <canvas id="webgl"></canvas>
-    <div id="webglVignette"></div>
+  <!-- Cosmos background pinned -->
+  <div id="cosmos" aria-hidden="true">
+    <div id="dragonWrap">
+      <div id="dragonGlow"></div>
+      <div id="orbits"></div>
+      <div id="dragon3d">
+        <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
+      </div>
+    </div>
   </div>
 
-  <div id="bang" aria-hidden="true"></div>
+  <!-- FX (dust + meteors + coins) -->
+  <canvas id="fxDust"></canvas>
+  <canvas id="fxMeteors"></canvas>
+  <canvas id="fxCoins"></canvas>
+  <div class="flash" id="flash"></div>
+
+  <div class="toast" id="toast">—</div>
 
   <div class="app">
     <div class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <div class="sigil"></div>
+          <div class="sigil" id="sigil" title="(dev) long-press"></div>
           <div class="brand-text">
             <div class="t1" id="tBrand1">TON TEMPLE</div>
-            <div class="t2" id="tBrand2">Imperial Flow Ritual</div>
+            <div class="t2" id="tBrand2">福流神殿</div>
           </div>
         </div>
 
         <div class="top-controls">
-          <!-- bang toggle -->
-          <button class="bangToggle" id="btnBang" type="button" title="Bang">〣</button>
-
-          <!-- help (?) opens rules -->
-          <button class="bangToggle" id="helpBtn" type="button" title="Rules / Guide">?</button>
+          <button class="btn secondary" id="btnHelp" type="button">?</button>
 
           <div class="pill" title="Local time / Lucky Hour">
-            <div class="small" id="tTimeLabel">LOCAL TIME</div>
+            <div class="small" id="tTimeLabel">本地时间</div>
             <b id="localTime">--:--</b>
-            <span class="small" id="luckyCountdown">• Next Lucky Hour --:--:--</span>
+            <span class="small" id="luckyCountdown">• --:--:--</span>
           </div>
 
           <div class="toggle">
-            <span class="small" id="tModeLabel">MODE</span>
+            <span class="small" id="tModeLabel">模式</span>
             <div class="seg" role="tablist" aria-label="Mode">
               <button id="btnRitual" class="active" type="button">RITUAL</button>
               <button id="btnPro" type="button">PRO</button>
@@ -770,118 +790,111 @@
           </div>
 
           <div class="toggle">
-            <span class="small" id="tLangLabel">LANG</span>
+            <span class="small" id="tLangLabel">语言</span>
             <div class="seg" role="tablist" aria-label="Language">
-              <button id="btnZH" type="button">中文</button>
+              <button id="btnZH" class="active" type="button">中文</button>
               <button id="btnEN" type="button">EN</button>
-              <button id="btnRU" class="active" type="button">RU</button>
+              <!-- RU appears only in dev-mode -->
+              <button id="btnRU" type="button" style="display:none">RU</button>
             </div>
           </div>
 
-          <!-- Rules button #1 -->
-          <button class="btn secondary" id="btnRules" type="button">RULES</button>
+          <button class="btn" id="btnConnect" type="button">CONNECT</button>
         </div>
       </div>
     </div>
 
     <div class="wrap">
-
-      <!-- NEW: DRAGON 3D + PLANETS -->
-      <div class="dragonCard">
-        <div class="dragonInner">
-          <div class="dragonHead">
-            <h2 id="tDragonTitle">Solar Dragon</h2>
-            <div class="sub" id="tDragonSub">Centered 3D emblem + orbiting planets.</div>
-          </div>
-
-          <div class="dragonScene" aria-label="Dragon with planets">
-            <div class="orbits" id="orbits"></div>
-
-            <div class="dragon3d">
-              <div class="dragonGlow"></div>
-              <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- HERO -->
       <div class="hero">
         <!-- LEFT: HUD -->
         <div class="card">
           <div class="inner">
             <div class="hline">
               <h2 id="tHudTitle">Temple HUD</h2>
-              <div class="sub" id="tHudSub">Everything is explained. First-time friendly.</div>
             </div>
 
             <div class="grid">
               <div class="tile">
-                <div class="k" id="tQKLabel">QK — Quantum Karma</div>
+                <div class="tileHead">
+                  <div class="k"><span id="tQKLabel">QK</span></div>
+                  <button class="iBtn" type="button" data-info="qk">i</button>
+                </div>
                 <div class="v">
                   <div class="big" id="qk">37.11</div>
-                  <div class="tag" id="qkTag">Balanced</div>
+                  <div class="tag" id="qkTag">BALANCED</div>
                 </div>
-                <div class="tiny" id="tQKHint">Your daily ritual energy. Used for status + progression.</div>
               </div>
 
               <div class="tile">
-                <div class="k" id="tFlowScoreLabel">Flow Score</div>
+                <div class="tileHead">
+                  <div class="k"><span id="tFlowScoreLabel">FLOW</span></div>
+                  <button class="iBtn" type="button" data-info="flow">i</button>
+                </div>
                 <div class="v">
                   <div class="big" id="flowScore">73</div>
-                  <div class="tag" id="flowTag">Temple Guidance</div>
+                  <div class="tag" id="flowTag">/100</div>
                 </div>
-                <div class="tiny" id="tFlowHint">0–100 indicator. Higher = calmer decisions.</div>
               </div>
 
               <div class="tile">
-                <div class="k" id="tWeatherLabel">Market Weather</div>
+                <div class="tileHead">
+                  <div class="k"><span id="tWeatherLabel">WEATHER</span></div>
+                  <button class="iBtn" type="button" data-info="weather">i</button>
+                </div>
                 <div class="v">
                   <div class="big" id="weather">CALM</div>
-                  <div class="tag" id="riskTag">Risk Aura: LOW</div>
+                  <div class="tag" id="riskTag">Risk: LOW</div>
                 </div>
-                <div class="tiny" id="tWeatherHint">A narrative layer that feels legit (not “signals”).</div>
               </div>
             </div>
 
             <div class="hr"></div>
 
-            <div class="row">
-              <div class="tiny" id="tDailySealLabel">Daily Seal</div>
-              <div class="pill" style="padding:8px 10px">
-                <b id="dailySeal">SEAL</b>
-                <span class="small" id="sealSub">• stamped</span>
+            <div class="grid">
+              <div class="tile">
+                <div class="tileHead">
+                  <div class="k"><span id="tDailySealLabel">SEAL</span></div>
+                  <button class="iBtn" type="button" data-info="seal">i</button>
+                </div>
+                <div class="v">
+                  <div class="big" id="dailySeal">—</div>
+                  <div class="tag" id="sealSub">—</div>
+                </div>
+              </div>
+
+              <div class="tile">
+                <div class="tileHead">
+                  <div class="k"><span id="tStreakLabel">STREAK</span></div>
+                  <button class="iBtn" type="button" data-info="streak">i</button>
+                </div>
+                <div class="v">
+                  <div class="big" id="streak">3</div>
+                  <div class="tag" id="cycleTag">7/21/49</div>
+                </div>
+              </div>
+
+              <div class="tile">
+                <div class="tileHead">
+                  <div class="k"><span id="tPulseLabel">PULSE</span></div>
+                  <button class="iBtn" type="button" data-info="pulse">i</button>
+                </div>
+                <div class="v">
+                  <div class="big" id="socialA">3,482</div>
+                  <div class="tag" id="socialB">VIP: 117</div>
+                </div>
               </div>
             </div>
 
             <div style="height:10px"></div>
 
-            <div class="grid">
-              <div class="tile">
-                <div class="k" id="tStreakLabel">Streak</div>
-                <div class="v">
-                  <div class="big" id="streak">3</div>
-                  <div class="tag" id="cycleTag">7/21/49 Path</div>
-                </div>
-                <div class="tiny" id="tStreakHint">Consistency unlocks status. Not “pay to win”.</div>
+            <div class="tile">
+              <div class="row">
+                <div class="k" style="margin:0"><span id="tStatsLabel">TODAY</span></div>
+                <button class="iBtn" type="button" data-info="today">i</button>
               </div>
-
-              <div class="tile">
-                <div class="k" id="tStatsLabel">Today Stats</div>
-                <div class="v">
-                  <div class="big" id="posCount">8</div>
-                  <div class="tag" id="negCountTag">Caution: 1</div>
-                </div>
-                <div class="tiny" id="tStatsHint">Hope engine: positives always dominate.</div>
-              </div>
-
-              <div class="tile">
-                <div class="k" id="tSocialLabel">Temple Pulse</div>
-                <div class="v">
-                  <div class="big" id="socialA">3,482</div>
-                  <div class="tag" id="socialB">VIP: 117</div>
-                </div>
-                <div class="tiny" id="tSocialHint">Social proof without chat (safe & clean).</div>
+              <div class="v">
+                <div class="big"><span id="posCount">8</span></div>
+                <div class="tag" id="negCountTag">Caution: 1</div>
               </div>
             </div>
           </div>
@@ -892,7 +905,7 @@
           <div class="inner">
             <div class="hline">
               <h2 id="tRitualTitle">Daily Ritual</h2>
-              <div class="sub" id="tRitualSub">One spin per day. Slow. Visible. No blur.</div>
+              <button class="iBtn" type="button" data-info="ritual">i</button>
             </div>
 
             <div class="stage">
@@ -919,7 +932,7 @@
                   </div>
                   <div class="pill" style="flex:1; justify-content:space-between">
                     <span class="small" id="tLimitLabel">LIMIT</span>
-                    <b id="limitText">1 / day</b>
+                    <b id="limitText">0 / 1</b>
                     <span class="small" id="limitPaywall">• extra: 1 TON</span>
                   </div>
                 </div>
@@ -929,11 +942,11 @@
                     <b id="oracleHead">Temple Guidance</b>
                     <span class="tiny" id="oracleStamp">—</span>
                   </div>
-                  <div class="body" id="oracleBody">Tap ORACLE to receive guidance.</div>
+                  <div class="body" id="oracleBody">—</div>
                   <div class="meta" id="oracleMeta">
-                    <span class="chip" id="chipWeather">Market Weather: Calm</span>
-                    <span class="chip ok" id="chipAura">Risk Aura: Low</span>
-                    <span class="chip" id="chipFlow">Flow Window: Open</span>
+                    <span class="chip" id="chipWeather">Market Weather: —</span>
+                    <span class="chip ok" id="chipAura">Risk Aura: —</span>
+                    <span class="chip" id="chipFlow">Flow Window: —</span>
                   </div>
                 </div>
 
@@ -943,55 +956,61 @@
                   <button class="btn danger" id="btnSkip" type="button" disabled>SKIP</button>
                 </div>
 
-                <div class="tiny" id="tDisclaimer">This is a ritualized UI. Not financial advice.</div>
+                <div class="tiny" id="tDisclaimer">Ritualized UI. Not financial advice.</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PRO TERMINAL -->
-      <div class="card" id="proCard">
+      <!-- PRO TERMINAL (simplified) -->
+      <div class="card" id="proCard" style="display:none">
         <div class="inner">
           <div class="hline">
-            <h2 id="tProTitle">Pro Terminal</h2>
-            <div class="sub" id="tProSub">Numbers for “mianzi”: serious look, clean UI.</div>
+            <h2 id="tProTitle">PRO TERMINAL</h2>
+            <button class="iBtn" type="button" data-info="pro">i</button>
           </div>
 
           <div class="grid">
             <div class="tile">
-              <div class="k" id="tTonPulse">TON Pulse</div>
+              <div class="tileHead">
+                <div class="k"><span id="tTonPulse">TON PULSE</span></div>
+                <button class="iBtn" type="button" data-info="pulseMetric">i</button>
+              </div>
               <div class="v">
                 <div class="big" id="tonPulse">+0.84%</div>
                 <div class="tag" id="liqPulse">Liquidity: Steady</div>
               </div>
-              <div class="tiny" id="tTonPulseHint">Synthetic metrics for premium terminal feel (MVP).</div>
             </div>
 
             <div class="tile">
-              <div class="k" id="tVol">Volatility</div>
+              <div class="tileHead">
+                <div class="k"><span id="tVol">VOLATILITY</span></div>
+                <button class="iBtn" type="button" data-info="vol">i</button>
+              </div>
               <div class="v">
                 <div class="big" id="vol">12.4</div>
                 <div class="tag" id="trend">Trend: Up</div>
               </div>
-              <div class="tiny" id="tVolHint">Used to shape Risk Aura + Gate warning.</div>
             </div>
 
             <div class="tile">
-              <div class="k" id="tWindow">Flow Window</div>
+              <div class="tileHead">
+                <div class="k"><span id="tWindow">FLOW WINDOW</span></div>
+                <button class="iBtn" type="button" data-info="window">i</button>
+              </div>
               <div class="v">
                 <div class="big" id="flowWindow">OPEN</div>
-                <div class="tag" id="windowTimer">Next: 02:14:18</div>
+                <div class="tag" id="windowTimer">Next: 00:00:00</div>
               </div>
-              <div class="tiny" id="tWindowHint">Aligned with Lucky Hour schedule.</div>
             </div>
           </div>
 
           <div class="hr"></div>
 
           <div class="hline">
-            <h2 id="tJournalTitle">Temple Journal</h2>
-            <div class="sub" id="tJournalSub">Last 7 days (decision memory).</div>
+            <h2 id="tJournalTitle">JOURNAL</h2>
+            <button class="iBtn" type="button" data-info="journal">i</button>
           </div>
 
           <div class="tile">
@@ -999,69 +1018,48 @@
           </div>
         </div>
       </div>
-
-      <!-- EXTRA -->
-      <div class="card">
-        <div class="inner">
-          <div class="hline">
-            <h2 id="tExtraTitle">Temple Layer</h2>
-            <div class="sub" id="tExtraSub">Scrollable content (not one-screen only).</div>
-          </div>
-          <div class="tile">
-            <div class="tiny" id="tExtraBody">
-              This area is intentionally long to allow natural scrolling.
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <!-- Bottom Dock -->
     <div class="bottomDock" role="navigation" aria-label="Temple Dock">
       <div class="dockInner">
         <button class="dockBtn" id="dockRitual" type="button">
-          <div class="dockIcon"><span>🜁</span></div>
+          <div class="dockIcon"><span>殿</span></div>
           <small id="dRitual">Ritual</small>
         </button>
         <button class="dockBtn" id="dockWheel" type="button">
-          <div class="dockIcon"><span>🎡</span></div>
+          <div class="dockIcon"><span>轮</span></div>
           <small id="dWheel">Wheel</small>
         </button>
         <button class="dockBtn" id="dockOracle" type="button">
-          <div class="dockIcon"><span>🧿</span></div>
+          <div class="dockIcon"><span>谕</span></div>
           <small id="dOracle">Oracle</small>
         </button>
         <button class="dockBtn" id="dockGate" type="button">
-          <div class="dockIcon"><span>⟠</span></div>
+          <div class="dockIcon"><span>门</span></div>
           <small id="dGate">Gate</small>
-        </button>
-        <!-- Rules button #2 -->
-        <button class="dockBtn" id="dockRules" type="button">
-          <div class="dockIcon"><span>❖</span></div>
-          <small id="dRules">Rules</small>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- RULES MODAL -->
-  <div class="modalBack" id="rulesBack" role="dialog" aria-modal="true">
+  <!-- MODAL (help + info) -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="mInner">
         <div class="mHead">
-          <h3 id="rulesTitle">Rules / What is this?</h3>
-          <button class="btn ghost" id="rulesClose" type="button">Close</button>
+          <h3 id="modalTitle">—</h3>
+          <button class="btn ghost" id="modalClose" type="button">Close</button>
         </div>
-        <div class="mBody" id="rulesBody"></div>
+        <div class="mBody" id="modalBody"></div>
         <div class="mFoot">
-          <button class="btn secondary" id="rulesOk" type="button">OK</button>
+          <button class="btn secondary" id="modalOk" type="button">OK</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PAYWALL MODAL -->
+  <!-- Paywall Modal (TonConnect) -->
   <div class="modalBack" id="payBack" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="mInner">
@@ -1072,24 +1070,7 @@
         <div class="mBody" id="payBody"></div>
         <div class="mFoot">
           <button class="btn secondary" id="payLater" type="button">Later</button>
-          <button class="btn" id="payMock" type="button">Donate 1 TON (Mock)</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RISK GATE MODAL -->
-  <div class="modalBack" id="riskBack" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="mInner">
-        <div class="mHead">
-          <h3 id="riskTitle">Risk Gate</h3>
-          <button class="btn ghost" id="riskClose" type="button">Close</button>
-        </div>
-        <div class="mBody" id="riskBody"></div>
-        <div class="mFoot">
-          <button class="btn secondary" id="riskCancel" type="button">Cancel</button>
-          <button class="btn" id="riskGo" type="button">Enter Gate</button>
+          <button class="btn" id="payTon" type="button">Donate 1 TON</button>
         </div>
       </div>
     </div>
@@ -1097,7 +1078,7 @@
 
   <script>
   /*****************************************************************
-   * TON TEMPLE — Dragon Center + Planets + Fixed Bang + Full i18n
+   * TON TEMPLE — FINAL (UI fixes + TonConnect embedded)
    *****************************************************************/
 
   const $ = (id) => document.getElementById(id);
@@ -1115,172 +1096,91 @@
     setTimeout(()=>f.classList.remove('on'), 140);
   }
 
+  function toast(msg){
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>el.classList.remove('on'), 1600);
+  }
+
+  // Telegram haptics (safe)
+  function haptic(type){
+    try{
+      const tg = window.Telegram?.WebApp;
+      if(!tg) return;
+      if(type==='heavy') tg.HapticFeedback.impactOccurred('heavy');
+      else if(type==='light') tg.HapticFeedback.impactOccurred('light');
+      else if(type==='success') tg.HapticFeedback.notificationOccurred('success');
+    }catch(e){}
+  }
+
+  const RECEIVER_TONKEEPER = "UQC2AbaVh84D4w3I58nRRAiZL9ToJfsVwBavDUqwjT_8TIhx";
+  const ORACLE_PRICE_TON = 1.0;
+
   const state = {
-    lang: 'ru',
+    devMode: false,          // RU shown only here
+    lang: 'zh',              // DEFAULT = ZH
     mode: 'ritual',
+
     qk: 37.11,
     flowScore: 73,
     weather: 'CALM',
     risk: 'LOW',
     streak: 3,
-    today: { key: dayKey(), oracleUsed: false, oraclePaidExtra: 0, pos: 8, neg: 1 },
+
+    today: { key: dayKey(), wheelUsed: false, oracleUsed: false, oraclePaidExtra: 0, pos: 8, neg: 1 },
     oracle: { type:'day', last:null, decision:null },
-    wheel: { petals: 15, angle: 0, spinning: false, usedToday: false, velocity: 0, friction: 0.987, stopEps: 0.0010, resultIndex: null },
     gate: { refUrl: "https://example.com" },
-    lucky: { morningHour:9, eveningHour:21, windowMinutes:45, isLuckyNow:false, nextLuckyIn:0 },
+
+    lucky: { morningHour:7, eveningHour:19, windowMinutes:120, isLuckyNow:false, nextLuckyIn:0 },
     social: {a:3482, vip:117},
-    journal: []
+    journal: [],
+
+    wallet: { connected:false, address:null }
   };
 
-  const LS_KEY = 'ton_temple_dragon_v1';
+  const LS_KEY = 'ton_temple_final_v1';
   function loadState(){
     try{
       const raw = localStorage.getItem(LS_KEY);
       if(!raw) return;
       const saved = JSON.parse(raw);
-      const k = dayKey();
+      Object.assign(state, saved);
 
-      if(saved?.today?.key !== k){
-        state.today.key = k;
-        state.today.oracleUsed = false;
-        state.today.oraclePaidExtra = 0;
-        state.today.pos = irnd(6,12);
-        state.today.neg = irnd(0,2);
-        state.wheel.usedToday = false;
-        state.oracle.last = null;
-        state.oracle.decision = null;
-        state.streak = (saved?.streak && saved?.today?.key) ? (saved.streak + 1) : 1;
-      } else {
-        Object.assign(state, saved);
-      }
+      // Sanity
       state.qk = clamp(Number(state.qk)||37.11, 0, 9999);
       state.flowScore = clamp(Number(state.flowScore)||73, 0, 100);
       if(!Array.isArray(state.journal)) state.journal = [];
       state.journal = state.journal.slice(0,7);
+
+      if(!state.today || !state.today.key) state.today = { key: dayKey(), wheelUsed:false, oracleUsed:false, oraclePaidExtra:0, pos: irnd(6,12), neg: irnd(0,2) };
     }catch(e){}
   }
   function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 
-  /* ===== FULL i18n: RU / EN / ZH ===== */
+  /* ===== i18n (ZH default + EN secondary + RU dev only) ===== */
   const I18N = {
-    ru: {
-      brand1:"TON TEMPLE",
-      brand2:"Имперский ритуал квантового потока",
-      timeLabel:"МЕСТНОЕ ВРЕМЯ",
-      modeLabel:"РЕЖИМ",
-      langLabel:"ЯЗЫК",
-      rules:"ПРАВИЛА",
-
-      dragonTitle:"Solar Dragon",
-      dragonSub:"Эмблема по центру (3D) + планеты по орбитам.",
-
-      hudTitle:"HUD ХРАМА",
-      hudSub:"Всё объяснено. Подходит с первого запуска.",
-      qkLabel:"QK — Квантовая карма",
-      qkHint:"Ежедневная энергия ритуала: статус, прогресс, разблокировки.",
-      flowScoreLabel:"FLOW SCORE",
-      flowHint:"Индикатор 0–100. Чем выше — тем спокойнее решения.",
-      weatherLabel:"ПОГОДА РЫНКА",
-      weatherHint:"Нарратив “как терминал”, а не “сигналы”.",
-      dailySeal:"ПЕЧАТЬ ДНЯ",
-      sealStamped:"• проставлено",
-      streak:"СЕРИЯ",
-      streakHint:"Разблокировки через регулярность, не только донат.",
-      stats:"СТАТИСТИКА ДНЯ",
-      statsHint:"Дизайн-правило: позитив всегда доминирует.",
-      caution:"Осторожность",
-      social:"ПУЛЬС ХРАМА",
-      socialHint:"Соц.доказательство без чата (чисто и безопасно).",
-
-      ritualTitle:"ЕЖЕДНЕВНЫЙ РИТУАЛ",
-      ritualSub:"Один медленный спин в день. Без блюра.",
-      activateFlow:"АКТИВИРОВАТЬ ПОТОК",
-      oracle:"ОРАКУЛ",
-      gate:"ОТКРЫТЬ ВРАТА",
-      forecast:"ПРОГНОЗ",
-      day:"DAY",
-      ton:"TON",
-      limit:"ЛИМИТ",
-      limitExtra:"• доп: 1 TON",
-      oracleHead:"Указ храма",
-      oracleTap:"Нажми ORACLE, получи указ. Потом выбери: ENTER / WAIT / SKIP.",
-      enter:"ENTER",
-      wait:"WAIT",
-      skip:"SKIP",
-      disclaimer:"Это ритуализированный UI. Не финсовет. Решение за тобой.",
-
-      proTitle:"PRO-ТЕРМИНАЛ",
-      proSub:"Цифры “для статуса”: серьёзно, чисто, как терминал.",
-      tonPulse:"TON Pulse",
-      tonPulseHint:"Синтетика для премиум-терминала (MVP).",
-      vol:"Волатильность",
-      volHint:"Влияет на Risk Aura и предупреждение Gate.",
-      window:"Окно потока",
-      windowHint:"Синхрон с Lucky Hour расписанием.",
-
-      journalTitle:"ЖУРНАЛ ХРАМА",
-      journalSub:"Последние 7 дней (память решений).",
-      noRecords:"Пока нет записей.",
-
-      extraTitle:"СЛОЙ ХРАМА",
-      extraSub:"Скролл (не один экран).",
-      extraBody:"Зарезервировано: трофеи 7/21/49, скины, VIP зал, будущий TON Connect.",
-
-      dockRitual:"Ритуал",
-      dockWheel:"Колесо",
-      dockOracle:"Оракул",
-      dockGate:"Врата",
-      dockRules:"Правила",
-
-      rulesTitle:"Правила / Гайд по индикаторам",
-      close:"Закрыть",
-      ok:"ОК",
-
-      payTitle:"Золотой алтарь",
-      payLater:"Позже",
-      payNow:"Пожертвовать 1 TON (Mock)",
-      payText1:"Бесплатный лимит на сегодня исчерпан.",
-      payText2:"“Золотой алтарь” даёт ещё 1 указ за 1 TON (пока Mock).",
-
-      riskTitle:"Врата риска",
-      riskText1:"Подтверди осознанность: риск-аура и личная ответственность.",
-      riskText2:"Откроется внешняя ссылка (твой ref).",
-      riskAgree:"Я понимаю риск",
-      cancel:"Отмена",
-      go:"Войти"
-    },
-
     en: {
       brand1:"TON TEMPLE",
-      brand2:"Imperial Quantum Flow Ritual",
+      brand2:"Fa Cai Supreme AI",
       timeLabel:"LOCAL TIME",
       modeLabel:"MODE",
       langLabel:"LANG",
-      rules:"RULES",
-
-      dragonTitle:"Solar Dragon",
-      dragonSub:"Centered 3D emblem + orbiting planets.",
+      connect:"CONNECT",
+      connected:"CONNECTED",
+      help:"HELP",
 
       hudTitle:"Temple HUD",
-      hudSub:"First-time friendly: everything is explained.",
-      qkLabel:"QK — Quantum Karma",
-      qkHint:"Daily ritual energy for status, progression, unlocks.",
-      flowScoreLabel:"FLOW SCORE",
-      flowHint:"0–100 indicator. Higher = calmer decisions.",
-      weatherLabel:"MARKET WEATHER",
-      weatherHint:"Terminal-like narrative (not “signals”).",
-      dailySeal:"DAILY SEAL",
-      sealStamped:"• stamped",
+      qk:"QK",
+      flow:"FLOW",
+      weather:"WEATHER",
+      seal:"SEAL",
       streak:"STREAK",
-      streakHint:"Unlock via consistency (not pure spending).",
-      stats:"TODAY STATS",
-      statsHint:"Hope engine: positives dominate by design.",
-      caution:"Caution",
-      social:"TEMPLE PULSE",
-      socialHint:"Social proof without chat (safe & clean).",
+      pulse:"PULSE",
+      today:"TODAY",
 
       ritualTitle:"DAILY RITUAL",
-      ritualSub:"One slow spin per day. No blur.",
       activateFlow:"ACTIVATE FLOW",
       oracle:"ORACLE",
       gate:"OPEN GATE",
@@ -1290,142 +1190,135 @@
       limit:"LIMIT",
       limitExtra:"• extra: 1 TON",
       oracleHead:"Temple Guidance",
-      oracleTap:"Tap ORACLE to receive guidance, then choose: ENTER / WAIT / SKIP.",
-      enter:"ENTER",
-      wait:"WAIT",
-      skip:"SKIP",
-      disclaimer:"Ritualized UI. Not financial advice. Use your judgment.",
-
-      proTitle:"PRO TERMINAL",
-      proSub:"Numbers for “mianzi”: serious, clean UI.",
-      tonPulse:"TON Pulse",
-      tonPulseHint:"Synthetic metrics for premium terminal feel (MVP).",
-      vol:"Volatility",
-      volHint:"Shapes Risk Aura + Gate warning.",
-      window:"Flow Window",
-      windowHint:"Aligned with Lucky Hour schedule.",
-
-      journalTitle:"TEMPLE JOURNAL",
-      journalSub:"Last 7 days (decision memory).",
-      noRecords:"No records yet.",
-
-      extraTitle:"TEMPLE LAYER",
-      extraSub:"Scrollable (not a single screen).",
-      extraBody:"Reserved for: Trophy Room 7/21/49, skins, VIP Hall, future TON Connect.",
+      oracleTap:"Tap ORACLE to receive guidance. Then choose: ENTER / WAIT / SKIP.",
+      disclaimer:"Ritualized UI. Not financial advice.",
 
       dockRitual:"Ritual",
       dockWheel:"Wheel",
       dockOracle:"Oracle",
       dockGate:"Gate",
-      dockRules:"Rules",
 
-      rulesTitle:"Rules / Indicator Guide",
-      close:"Close",
-      ok:"OK",
+      modalClose:"Close",
+      modalOk:"OK",
 
       payTitle:"Golden Altar",
       payLater:"Later",
-      payNow:"Donate 1 TON (Mock)",
-      payText1:"Free daily limit reached.",
-      payText2:"“Golden Altar” grants 1 more oracle for 1 TON (Mock).",
+      payNow:"Donate 1 TON",
+      payBody:`Daily Oracle limit reached.\nDonate 1 TON to cleanse the flow and unlock +1 Oracle.`,
 
-      riskTitle:"Risk Gate",
-      riskText1:"Confirm: Risk Aura & your own judgment.",
-      riskText2:"This will open an external link (your ref).",
-      riskAgree:"I understand the risk",
-      cancel:"Cancel",
-      go:"Enter"
+      usedSpin:"Wheel already used today.",
+      needOracleForGate:"Oracle first — then Gate.",
+      needWallet:"Connect wallet to donate.",
+      paySuccess:"Donation received. +1 Oracle unlocked.",
+      payFail:"Payment canceled or failed."
     },
 
     zh: {
       brand1:"TON TEMPLE",
-      brand2:"帝王量子福流仪式",
+      brand2:"福流神殿",
       timeLabel:"本地时间",
       modeLabel:"模式",
       langLabel:"语言",
-      rules:"规则",
-
-      dragonTitle:"Solar Dragon",
-      dragonSub:"中心 3D 徽章 + 行星环绕轨道。",
+      connect:"连接钱包",
+      connected:"已连接",
+      help:"指南",
 
       hudTitle:"神殿 HUD",
-      hudSub:"新手友好：所有指标都解释清楚。",
-      qkLabel:"QK — 量子福业值",
-      qkHint:"每日仪式能量：用于状态、进度与解锁。",
-      flowScoreLabel:"FLOW SCORE",
-      flowHint:"0–100 指标。越高越冷静。",
-      weatherLabel:"市场天气",
-      weatherHint:"用“合法词汇”表达，而不是“信号”。",
-      dailySeal:"今日印章",
-      sealStamped:"• 已盖章",
+      qk:"QK",
+      flow:"福流",
+      weather:"气象",
+      seal:"印章",
       streak:"连击",
-      streakHint:"靠坚持解锁，不是纯氪金。",
-      stats:"今日统计",
-      statsHint:"希望引擎：正向永远更多。",
-      caution:"谨慎",
-      social:"神殿脉冲",
-      socialHint:"无聊天的社交证明（安全、干净）。",
+      pulse:"脉冲",
+      today:"今日",
 
       ritualTitle:"每日仪式",
-      ritualSub:"每天一次慢速转盘。无模糊。",
       activateFlow:"启动福流",
       oracle:"神谕",
       gate:"开启之门",
-      forecast:"预测",
+      forecast:"类型",
       day:"DAY",
       ton:"TON",
       limit:"限制",
       limitExtra:"• 额外: 1 TON",
       oracleHead:"神殿指引",
       oracleTap:"点击 ORACLE 获取指引，然后选择：ENTER / WAIT / SKIP。",
-      enter:"ENTER",
-      wait:"WAIT",
-      skip:"SKIP",
-      disclaimer:"这是仪式化 UI。非投资建议。请自行判断。",
-
-      proTitle:"专业终端",
-      proSub:"给面子：严肃、干净、像终端。",
-      tonPulse:"TON Pulse",
-      tonPulseHint:"合成指标用于终端感（MVP）。",
-      vol:"波动率",
-      volHint:"影响 Risk Aura 与 Gate 提示。",
-      window:"福流窗口",
-      windowHint:"与 Lucky Hour 对齐。",
-
-      journalTitle:"神殿日志",
-      journalSub:"最近 7 天（决策记忆）。",
-      noRecords:"暂无记录。",
-
-      extraTitle:"神殿层",
-      extraSub:"可滚动（不止一屏）。",
-      extraBody:"预留：奖杯室 7/21/49、皮肤、VIP 大厅、未来 TON Connect。",
+      disclaimer:"仪式化 UI。非投资建议。",
 
       dockRitual:"仪式",
       dockWheel:"转盘",
       dockOracle:"神谕",
       dockGate:"之门",
-      dockRules:"规则",
 
-      rulesTitle:"规则 / 指标说明",
-      close:"关闭",
-      ok:"好的",
+      modalClose:"关闭",
+      modalOk:"好的",
 
       payTitle:"黄金祭坛",
       payLater:"稍后",
-      payNow:"供奉 1 TON（Mock）",
-      payText1:"今日免费次数已用完。",
-      payText2:"“黄金祭坛”以 1 TON 获得额外一次（当前 Mock）。",
+      payNow:"供奉 1 TON",
+      payBody:`今日神谕次数已用完。\n供奉 1 TON 以“净化福流”，解锁额外 1 次。`,
 
-      riskTitle:"风险之门",
-      riskText1:"进入前确认：风险光环与自我判断。",
-      riskText2:"将打开外部链接（你的 ref）。",
-      riskAgree:"我已理解风险",
-      cancel:"取消",
-      go:"进入"
+      usedSpin:"今日转盘已使用。",
+      needOracleForGate:"先神谕，再开门。",
+      needWallet:"请先连接钱包。",
+      paySuccess:"供奉成功：已解锁 +1 次神谕。",
+      payFail:"支付取消或失败。"
+    },
+
+    ru: {
+      brand1:"TON TEMPLE",
+      brand2:"Храм Потока",
+      timeLabel:"МЕСТНОЕ ВРЕМЯ",
+      modeLabel:"РЕЖИМ",
+      langLabel:"ЯЗЫК",
+      connect:"CONNECT",
+      connected:"CONNECTED",
+      help:"GUIDE",
+
+      hudTitle:"HUD ХРАМА",
+      qk:"QK",
+      flow:"FLOW",
+      weather:"ПОГОДА",
+      seal:"ПЕЧАТЬ",
+      streak:"СЕРИЯ",
+      pulse:"ПУЛЬС",
+      today:"СЕГОДНЯ",
+
+      ritualTitle:"ЕЖЕДНЕВНЫЙ РИТУАЛ",
+      activateFlow:"АКТИВИРОВАТЬ ПОТОК",
+      oracle:"ОРАКУЛ",
+      gate:"ОТКРЫТЬ ВРАТА",
+      forecast:"ТИП",
+      day:"DAY",
+      ton:"TON",
+      limit:"ЛИМИТ",
+      limitExtra:"• доп: 1 TON",
+      oracleHead:"Указ Храма",
+      oracleTap:"Нажми ORACLE и выбери: ENTER / WAIT / SKIP.",
+      disclaimer:"Ритуализированный UI. Не финсовет.",
+
+      dockRitual:"Ритуал",
+      dockWheel:"Колесо",
+      dockOracle:"Оракул",
+      dockGate:"Врата",
+
+      modalClose:"Закрыть",
+      modalOk:"ОК",
+
+      payTitle:"Золотой Алтарь",
+      payLater:"Позже",
+      payNow:"Пожертвовать 1 TON",
+      payBody:`Лимит Оракула на сегодня исчерпан.\nПожертвуй 1 TON, чтобы открыть +1 попытку.`,
+
+      usedSpin:"Колесо уже было сегодня.",
+      needOracleForGate:"Сначала Оракул — потом Врата.",
+      needWallet:"Сначала подключи кошелёк.",
+      paySuccess:"Оплата прошла. +1 Оракул открыт.",
+      payFail:"Платёж отменён или не прошёл."
     }
   };
 
-  const t = (key) => (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en[key] || key);
+  const t = (k) => (I18N[state.lang] && I18N[state.lang][k]) || (I18N.en[k] || k);
 
   function applyI18n(){
     document.documentElement.lang = state.lang;
@@ -1435,32 +1328,21 @@
     $('tTimeLabel').textContent = t('timeLabel');
     $('tModeLabel').textContent = t('modeLabel');
     $('tLangLabel').textContent = t('langLabel');
-    $('btnRules').textContent = t('rules');
 
-    $('tDragonTitle').textContent = t('dragonTitle');
-    $('tDragonSub').textContent = t('dragonSub');
+    $('btnHelp').textContent = '?';
+    $('btnConnect').textContent = state.wallet.connected ? t('connected') : t('connect');
 
     $('tHudTitle').textContent = t('hudTitle');
-    $('tHudSub').textContent = t('hudSub');
-    $('tQKLabel').textContent = t('qkLabel');
-    $('tQKHint').textContent = t('qkHint');
-    $('tFlowScoreLabel').textContent = t('flowScoreLabel');
-    $('tFlowHint').textContent = t('flowHint');
-    $('tWeatherLabel').textContent = t('weatherLabel');
-    $('tWeatherHint').textContent = t('weatherHint');
 
-    $('tDailySealLabel').textContent = t('dailySeal');
-    $('sealSub').textContent = t('sealStamped');
-
+    $('tQKLabel').textContent = t('qk');
+    $('tFlowScoreLabel').textContent = t('flow');
+    $('tWeatherLabel').textContent = t('weather');
+    $('tDailySealLabel').textContent = t('seal');
     $('tStreakLabel').textContent = t('streak');
-    $('tStreakHint').textContent = t('streakHint');
-    $('tStatsLabel').textContent = t('stats');
-    $('tStatsHint').textContent = t('statsHint');
-    $('tSocialLabel').textContent = t('social');
-    $('tSocialHint').textContent = t('socialHint');
+    $('tPulseLabel').textContent = t('pulse');
+    $('tStatsLabel').textContent = t('today');
 
     $('tRitualTitle').textContent = t('ritualTitle');
-    $('tRitualSub').textContent = t('ritualSub');
     $('btnSpin').textContent = t('activateFlow');
     $('btnOracle').textContent = t('oracle');
     $('btnGate').textContent = t('gate');
@@ -1471,57 +1353,58 @@
     $('limitPaywall').textContent = t('limitExtra');
     $('oracleHead').textContent = t('oracleHead');
     if(!state.oracle.last) $('oracleBody').textContent = t('oracleTap');
-    $('btnEnter').textContent = t('enter');
-    $('btnWait').textContent = t('wait');
-    $('btnSkip').textContent = t('skip');
     $('tDisclaimer').textContent = t('disclaimer');
-
-    $('tProTitle').textContent = t('proTitle');
-    $('tProSub').textContent = t('proSub');
-    $('tTonPulse').textContent = t('tonPulse');
-    $('tTonPulseHint').textContent = t('tonPulseHint');
-    $('tVol').textContent = t('vol');
-    $('tVolHint').textContent = t('volHint');
-    $('tWindow').textContent = t('window');
-    $('tWindowHint').textContent = t('windowHint');
-
-    $('tJournalTitle').textContent = t('journalTitle');
-    $('tJournalSub').textContent = t('journalSub');
-
-    $('tExtraTitle').textContent = t('extraTitle');
-    $('tExtraSub').textContent = t('extraSub');
-    $('tExtraBody').textContent = t('extraBody');
 
     $('dRitual').textContent = t('dockRitual');
     $('dWheel').textContent = t('dockWheel');
     $('dOracle').textContent = t('dockOracle');
     $('dGate').textContent = t('dockGate');
-    $('dRules').textContent = t('dockRules');
 
-    $('rulesTitle').textContent = t('rulesTitle');
-    $('rulesClose').textContent = t('close');
-    $('rulesOk').textContent = t('ok');
+    $('modalClose').textContent = t('modalClose');
+    $('modalOk').textContent = t('modalOk');
 
     $('payTitle').textContent = t('payTitle');
-    $('payClose').textContent = t('close');
+    $('payClose').textContent = t('modalClose');
     $('payLater').textContent = t('payLater');
-    $('payMock').textContent = t('payNow');
+    $('payTon').textContent = t('payNow');
+    $('payBody').textContent = t('payBody');
 
-    $('riskTitle').textContent = t('riskTitle');
-    $('riskClose').textContent = t('close');
-    $('riskCancel').textContent = t('cancel');
-    $('riskGo').textContent = t('go');
-
+    // LANG toggles: EN must always be "EN" (already)
     $('btnZH').classList.toggle('active', state.lang==='zh');
     $('btnEN').classList.toggle('active', state.lang==='en');
     $('btnRU').classList.toggle('active', state.lang==='ru');
+
+    $('btnRU').style.display = state.devMode ? 'inline-block' : 'none';
   }
 
-  /* ===== Dragon Planets (names per language) ===== */
+  /* ===== Dev Mode (RU) — long-press sigil 2s ===== */
+  function setupDevLongPress(){
+    const el = $('sigil');
+    let timer = null;
+
+    const start = () => {
+      clearTimeout(timer);
+      timer = setTimeout(()=>{
+        state.devMode = !state.devMode;
+        saveState();
+        applyI18n();
+        toast(state.devMode ? "DEV MODE: ON (RU)" : "DEV MODE: OFF");
+        haptic('light');
+      }, 2000);
+    };
+    const cancel = () => { clearTimeout(timer); timer = null; };
+
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointerup', cancel);
+    el.addEventListener('pointerleave', cancel);
+    el.addEventListener('pointercancel', cancel);
+  }
+
+  /* ===== Planets (labels) ===== */
   const PLANETS = {
-    ru: ["Меркурий","Венера","Земля","Марс","Юпитер","Сатурн","Уран","Нептун"],
     en: ["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],
-    zh: ["水星","金星","地球","火星","木星","土星","天王星","海王星"]
+    zh: ["水星","金星","地球","火星","木星","土星","天王星","海王星"],
+    ru: ["Меркурий","Венера","Земля","Марс","Юпитер","Сатурн","Уран","Нептун"]
   };
 
   function buildOrbits(){
@@ -1531,14 +1414,14 @@
     const names = PLANETS[state.lang] || PLANETS.en;
 
     const cfg = [
-      {d: 260, p: 14, t: 9.0,  z: -20, rx:"62deg", ry:"10deg", pz:  8,  a:"20deg",  c1:"#c2b280", c2:"#7a6a4a"},
-      {d: 320, p: 18, t: 12.0, z: -10, rx:"58deg", ry:"-8deg",pz: 10, a:"120deg", c1:"#f4caa6", c2:"#b77e53"},
-      {d: 390, p: 20, t: 15.5, z:  0,  rx:"54deg", ry:"14deg",pz: 12, a:"220deg", c1:"#3fa9f5", c2:"#1b3b8f"},
-      {d: 460, p: 16, t: 18.0, z:  8,  rx:"50deg", ry:"-10deg",pz: 14,a:"310deg", c1:"#ff7a4b", c2:"#8f1b10"},
-      {d: 560, p: 28, t: 24.0, z: 16,  rx:"46deg", ry:"8deg", pz: 18, a:"70deg",  c1:"#f1d07a", c2:"#b07c2b"},
-      {d: 650, p: 26, t: 30.0, z: 22,  rx:"44deg", ry:"-12deg",pz: 20,a:"170deg", c1:"#ffe8a8", c2:"#a7792b"},
-      {d: 740, p: 22, t: 36.0, z: 28,  rx:"42deg", ry:"10deg",pz: 22,a:"250deg", c1:"#88d7ff", c2:"#2a7a9b"},
-      {d: 840, p: 22, t: 44.0, z: 34,  rx:"40deg", ry:"-6deg", pz: 24,a:"340deg", c1:"#6fa8ff", c2:"#2b3f9f"},
+      {d: 300, p: 22, t: 10.0, z: -20, rx:"62deg", ry:"10deg", pz: 10, a:"18deg",  c1:"#cbbf86", c2:"#6f5f3a", ring:0},
+      {d: 370, p: 26, t: 13.5, z: -10, rx:"58deg", ry:"-8deg", pz: 12, a:"118deg", c1:"#f5caa2", c2:"#b3764c", ring:0},
+      {d: 450, p: 28, t: 17.0, z:  0,  rx:"54deg", ry:"14deg", pz: 14, a:"226deg", c1:"#43b3ff", c2:"#1b3a8f", ring:0},
+      {d: 530, p: 24, t: 20.0, z:  8,  rx:"50deg", ry:"-10deg",pz: 16, a:"308deg", c1:"#ff834e", c2:"#8f1b10", ring:0},
+      {d: 640, p: 38, t: 26.0, z: 16,  rx:"46deg", ry:"8deg", pz: 20, a:"68deg",  c1:"#f2d27a", c2:"#b07c2b", ring:0},
+      {d: 740, p: 36, t: 32.0, z: 22,  rx:"44deg", ry:"-12deg",pz: 22, a:"168deg", c1:"#ffe8a8", c2:"#a7792b", ring:1},
+      {d: 850, p: 32, t: 39.0, z: 28,  rx:"42deg", ry:"10deg",pz: 24, a:"246deg", c1:"#95e1ff", c2:"#2a7a9b", ring:0},
+      {d: 980, p: 32, t: 48.0, z: 34,  rx:"40deg", ry:"-6deg", pz: 26, a:"338deg", c1:"#6fa8ff", c2:"#2b3f9f", ring:0},
     ];
 
     cfg.forEach((c, i)=>{
@@ -1561,107 +1444,158 @@
       planet.style.setProperty("--a", c.a);
       planet.style.setProperty("--c1", c.c1);
       planet.style.setProperty("--c2", c.c2);
-      planet.setAttribute("data-name", names[i]);
+      if(c.ring) planet.setAttribute("data-ring","1");
 
+      const name = document.createElement("div");
+      name.className = "pName";
+      name.textContent = names[i];
+
+      planet.appendChild(name);
       spin.appendChild(planet);
       orbit.appendChild(spin);
       root.appendChild(orbit);
     });
   }
 
-  /* ===== Bang toggle ===== */
-  function toggleBang(){ $('bang').classList.toggle('open'); }
+  /* ===== Info content (modal) ===== */
+  const INFO = {
+    en: {
+      helpTitle:"Guide",
+      helpBody:
+`3 steps:
+1) Spin Wheel (1/day)
+2) Oracle gives Guidance (DAY / TON)
+3) Choose: ENTER / WAIT / SKIP (affects QK)
 
-  /* ===== Rules content (localized) ===== */
-  function rulesHTML(){
-    if(state.lang==='ru'){
-      return `
-        <div class="sec"><b>Одна строка:</b> Это “ритуализированный UI”. Мы продаём ритм/уверенность/статус, а не “сигналы”.</div>
-        <div class="sec"><b>QK</b> — энергия статуса. Даётся колесом/оракулом/решением.</div>
-        <div class="sec"><b>Flow Score (0–100)</b> — индикатор спокойствия решений.</div>
-        <div class="sec"><b>Погода рынка</b> — нарратив: CALM / BREEZE / HEAVY / STORM.</div>
-        <div class="sec"><b>Risk Aura</b> — LOW / MED / HIGH. Перед Gate всегда подтверждение.</div>
-        <div class="sec"><b>Wheel</b> — 1 раз в день.</div>
-        <div class="sec"><b>Oracle</b> — 1 раз в день бесплатно (DAY/TON), далее доп. попытка за 1 TON (Mock).</div>
-        <div class="sec"><b>Gate</b> — сначала Risk Gate, потом ref-ссылка.</div>
-        <div class="sec"><b>Важно:</b> не финсовет.</div>
-      `;
+Words:
+Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Golden Altar / Daily Seal`,
+      qk:"QK — Quantum Karma.\nStatus value. Grows by Wheel / Oracle / Decisions.",
+      flow:"Flow Score (0–100).\nCalmness indicator. Higher = calmer.",
+      weather:"Market Weather.\nNarrative layer (not “signals”).\nAffects Risk Aura.",
+      seal:"Daily Seal.\nDaily stamp to build habit and status.",
+      streak:"Streak.\nConsistency unlock path 7 / 21 / 49.",
+      pulse:"Temple Pulse.\nSocial proof without chat.",
+      today:"Today Stats.\nPositives dominate by design.",
+      ritual:"Wheel 1/day.\nOracle 1/day free.\nExtra Oracle via Golden Altar.",
+      pro:"PRO mode.\nSerious numbers & indicators.\nDesigned for terminal feel.",
+      pulseMetric:"Synthetic premium metric.\nUsed to shape Risk Aura feel.",
+      vol:"Volatility number.\nShapes Risk Aura and Gate caution.",
+      window:"Flow Window.\nAligned with Lucky Hour schedule.",
+      journal:"Journal stores last 7 days.\nWheel / Oracle / Decisions."
+    },
+    zh: {
+      helpTitle:"指南",
+      helpBody:
+`三步：
+1）转盘（每天 1 次）
+2）神谕给出指引（DAY / TON）
+3）选择：ENTER / WAIT / SKIP（影响 QK）
+
+词汇：
+Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Golden Altar / Daily Seal`,
+      qk:"QK（量子福业值）。\n用于状态与进度。\n来自：转盘 / 神谕 / 决策。",
+      flow:"Flow Score（0–100）。\n冷静度指标。\n越高越稳。",
+      weather:"Market Weather（市场气象）。\n叙事层（不是信号）。\n影响 Risk Aura。",
+      seal:"Daily Seal（今日印章）。\n每日盖章，形成习惯与身份。",
+      streak:"Streak（连击）。\n坚持解锁 7/21/49 路径。",
+      pulse:"Temple Pulse（神殿脉冲）。\n无聊天的社交证明。",
+      today:"今日统计。\n正向次数设计上更多。",
+      ritual:"转盘每天 1 次。\n神谕每天 1 次免费。\n额外神谕：黄金祭坛。",
+      pro:"PRO 模式。\n更严肃的数字与指标。\n终端感。",
+      pulseMetric:"合成指标（MVP）。\n用于塑造终端观感。",
+      vol:"波动率。\n塑造 Risk Aura 与 Gate 提示。",
+      window:"福流窗口。\n与 Lucky Hour 对齐。",
+      journal:"日志保存 7 天。\n记录转盘/神谕/决策。"
+    },
+    ru: {
+      helpTitle:"GUIDE",
+      helpBody:
+`3 шага:
+1) Колесо (1/день)
+2) Оракул (DAY / TON)
+3) ENTER / WAIT / SKIP (влияет на QK)
+
+Словарь:
+Flow Window / Temple Guidance / Market Weather / Risk Aura / Oracle / Gate / Golden Altar / Daily Seal`,
+      qk:"QK — статус.\nРастёт от колеса/оракула/решений.",
+      flow:"Flow Score 0–100.\nИндикатор спокойствия.",
+      weather:"Market Weather.\nНарратив (не сигналы).\nВлияет на Risk Aura.",
+      seal:"Daily Seal.\nЕжедневная печать привычки.",
+      streak:"Streak.\nПуть 7/21/49.",
+      pulse:"Pulse.\nСоц.доказательство без чата.",
+      today:"Today.\nПозитив доминирует по дизайну.",
+      ritual:"Колесо 1/день.\nОракул 1/день.\nАлтарь = доп. оракул.",
+      pro:"PRO.\nСерьёзные числа.\nТерминальный вид.",
+      pulseMetric:"Синтетика для премиум-вида.",
+      vol:"Волатильность.\nФормирует Risk Aura.",
+      window:"Окно потока.\nСинхрон Lucky Hour.",
+      journal:"Журнал 7 дней.\nКолесо/Оракул/Решения."
     }
-    if(state.lang==='zh'){
-      return `
-        <div class="sec"><b>一句话：</b>仪式化 UI。卖的是节奏/信心/状态，不是“信号”。</div>
-        <div class="sec"><b>QK</b>：状态能量，来自 Wheel/Oracle/Decision。</div>
-        <div class="sec"><b>Flow Score (0–100)</b>：决策冷静度指标。</div>
-        <div class="sec"><b>Market Weather</b>：CALM / BREEZE / HEAVY / STORM。</div>
-        <div class="sec"><b>Risk Aura</b>：LOW / MED / HIGH。Gate 前确认。</div>
-        <div class="sec"><b>Wheel</b>：每天一次。</div>
-        <div class="sec"><b>Oracle</b>：每天一次免费，额外 1 次 1 TON（Mock）。</div>
-        <div class="sec"><b>Gate</b>：Risk Gate → ref 链接。</div>
-        <div class="sec"><b>注意：</b>非投资建议。</div>
-      `;
-    }
-    return `
-      <div class="sec"><b>One-liner:</b> Ritualized UI. You sell rhythm/confidence/status — not “signals”.</div>
-      <div class="sec"><b>QK</b> status energy from Wheel/Oracle/Decisions.</div>
-      <div class="sec"><b>Flow Score (0–100)</b> calm indicator.</div>
-      <div class="sec"><b>Market Weather</b> narrative: CALM / BREEZE / HEAVY / STORM.</div>
-      <div class="sec"><b>Risk Aura</b> LOW / MED / HIGH; Gate confirmation.</div>
-      <div class="sec"><b>Wheel</b> 1/day.</div>
-      <div class="sec"><b>Oracle</b> 1/day free, extra 1 for 1 TON (Mock).</div>
-      <div class="sec"><b>Gate</b> Risk Gate → ref link.</div>
-      <div class="sec"><b>Note:</b> not financial advice.</div>
-    `;
+  };
+
+  function openModal(title, body){
+    $('modalTitle').textContent = title;
+    $('modalBody').textContent = body;
+    $('modalBack').style.display = 'flex';
+  }
+  function closeModal(){ $('modalBack').style.display = 'none'; }
+
+  /* ===== Lucky Hour ===== */
+  function isWithinWindow(d, baseHour, windowMinutes){
+    const start = new Date(d);
+    start.setHours(baseHour,0,0,0);
+    const end = new Date(start.getTime() + windowMinutes*60*1000);
+    return d >= start && d <= end;
   }
 
-  function openRules(){ $('rulesBody').innerHTML = rulesHTML(); $('rulesBack').style.display = 'flex'; }
-  function closeRules(){ $('rulesBack').style.display = 'none'; }
+  function computeLucky(){
+    const d = new Date();
+    const {morningHour, eveningHour, windowMinutes} = state.lucky;
+    const inMorning = isWithinWindow(d, morningHour, windowMinutes);
+    const inEvening = isWithinWindow(d, eveningHour, windowMinutes);
+    state.lucky.isLuckyNow = inMorning || inEvening;
 
-  function openPaywall(){
-    const html = `
-      <div class="sec"><b>${t('payText1')}</b></div>
-      <div class="sec">${t('payText2')}</div>
-    `;
-    $('payBody').innerHTML = html;
-    $('payBack').style.display = 'flex';
-  }
-  function closePaywall(){ $('payBack').style.display = 'none'; }
+    const todayMorning = new Date(d); todayMorning.setHours(morningHour,0,0,0);
+    const todayEvening = new Date(d); todayEvening.setHours(eveningHour,0,0,0);
+    const tomorrowMorning = new Date(d); tomorrowMorning.setDate(d.getDate()+1); tomorrowMorning.setHours(morningHour,0,0,0);
 
-  let riskConfirmed = false;
-  function openRiskGate(){
-    riskConfirmed = false;
-    $('riskBody').innerHTML = `
-      <div class="sec"><b>${t('riskText1')}</b></div>
-      <div class="sec">${t('riskText2')}</div>
-      <div class="sec">
-        <span style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,211,106,.18);background:rgba(255,211,106,.08)">
-          Risk Aura: <b>${state.risk}</b>
-        </span>
-      </div>
-      <div class="sec">
-        <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
-          <input id="riskCheck" type="checkbox" style="transform:scale(1.15)"/>
-          <span>${t('riskAgree')}</span>
-        </label>
-      </div>
-    `;
-    $('riskBack').style.display = 'flex';
-    setTimeout(()=>{
-      const cb = $('riskCheck');
-      if(cb) cb.addEventListener('change', ()=> riskConfirmed = cb.checked);
-    },0);
+    let nextStart = null;
+    if(d < todayMorning) nextStart = todayMorning;
+    else if(d < todayEvening) nextStart = todayEvening;
+    else nextStart = tomorrowMorning;
+
+    const diff = Math.max(0, nextStart - d);
+    state.lucky.nextLuckyIn = diff;
+
+    document.body.classList.toggle('luckyHour', state.lucky.isLuckyNow);
+
+    const hh = Math.floor(diff/3600000);
+    const mm = Math.floor((diff%3600000)/60000);
+    const ss = Math.floor((diff%60000)/1000);
+    $('luckyCountdown').textContent = `• ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+    $('windowTimer').textContent = `Next: ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
   }
-  function closeRiskGate(){ $('riskBack').style.display = 'none'; }
-  function goGate(){
-    if(!riskConfirmed) return;
-    closeRiskGate();
-    flash();
-    setTimeout(()=> window.open(state.gate.refUrl, "_blank"), 520);
+
+  function tickClock(){
+    $('localTime').textContent = nowHMS();
+    computeLucky();
+    setTimeout(tickClock, 250);
   }
 
   /* ===== Wheel ===== */
   const wheelCanvas = $('wheel');
   const wctx = wheelCanvas.getContext('2d');
   const luckSymbols = ["福","禄","寿","喜","财","吉","祥","安","顺","旺","昌","瑞","德","和","兴"];
+
+  const wheel = {
+    petals: 15,
+    angle: 0,
+    spinning:false,
+    velocity:0,
+    friction:0.987,
+    stopEps:0.0010,
+    resultIndex:null
+  };
 
   function resizeWheel(){
     const rect = wheelCanvas.getBoundingClientRect();
@@ -1681,20 +1615,20 @@
 
     const ringGrad = wctx.createRadialGradient(cx,cy,R*0.4,cx,cy,R*1.02);
     ringGrad.addColorStop(0, "rgba(255,211,106,.08)");
-    ringGrad.addColorStop(1, "rgba(255,43,63,.10)");
+    ringGrad.addColorStop(1, "rgba(184,0,29,.10)");
     wctx.fillStyle = ringGrad;
     wctx.beginPath(); wctx.arc(cx,cy,R*1.02,0,Math.PI*2); wctx.fill();
 
-    const N = state.wheel.petals;
+    const N = wheel.petals;
     const step = (Math.PI*2)/N;
-    const angle0 = state.wheel.angle;
+    const angle0 = wheel.angle;
 
     for(let i=0;i<N;i++){
       const a1 = angle0 + i*step;
       const a2 = a1 + step;
       const alt = (i%2===0);
-      const col1 = alt ? "rgba(180,0,29,.95)" : "rgba(255,43,63,.70)";
-      const col2 = alt ? "rgba(255,43,63,.55)" : "rgba(180,0,29,.85)";
+      const col1 = alt ? "rgba(184,0,29,.95)" : "rgba(255,43,63,.70)";
+      const col2 = alt ? "rgba(255,43,63,.55)" : "rgba(184,0,29,.85)";
       const g = wctx.createLinearGradient(
         cx + Math.cos(a1)*R, cy + Math.sin(a1)*R,
         cx + Math.cos(a2)*R, cy + Math.sin(a2)*R
@@ -1737,10 +1671,10 @@
   }
 
   function computeWheelIndex(){
-    const N = state.wheel.petals;
+    const N = wheel.petals;
     const step = (Math.PI*2)/N;
     const pointer = 0;
-    let a = (pointer - state.wheel.angle) % (Math.PI*2);
+    let a = (pointer - wheel.angle) % (Math.PI*2);
     if(a<0) a += Math.PI*2;
     return Math.floor(a/step);
   }
@@ -1753,56 +1687,80 @@
     else { state.weather = "STORM"; state.risk = "HIGH"; }
 
     $('weather').textContent = state.weather;
-    $('riskTag').textContent = `Risk Aura: ${state.risk}`;
+    $('riskTag').textContent = `Risk: ${state.risk}`;
+
+    const fw = (state.risk === 'LOW') ? "OPEN" : (state.risk === 'MED' ? "NARROW" : "CLOSED");
     $('chipWeather').textContent = `Market Weather: ${state.weather}`;
     $('chipAura').textContent = `Risk Aura: ${state.risk}`;
     $('chipAura').classList.toggle('ok', state.risk === 'LOW');
     $('chipAura').classList.toggle('red', state.risk === 'HIGH');
-
-    const fw = (state.risk === 'LOW') ? "OPEN" : (state.risk === 'MED' ? "NARROW" : "CLOSED");
     $('chipFlow').textContent = `Flow Window: ${fw}`;
     $('flowWindow').textContent = fw;
   }
 
+  function newDayResetIfNeeded(){
+    const k = dayKey();
+    if(state.today.key !== k){
+      state.today.key = k;
+      state.today.wheelUsed = false;
+      state.today.oracleUsed = false;
+      state.today.oraclePaidExtra = 0;
+      state.today.pos = irnd(6,12);
+      state.today.neg = irnd(0,2);
+      state.oracle.last = null;
+      state.oracle.decision = null;
+      state.streak = (state.streak || 0) + 1;
+      saveState();
+    }
+  }
+
   function startSpin(){
-    const tk = dayKey();
-    if(state.wheel.usedToday && state.today.key === tk){
-      openRules();
+    newDayResetIfNeeded();
+    if(state.today.wheelUsed){
+      toast(t('usedSpin'));
+      haptic('light');
       return;
     }
-    if(state.wheel.spinning) return;
+    if(wheel.spinning) return;
 
-    state.wheel.usedToday = true;
-    state.wheel.spinning = true;
-    state.wheel.resultIndex = null;
+    state.today.wheelUsed = true;
+    wheel.spinning = true;
+    wheel.resultIndex = null;
 
-    state.wheel.velocity = rnd(0.14, 0.18);
-    state.wheel.friction = 0.987;
-    state.wheel.stopEps = 0.0010;
+    // 7–10 sec feel
+    wheel.velocity = rnd(0.14, 0.18);
+    wheel.friction = 0.987;
+    wheel.stopEps = 0.0010;
 
     flash();
+    haptic('heavy');
     saveState();
+    renderHUD();
   }
 
   function wheelTick(){
-    if(state.wheel.spinning){
-      state.wheel.angle += state.wheel.velocity;
-      state.wheel.velocity *= state.wheel.friction;
-      state.wheel.velocity = clamp(state.wheel.velocity, 0, 0.22);
+    if(wheel.spinning){
+      wheel.angle += wheel.velocity;
+      wheel.velocity *= wheel.friction;
+      wheel.velocity = clamp(wheel.velocity, 0, 0.22);
 
-      if(state.wheel.velocity < state.wheel.stopEps){
-        state.wheel.spinning = false;
-        state.wheel.velocity = 0;
-        state.wheel.resultIndex = computeWheelIndex();
+      if(wheel.velocity < wheel.stopEps){
+        wheel.spinning = false;
+        wheel.velocity = 0;
+        wheel.resultIndex = computeWheelIndex();
 
-        const gain = rnd(2.2, 6.6);
+        const mult = state.lucky.isLuckyNow ? 1.25 : 1.0;
+        const gain = rnd(3, 12) * mult;
         state.qk = +(state.qk + gain).toFixed(2);
-        state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +8)), 0, 100);
+
+        // flow update
+        state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +10)), 0, 100);
 
         applyNarrativeFromFlow();
         flash();
+        haptic('success');
 
-        pushJournal({ type:"wheel", title:`Wheel → ${luckSymbols[state.wheel.resultIndex]}`, detail:`+${gain.toFixed(2)} QK` });
+        pushJournal({ type:"wheel", title:`Wheel → ${luckSymbols[wheel.resultIndex]}`, detail:`+${gain.toFixed(2)} QK` });
         enableChoicesIfOracleReady();
         saveState();
         renderHUD();
@@ -1814,25 +1772,6 @@
 
   /* ===== Oracle ===== */
   const oracleBank = {
-    ru: {
-      dayPos:[
-        "Удача рядом. Упростишь день — выиграешь: сделай одну главную задачу и получишь импульс.",
-        "День ровный. Не спеши: стабильность = победа.",
-        "Стратегия “меньше, но лучше”: меньше действий, больше качества."
-      ],
-      dayCaution:[
-        "Сегодня лучше удержаться, чем давить. Без импульсивных решений — вечером яснее.",
-        "День осторожности: без конфликтов и доказательств — сохраняй поток."
-      ],
-      tonPos:[
-        "Поток ровный. Если действовать — маленький размер, вход частями.",
-        "Смотри Risk Aura: LOW/MED → лёгкий вход. HIGH → ждать."
-      ],
-      tonCaution:[
-        "Лучше наблюдать. Если Risk Aura HIGH — только заметки, без действий.",
-        "Шумный поток: без тяжёлого размера и частых входов/выходов."
-      ]
-    },
     en: {
       dayPos:[
         "Prosperity is near. Keep it simple: one top task — momentum follows.",
@@ -1844,8 +1783,8 @@
         "Caution wins: avoid conflict, keep the flow."
       ],
       tonPos:[
-        "Wealth flow is steady. If you act: small size, split entries.",
-        "Check Risk Aura first: LOW/MED → small steps. HIGH → wait."
+        "Flow is steady. If you act: small size, split entries.",
+        "Check Risk Aura: LOW/MED → small steps. HIGH → wait."
       ],
       tonCaution:[
         "Better to observe. If Risk Aura is HIGH, record notes — no action.",
@@ -1870,15 +1809,30 @@
         "今日宜观望。Risk Aura HIGH 只记录不操作。",
         "气场偏乱。避免重仓与频繁进出。"
       ]
+    },
+    ru: {
+      dayPos:[
+        "Удача рядом. Упростишь день — выиграешь: сделай одну главную задачу.",
+        "День ровный. Не спеши: стабильность = победа.",
+        "Меньше действий — больше качества."
+      ],
+      dayCaution:[
+        "Сегодня лучше удержаться, чем давить. Без импульсивных решений.",
+        "День осторожности: без конфликтов — сохраняй поток."
+      ],
+      tonPos:[
+        "Поток ровный. Если действовать — маленький размер, вход частями.",
+        "LOW/MED → лёгкий вход. HIGH → ждать."
+      ],
+      tonCaution:[
+        "Лучше наблюдать. HIGH — только заметки, без действий.",
+        "Шумный поток: без тяжёлого размера и частых входов."
+      ]
     }
   };
 
   function canUseOracle(){
-    if(state.today.key !== dayKey()){
-      state.today.key = dayKey();
-      state.today.oracleUsed = false;
-      state.today.oraclePaidExtra = 0;
-    }
+    newDayResetIfNeeded();
     return !state.today.oracleUsed || state.today.oraclePaidExtra > 0;
   }
   function consumeOracleUse(){
@@ -1937,7 +1891,8 @@
     state.oracle.last = o;
     state.oracle.decision = null;
 
-    const gain = o.isCaution ? rnd(0.6, 1.8) : rnd(1.2, 3.6);
+    const mult = state.lucky.isLuckyNow ? 1.25 : 1.0;
+    const gain = (o.isCaution ? rnd(2, 5) : rnd(4, 8)) * mult;
     state.qk = +(state.qk + gain).toFixed(2);
 
     if(o.isCaution) state.today.neg += 1; else state.today.pos += 1;
@@ -1945,8 +1900,9 @@
     setOracleUI(o);
     enableChoicesIfOracleReady();
     flash();
+    haptic('light');
 
-    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:o.isCaution ? t('caution') : "Positive" });
+    pushJournal({ type:"oracle", title:`Oracle (${o.type.toUpperCase()}) → ${o.suggested}`, detail:`+${gain.toFixed(2)} QK` });
     saveState();
     renderHUD();
   }
@@ -1957,15 +1913,22 @@
 
     let delta = 0;
     if(dec==='ENTER'){
-      delta = (state.risk==='HIGH') ? rnd(-2.0, 0.8) : rnd(1.0, 4.0);
+      delta = (state.risk==='HIGH') ? rnd(-2.0, 0.8) : rnd(1.0, 5.0);
     } else if(dec==='WAIT'){
-      delta = rnd(0.4, 2.4);
+      delta = rnd(1.0, 3.0);
     } else {
-      delta = rnd(0.8, 2.2);
+      delta = rnd(0.5, 2.0);
     }
+
+    if(state.lucky.isLuckyNow) delta *= 1.25;
 
     state.qk = +(state.qk + delta).toFixed(2);
     flash();
+    haptic('light');
+
+    // Coins shower on decisions
+    coinsBurst(dec);
+
     pushJournal({ type:"decision", title:`Decision → ${dec}`, detail:`QK ${delta>=0?'+':''}${delta.toFixed(2)}` });
     renderHUD();
     saveState();
@@ -1981,11 +1944,11 @@
 
   function renderJournal(){
     if(state.journal.length === 0){
-      $('journal').textContent = t('noRecords');
+      $('journal').textContent = (state.lang==='zh') ? "暂无记录。" : (state.lang==='ru' ? "Пока нет записей." : "No records yet.");
       return;
     }
     const lines = state.journal.map(j => {
-      const icon = (j.type==='wheel') ? "🎡" : (j.type==='oracle' ? "🧿" : "⟠");
+      const icon = (j.type==='wheel') ? "轮" : (j.type==='oracle' ? "谕" : "门");
       return `${icon} ${j.date} ${j.time} — ${j.title} • ${j.detail}`;
     });
     $('journal').textContent = lines.join("\n");
@@ -1993,9 +1956,9 @@
 
   /* ===== HUD ===== */
   const seals = {
-    ru: ["ПЕЧАТЬ ДОСТАТКА","ПЕЧАТЬ БЛАГОСЛОВЕНИЯ","ПЕЧАТЬ ДРАКОНА","ВЕЧНАЯ УДАЧА","ПЕЧАТЬ ПОТОКА"],
     en: ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"],
-    zh: ["今日财印","天赐福印","金龙护印","富贵长明","福运相随"]
+    zh: ["今日财印","天赐福印","金龙护印","富贵长明","福运相随"],
+    ru: ["ПЕЧАТЬ ДОСТАТКА","ПЕЧАТЬ БЛАГОСЛОВЕНИЯ","ПЕЧАТЬ ДРАКОНА","ВЕЧНАЯ УДАЧА","ПЕЧАТЬ ПОТОКА"]
   };
 
   function pickDailySeal(){
@@ -2003,6 +1966,7 @@
     let hash = 0; for(const c of k) hash = (hash*31 + c.charCodeAt(0))>>>0;
     const arr = seals[state.lang] || seals.en;
     $('dailySeal').textContent = arr[hash % arr.length];
+    $('sealSub').textContent = state.lucky.isLuckyNow ? "Lucky Hour" : "—";
   }
 
   function renderHUD(){
@@ -2013,16 +1977,18 @@
     const qk = state.qk;
     $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "BALANCED");
 
-    $('riskTag').textContent = `Risk Aura: ${state.risk}`;
+    $('riskTag').textContent = `Risk: ${state.risk}`;
+
     $('posCount').textContent = String(state.today.pos);
-    $('negCountTag').textContent = `${t('caution')}: ${state.today.neg}`;
+    $('negCountTag').textContent = `${state.lang==='zh' ? '谨慎' : (state.lang==='ru' ? 'Осторожность' : 'Caution')}: ${state.today.neg}`;
 
     $('socialA').textContent = state.social.a.toLocaleString();
     $('socialB').textContent = `VIP: ${state.social.vip}`;
 
     $('streak').textContent = String(state.streak);
-    $('cycleTag').textContent = "7/21/49 Path";
+    $('cycleTag').textContent = "7/21/49";
 
+    // Pro metrics (synthetic)
     const pulse = (state.flowScore>=60) ? `+${rnd(.2,1.8).toFixed(2)}%` : `-${rnd(.1,1.2).toFixed(2)}%`;
     $('tonPulse').textContent = pulse;
     $('liqPulse').textContent = `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
@@ -2031,56 +1997,14 @@
     $('flowWindow').textContent = (state.risk==='LOW')?'OPEN':(state.risk==='MED')?'NARROW':'CLOSED';
 
     const used = state.today.oracleUsed ? 1 : 0;
-    $('limitText').textContent = `${used} / day`;
+    $('limitText').textContent = `${used} / 1`;
 
     pickDailySeal();
     applyNarrativeFromFlow();
     renderJournal();
   }
 
-  /* ===== Lucky Hour ===== */
-  function isWithinWindow(d, baseHour, windowMinutes){
-    const start = new Date(d);
-    start.setHours(baseHour,0,0,0);
-    const end = new Date(start.getTime() + windowMinutes*60*1000);
-    return d >= start && d <= end;
-  }
-
-  function computeLucky(){
-    const d = new Date();
-    const {morningHour, eveningHour, windowMinutes} = state.lucky;
-    const inMorning = isWithinWindow(d, morningHour, windowMinutes);
-    const inEvening = isWithinWindow(d, eveningHour, windowMinutes);
-    state.lucky.isLuckyNow = inMorning || inEvening;
-
-    const todayMorning = new Date(d); todayMorning.setHours(morningHour,0,0,0);
-    const todayEvening = new Date(d); todayEvening.setHours(eveningHour,0,0,0);
-    const tomorrowMorning = new Date(d); tomorrowMorning.setDate(d.getDate()+1); tomorrowMorning.setHours(morningHour,0,0,0);
-
-    let nextStart = null;
-    if(d < todayMorning) nextStart = todayMorning;
-    else if(d < todayEvening) nextStart = todayEvening;
-    else nextStart = tomorrowMorning;
-
-    const diff = Math.max(0, nextStart - d);
-    state.lucky.nextLuckyIn = diff;
-
-    document.body.classList.toggle('luckyHour', state.lucky.isLuckyNow);
-
-    const hh = Math.floor(diff/3600000);
-    const mm = Math.floor((diff%3600000)/60000);
-    const ss = Math.floor((diff%60000)/1000);
-    $('luckyCountdown').textContent = `• Next Lucky Hour ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
-    $('windowTimer').textContent = `Next: ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
-  }
-
-  function tickClock(){
-    $('localTime').textContent = nowHMS();
-    computeLucky();
-    setTimeout(tickClock, 250);
-  }
-
-  /* ===== Mode + Lang ===== */
+  /* ===== Mode / Lang / Forecast ===== */
   function setMode(mode){
     state.mode = mode;
     $('btnRitual').classList.toggle('active', mode==='ritual');
@@ -2090,9 +2014,11 @@
   }
 
   function setLang(lang){
+    // ZH default; EN secondary; RU only if dev
+    if(lang==='ru' && !state.devMode) return;
     state.lang = lang;
     applyI18n();
-    buildOrbits();          // IMPORTANT: planet names translated
+    buildOrbits();
     renderHUD();
     saveState();
   }
@@ -2101,17 +2027,371 @@
     state.oracle.type = type;
     $('btnForecastDay').classList.toggle('active', type==='day');
     $('btnForecastTON').classList.toggle('active', type==='ton');
+
+    // Make switching visible even before pressing Oracle
+    if(!state.oracle.last){
+      $('oracleBody').textContent = t('oracleTap');
+      $('oracleStamp').textContent = `— • ${type.toUpperCase()}`;
+      $('oracleHead').textContent = `${t('oracleHead')}`;
+    }
     saveState();
   }
 
-  function mockPay(){
-    state.today.oraclePaidExtra += 1;
-    closePaywall();
+  /* ===== Help & Info ===== */
+  function openHelp(){
+    const bank = INFO[state.lang] || INFO.en;
+    openModal(bank.helpTitle, bank.helpBody);
+  }
+
+  function openInfo(key){
+    const bank = INFO[state.lang] || INFO.en;
+    const titleMap = {
+      qk:"QK", flow:"FLOW", weather:"WEATHER", seal:"SEAL", streak:"STREAK", pulse:"PULSE", today:"TODAY",
+      ritual:"RITUAL", pro:"PRO", pulseMetric:"TON PULSE", vol:"VOLATILITY", window:"FLOW WINDOW", journal:"JOURNAL"
+    };
+    const title = titleMap[key] || "INFO";
+    openModal(title, bank[key] || "—");
+  }
+
+  /* ===== Gate (no more weird checkbox modal) ===== */
+  function openGate(){
+    if(!state.oracle.last){
+      toast(t('needOracleForGate'));
+      haptic('light');
+      return;
+    }
     flash();
-    saveState();
+    haptic('heavy');
+    setTimeout(()=> window.open(state.gate.refUrl, "_blank"), 420);
   }
 
-  /* ===== Dock icon spin ===== */
+  /* ===== FX: Dust + Meteors + Gold chunks + Comets ===== */
+  const dustC = $('fxDust');
+  const metC = $('fxMeteors');
+  const coinC = $('fxCoins');
+
+  const dctx = dustC.getContext('2d');
+  const mctx = metC.getContext('2d');
+  const cctx = coinC.getContext('2d');
+
+  function resizeFX(){
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    [dustC, metC, coinC].forEach(c=>{
+      c.width = Math.floor(innerWidth * dpr);
+      c.height = Math.floor(innerHeight * dpr);
+      c.style.width = innerWidth+"px";
+      c.style.height = innerHeight+"px";
+      const ctx = c.getContext('2d');
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    });
+  }
+
+  // Dust particles
+  let dust = [];
+  function initDust(){
+    dust = [];
+    const base = state.lucky.isLuckyNow ? irnd(180,220) : irnd(110,140);
+    for(let i=0;i<base;i++){
+      dust.push({
+        x: Math.random()*innerWidth,
+        y: Math.random()*innerHeight,
+        r: rnd(0.6, 2.2),
+        a: rnd(0.08, 0.42),
+        vx: rnd(-0.05, 0.05),
+        vy: rnd(-0.18, -0.04),
+        tw: rnd(0, Math.PI*2),
+        streak: Math.random() < 0.11
+      });
+    }
+  }
+
+  function drawDust(){
+    dctx.clearRect(0,0,innerWidth,innerHeight);
+    for(const p of dust){
+      p.tw += 0.02;
+      const tw = 0.65 + 0.35*Math.sin(p.tw);
+      p.x += p.vx + rnd(-0.03,0.03)*0.2;
+      p.y += p.vy;
+
+      if(p.y < -20) p.y = innerHeight + 20;
+      if(p.x < -20) p.x = innerWidth + 20;
+      if(p.x > innerWidth+20) p.x = -20;
+
+      dctx.beginPath();
+      dctx.fillStyle = `rgba(255,211,106,${p.a*tw})`;
+      dctx.shadowColor = `rgba(255,211,106,${p.a*0.6})`;
+      dctx.shadowBlur = 12;
+      dctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      dctx.fill();
+
+      if(p.streak && Math.random() < 0.11){
+        dctx.shadowBlur = 0;
+        dctx.strokeStyle = `rgba(255,211,106,${p.a*0.55})`;
+        dctx.lineWidth = 1;
+        dctx.beginPath();
+        dctx.moveTo(p.x, p.y);
+        dctx.lineTo(p.x - p.vx*120, p.y - p.vy*120);
+        dctx.stroke();
+      }
+    }
+  }
+
+  // Meteors + gold chunks + comets
+  let meteors = [];
+  function spawnMeteor(kind="chunk"){
+    const lucky = state.lucky.isLuckyNow;
+
+    const fromLeft = Math.random() < 0.5;
+    const baseSpeed = kind==="comet" ? rnd(0.9, 1.6) : rnd(0.28, 0.62); // comet faster
+    const vx = (fromLeft ? 1 : -1) * baseSpeed;
+    const vy = kind==="comet" ? rnd(-0.35,0.35) : rnd(-0.12,0.12);
+
+    const len = kind==="comet" ? rnd(160, 320) : rnd(120, 260);
+    const thick = kind==="comet" ? rnd(2, 5) : rnd(6, 14);
+
+    meteors.push({
+      kind,
+      x: fromLeft ? -len : innerWidth + len,
+      y: rnd(0, innerHeight),
+      vx, vy,
+      len, thick,
+      life: 1.0,
+      rot: Math.atan2(vy, vx)
+    });
+
+    // cap
+    if(meteors.length > 28) meteors.shift();
+  }
+
+  function drawMeteors(){
+    mctx.clearRect(0,0,innerWidth,innerHeight);
+
+    // spawn base rare always
+    const baseSpawn = state.lucky.isLuckyNow ? 0.010 : 0.006;
+    if(Math.random() < baseSpawn){
+      spawnMeteor("chunk");
+    }
+    // rare comets always
+    if(Math.random() < (state.lucky.isLuckyNow ? 0.0032 : 0.0018)){
+      spawnMeteor("comet");
+    }
+
+    for(const m of meteors){
+      m.x += m.vx;
+      m.y += m.vy;
+      m.life *= 0.997;
+
+      // gradient body
+      mctx.save();
+      mctx.translate(m.x, m.y);
+      mctx.rotate(m.rot);
+
+      const g = mctx.createLinearGradient(-m.len,0, 0,0);
+      g.addColorStop(0, "rgba(255,211,106,0)");
+      g.addColorStop(0.55, "rgba(255,211,106,.55)");
+      g.addColorStop(0.78, "rgba(255,243,209,.85)");
+      g.addColorStop(1, "rgba(255,211,106,.25)");
+
+      mctx.fillStyle = g;
+      mctx.beginPath();
+      mctx.roundRect(-m.len, -m.thick/2, m.len, m.thick, m.thick/2);
+      mctx.fill();
+
+      // tail sparks
+      const sparks = irnd(2,6);
+      for(let i=0;i<sparks;i++){
+        const sx = -rnd(m.len*0.35, m.len*0.95);
+        const sy = rnd(-m.thick*1.4, m.thick*1.4);
+        mctx.fillStyle = `rgba(255,243,209,${rnd(0.12,0.35)})`;
+        mctx.beginPath();
+        mctx.arc(sx, sy, rnd(1.2, 2.6), 0, Math.PI*2);
+        mctx.fill();
+      }
+
+      // micro scratches
+      if(m.kind==="chunk"){
+        mctx.strokeStyle = "rgba(0,0,0,.18)";
+        mctx.lineWidth = 1;
+        for(let i=0;i<4;i++){
+          const y = rnd(-m.thick/2, m.thick/2);
+          mctx.beginPath();
+          mctx.moveTo(-m.len*rnd(0.18,0.45), y);
+          mctx.lineTo(-m.len*rnd(0.55,0.95), y + rnd(-1,1));
+          mctx.stroke();
+        }
+      }
+
+      mctx.restore();
+    }
+
+    // remove offscreen
+    meteors = meteors.filter(m => (m.x > -m.len*2 && m.x < innerWidth+m.len*2 && m.y > -200 && m.y < innerHeight+200 && m.life > 0.25));
+  }
+
+  /* ===== Coins shower on decision ===== */
+  let coins = [];
+  function coinsBurst(dec){
+    const count = (dec==='ENTER') ? 22 : (dec==='WAIT' ? 16 : 12);
+    const strength = (dec==='ENTER') ? 1.0 : (dec==='WAIT' ? 0.85 : 0.70);
+
+    for(let i=0;i<count;i++){
+      coins.push({
+        x: rnd(innerWidth*0.15, innerWidth*0.85),
+        y: -rnd(10, 260),
+        vx: rnd(-0.6, 0.6) * strength,
+        vy: rnd(3.2, 6.4) * strength,
+        r: rnd(3.5, 6.5),
+        rot: rnd(0, Math.PI*2),
+        vr: rnd(-0.18, 0.18),
+        a: rnd(0.75, 1.0),
+        life: 1.0
+      });
+    }
+  }
+
+  function drawCoins(){
+    cctx.clearRect(0,0,innerWidth,innerHeight);
+    if(coins.length === 0) return;
+
+    for(const k of coins){
+      k.x += k.vx;
+      k.y += k.vy;
+      k.vy *= 1.01;
+      k.rot += k.vr;
+      k.life *= 0.985;
+
+      cctx.save();
+      cctx.translate(k.x, k.y);
+      cctx.rotate(k.rot);
+
+      const g = cctx.createRadialGradient(0,0, 1, 0,0, k.r*1.8);
+      g.addColorStop(0, `rgba(255,243,209,${0.95*k.a})`);
+      g.addColorStop(0.55, `rgba(255,211,106,${0.85*k.a})`);
+      g.addColorStop(1, `rgba(184,134,11,${0.55*k.a})`);
+
+      cctx.fillStyle = g;
+      cctx.beginPath();
+      cctx.ellipse(0,0, k.r*1.2, k.r, 0, 0, Math.PI*2);
+      cctx.fill();
+
+      cctx.strokeStyle = `rgba(0,0,0,${0.18*k.a})`;
+      cctx.lineWidth = 1;
+      cctx.beginPath();
+      cctx.ellipse(0,0, k.r*0.95, k.r*0.78, 0, 0, Math.PI*2);
+      cctx.stroke();
+
+      cctx.restore();
+    }
+
+    coins = coins.filter(k => k.y < innerHeight+120 && k.life > 0.35);
+  }
+
+  function fxLoop(){
+    // lucky dust count adapt
+    if(state.lucky.isLuckyNow && dust.length < 180) initDust();
+    if(!state.lucky.isLuckyNow && dust.length > 160) initDust();
+
+    drawDust();
+    drawMeteors();
+    drawCoins();
+    requestAnimationFrame(fxLoop);
+  }
+
+  /* ===== TonConnect UI (CDN) ===== */
+  let tonUI = null;
+
+  async function initTonConnect(){
+    // TonConnect UI loads from external script (added below in HTML)
+    if(!window.TON_CONNECT_UI) return;
+
+    tonUI = new window.TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://businessstpeterburg-design.github.io/facai-app/tonconnect-manifest.json",
+      buttonRootId: null
+    });
+
+    // Restore session if possible
+    try{
+      const wallet = tonUI.wallet;
+      if(wallet?.account?.address){
+        state.wallet.connected = true;
+        state.wallet.address = wallet.account.address;
+      }
+    }catch(e){}
+
+    tonUI.onStatusChange((wallet)=>{
+      if(wallet?.account?.address){
+        state.wallet.connected = true;
+        state.wallet.address = wallet.account.address;
+        $('btnConnect').textContent = t('connected');
+        toast("Wallet connected");
+        haptic('success');
+      } else {
+        state.wallet.connected = false;
+        state.wallet.address = null;
+        $('btnConnect').textContent = t('connect');
+      }
+      saveState();
+    });
+
+    $('btnConnect').addEventListener('click', async ()=>{
+      try{
+        if(state.wallet.connected){
+          // disconnect
+          await tonUI.disconnect();
+          toast("Disconnected");
+          return;
+        }
+        await tonUI.openModal();
+      }catch(e){
+        toast("TonConnect not available");
+      }
+    });
+  }
+
+  function openPaywall(){
+    $('payBack').style.display = 'flex';
+  }
+  function closePaywall(){ $('payBack').style.display = 'none'; }
+
+  async function pay1TON(){
+    if(!state.wallet.connected || !tonUI){
+      toast(t('needWallet'));
+      return;
+    }
+
+    const amountNano = String(Math.floor(ORACLE_PRICE_TON * 1e9));
+
+    const tx = {
+      validUntil: Math.floor(Date.now()/1000) + 300,
+      messages: [
+        {
+          address: RECEIVER_TONKEEPER,
+          amount: amountNano,
+          payload: "" // optional
+        }
+      ]
+    };
+
+    try{
+      $('payTon').disabled = true;
+      await tonUI.sendTransaction(tx);
+
+      // success: unlock +1 oracle attempt
+      state.today.oraclePaidExtra += 1;
+      saveState();
+
+      closePaywall();
+      flash();
+      haptic('success');
+      toast(t('paySuccess'));
+      $('payTon').disabled = false;
+    }catch(e){
+      $('payTon').disabled = false;
+      toast(t('payFail'));
+    }
+  }
+
+  /* ===== Events ===== */
   function spinDockIcon(btn, dir='R'){
     const icon = btn.querySelector('.dockIcon');
     if(!icon) return;
@@ -2121,17 +2401,17 @@
     setTimeout(()=>icon.classList.remove('spinL','spinR'), 1100);
   }
 
-  /* ===== Events ===== */
   function bindEvents(){
-    $('btnBang').addEventListener('click', toggleBang);
+    $('btnHelp').addEventListener('click', openHelp);
 
-    $('helpBtn').addEventListener('click', openRules);
-    $('btnRules').addEventListener('click', openRules);
-    $('dockRules').addEventListener('click', ()=>{ spinDockIcon($('dockRules'),'L'); openRules(); });
+    $('modalClose').addEventListener('click', closeModal);
+    $('modalOk').addEventListener('click', closeModal);
+    $('modalBack').addEventListener('click', (e)=>{ if(e.target.id==='modalBack') closeModal(); });
 
-    $('rulesClose').addEventListener('click', closeRules);
-    $('rulesOk').addEventListener('click', closeRules);
-    $('rulesBack').addEventListener('click', (e)=>{ if(e.target.id==='rulesBack') closeRules(); });
+    // Info buttons
+    document.querySelectorAll('.iBtn[data-info]').forEach(b=>{
+      b.addEventListener('click', ()=> openInfo(b.getAttribute('data-info')));
+    });
 
     $('btnRitual').addEventListener('click', ()=> setMode('ritual'));
     $('btnPro').addEventListener('click', ()=> setMode('pro'));
@@ -2145,10 +2425,7 @@
 
     $('btnSpin').addEventListener('click', startSpin);
     $('btnOracle').addEventListener('click', runOracle);
-    $('btnGate').addEventListener('click', ()=>{
-      if(!state.oracle.last){ openRules(); return; }
-      openRiskGate();
-    });
+    $('btnGate').addEventListener('click', openGate);
 
     $('btnEnter').addEventListener('click', ()=> takeDecision('ENTER'));
     $('btnWait').addEventListener('click', ()=> takeDecision('WAIT'));
@@ -2170,194 +2447,62 @@
     });
     $('dockGate').addEventListener('click', ()=>{
       spinDockIcon($('dockGate'),'R');
-      if(!state.oracle.last){ openRules(); return; }
-      openRiskGate();
+      openGate();
     });
 
     $('payClose').addEventListener('click', closePaywall);
     $('payLater').addEventListener('click', closePaywall);
-    $('payMock').addEventListener('click', mockPay);
+    $('payTon').addEventListener('click', pay1TON);
     $('payBack').addEventListener('click', (e)=>{ if(e.target.id==='payBack') closePaywall(); });
 
-    $('riskClose').addEventListener('click', closeRiskGate);
-    $('riskCancel').addEventListener('click', closeRiskGate);
-    $('riskGo').addEventListener('click', goGate);
-    $('riskBack').addEventListener('click', (e)=>{ if(e.target.id==='riskBack') closeRiskGate(); });
-
-    window.addEventListener('resize', resizeWheel);
+    window.addEventListener('resize', ()=>{
+      resizeWheel();
+      resizeFX();
+      initDust();
+    });
   }
 
   /* ===== Init ===== */
   loadState();
 
-  if(state.today.key !== dayKey()){
-    state.today.key = dayKey();
-    state.today.pos = irnd(6,12);
-    state.today.neg = irnd(0,2);
-    state.today.oracleUsed = false;
-    state.today.oraclePaidExtra = 0;
-    state.wheel.usedToday = false;
-  }
+  // enforce default ZH unless dev wants RU
+  if(!['zh','en','ru'].includes(state.lang)) state.lang = 'zh';
+  if(state.lang==='ru' && !state.devMode) state.lang = 'zh';
 
-  setMode(state.mode || 'ritual');
+  newDayResetIfNeeded();
   applyNarrativeFromFlow();
 
+  setupDevLongPress();
   applyI18n();
   buildOrbits();
 
   resizeWheel();
+  resizeFX();
+  initDust();
+
   renderHUD();
   bindEvents();
   tickClock();
   wheelTick();
+  fxLoop();
+
+  // default oracle placeholder shows chosen type
+  $('oracleBody').textContent = t('oracleTap');
+  $('oracleStamp').textContent = `— • ${state.oracle.type.toUpperCase()}`;
+  enableChoicesIfOracleReady();
 
   </script>
 
-  <!-- Three.js background (optional, behind UI and not clickable) -->
-  <script type="module">
-    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-
-    const canvas = document.getElementById("webgl");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:"high-performance" });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.1, 200);
-    camera.position.set(0, 2.4, 9.2);
-
-    const key = new THREE.DirectionalLight(0xffd36a, 1.2);
-    key.position.set(4, 8, 6);
-    scene.add(key);
-
-    const rim = new THREE.DirectionalLight(0xffffff, 0.55);
-    rim.position.set(-6, 3, -4);
-    scene.add(rim);
-
-    const amb = new THREE.AmbientLight(0x2a1c08, 0.9);
-    scene.add(amb);
-
-    const gold = new THREE.MeshStandardMaterial({ color:0xffd36a, metalness:1.0, roughness:0.18, emissive:0x1a0f00, emissiveIntensity:0.25 });
-    const obsidian = new THREE.MeshStandardMaterial({ color:0x040405, metalness:0.45, roughness:0.35, emissive:0x000000, emissiveIntensity:0.2 });
-    const crimson = new THREE.MeshStandardMaterial({ color:0xb8001d, metalness:0.35, roughness:0.35, emissive:0x2a0008, emissiveIntensity:0.45 });
-
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(18, 64), obsidian);
-    floor.rotation.x = -Math.PI/2;
-    floor.position.y = -0.02;
-    scene.add(floor);
-
-    const colGeo = new THREE.CylinderGeometry(0.28, 0.34, 4.2, 24);
-    for(let i=0;i<8;i++){
-      const a = (i/8)*Math.PI*2;
-      const x = Math.cos(a)*4.8;
-      const z = Math.sin(a)*4.8;
-      const col = new THREE.Mesh(colGeo, obsidian);
-      col.position.set(x, 2.05, z);
-      scene.add(col);
-
-      const cap = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.08, 16, 48), gold);
-      cap.position.set(x, 4.18, z);
-      cap.rotation.x = Math.PI/2;
-      scene.add(cap);
-    }
-
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.12, 24, 96), gold);
-    ring.position.set(0, 2.0, 0);
-    scene.add(ring);
-
-    const core = new THREE.Mesh(new THREE.CircleGeometry(0.86, 64), crimson);
-    core.position.set(0, 2.0, 0.01);
-    scene.add(core);
-
-    const glowPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(6.2, 6.2),
-      new THREE.MeshBasicMaterial({ color:0xffd36a, transparent:true, opacity:0.06 })
-    );
-    glowPlane.position.set(0,2.0,0);
-    scene.add(glowPlane);
-
-    const dustCount = 700;
-    const dustPos = new Float32Array(dustCount*3);
-    for(let i=0;i<dustCount;i++){
-      dustPos[i*3+0] = (Math.random()-0.5)*16;
-      dustPos[i*3+1] = Math.random()*8;
-      dustPos[i*3+2] = (Math.random()-0.5)*16;
-    }
-    const dustGeo = new THREE.BufferGeometry();
-    dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-    const dustMat = new THREE.PointsMaterial({ color:0xffd36a, size:0.035, transparent:true, opacity:0.65 });
-    const dust = new THREE.Points(dustGeo, dustMat);
-    scene.add(dust);
-
-    const meteorGeo = new THREE.IcosahedronGeometry(0.18, 1);
-    const meteors = [];
-    function spawnMeteor(){
-      const m = new THREE.Mesh(meteorGeo, gold);
-      const fromLeft = Math.random() < 0.5;
-      m.position.set(fromLeft? -10: 10, 1.2 + Math.random()*4.8, (Math.random()-0.5)*8);
-      m.userData.vx = fromLeft? (0.012+Math.random()*0.018) : -(0.012+Math.random()*0.018);
-      m.userData.vy = (Math.random()-0.5)*0.004;
-      m.userData.vz = (Math.random()-0.5)*0.006;
-      m.userData.spin = (Math.random()-0.5)*0.05;
-      scene.add(m);
-      meteors.push(m);
-      if(meteors.length > 18){
-        const old = meteors.shift();
-        scene.remove(old);
-      }
-    }
-    setInterval(spawnMeteor, 1400);
-
-    function applyLuckyVisual(){
-      const lucky = document.body.classList.contains("luckyHour");
-      dustMat.opacity = lucky ? 0.95 : 0.65;
-      glowPlane.material.opacity = lucky ? 0.10 : 0.06;
-      core.material.emissiveIntensity = lucky ? 0.85 : 0.45;
-    }
-
-    let t0 = performance.now();
-    function animate(t){
-      const dt = Math.min(40, t - t0);
-      t0 = t;
-
-      const breath = Math.sin(t*0.0006)*0.12;
-      camera.position.x = breath;
-      camera.lookAt(0, 2.0, 0);
-
-      ring.rotation.z += 0.0028;
-      ring.rotation.x = Math.sin(t*0.0007)*0.04;
-
-      const pulse = 0.55 + 0.45*Math.sin(t*0.0012);
-      core.scale.setScalar(1.0 + pulse*0.02);
-
-      const arr = dustGeo.attributes.position.array;
-      for(let i=0;i<dustCount;i++){
-        arr[i*3+1] += 0.0022 + (document.body.classList.contains("luckyHour")?0.0012:0);
-        arr[i*3+0] += Math.sin((t*0.0002)+(i*0.01))*0.00035;
-        if(arr[i*3+1] > 9) arr[i*3+1] = 0;
-      }
-      dustGeo.attributes.position.needsUpdate = true;
-
-      for(const m of meteors){
-        m.position.x += m.userData.vx * (dt*0.06);
-        m.position.y += m.userData.vy * (dt*0.06);
-        m.position.z += m.userData.vz * (dt*0.06);
-        m.rotation.y += m.userData.spin;
-        if(m.position.x < -12 || m.position.x > 12) scene.remove(m);
-      }
-
-      applyLuckyVisual();
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-
-    window.addEventListener("resize", ()=>{
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-    });
+  <!-- TonConnect UI CDN -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <script>
+    // Init after script loaded
+    (function(){
+      // Wait a tick to ensure global exists
+      setTimeout(async ()=>{
+        try{ await initTonConnect(); }catch(e){}
+      }, 50);
+    })();
   </script>
 </body>
 </html>
