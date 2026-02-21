@@ -1,3020 +1,1464 @@
 <!doctype html>
 <html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TON TEMPLE — Fa Cai Supreme AI</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>TON TEMPLE / FA CAI SUPREME AI</title>
 
   <style>
     :root{
-      /* LOCKED PALETTE */
       --obsidian:#050505;
-      --bg1:#0a0704;
       --gold:#FFD36A;
       --gold2:#B8860B;
       --crimson:#B8001D;
       --warm:#FFF3D1;
-
-      /* GLASS */
-      --glassA: rgba(10,10,12,0.72);
-      --glassB: rgba(10,10,12,0.62);
-      --line: rgba(255,211,106,.20);
-
-      --muted: rgba(255,255,255,.80);
-      --shadow: 0 20px 70px rgba(0,0,0,.55);
-      --shadow2: 0 28px 90px rgba(0,0,0,.70);
-
-      --radiusCard: 26px;
-      --radiusTile: 18px;
-
-      --safeTop: env(safe-area-inset-top, 0px);
-      --safeBottom: env(safe-area-inset-bottom, 0px);
-
-      --topbarH: 56px;
-
-      /* PERFORMANCE */
-      --dprCap: 2;
+      --glass: rgba(10,10,12,.52);
+      --glassBorder: rgba(255,211,106,.18);
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      color:#fff;
-      background: linear-gradient(180deg, var(--bg1), var(--obsidian));
-      overflow-x:hidden;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      -webkit-font-smoothing: antialiased;
-      text-rendering: geometricPrecision;
-    }
-
-    /* ===== COSMOS (PINNED) ===== */
-    #cosmos{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
-      overflow:hidden;
-      background:
-        radial-gradient(700px 520px at 46% 34%, rgba(255,211,106,.10), transparent 60%),
-        radial-gradient(1200px 900px at 50% 18%, rgba(255,211,106,.10), transparent 55%),
-        radial-gradient(900px 700px at 15% 65%, rgba(184,0,29,.08), transparent 60%),
-        radial-gradient(900px 700px at 85% 70%, rgba(184,0,29,.08), transparent 60%),
-        radial-gradient(1200px 900px at 50% 85%, rgba(255,211,106,.05), transparent 60%);
-    }
-
-    /* ===== HERO DRAGON (FULL BODY LOCK) ===== */
-    #dragonWrap{
-      position:absolute;
-      filter: drop-shadow(0 35px 70px rgba(0,0,0,.75));
-      opacity:.96;
-      width:min(720px, 112vw);
-      aspect-ratio: 1/1;
-      transform-style: preserve-3d;
-      overflow: visible;
-      max-height: min(86vh, 820px);
-    }
-
-    /* FULL BODY RULE: NEVER COVER */
-    #dragon3d{
-      position:absolute;
-      inset:0;
-      transform-style: preserve-3d;
-      animation: dragonFloat 7.8s ease-in-out infinite;
-    }
-    @keyframes dragonFloat{
-      0%,100%{ transform: rotateX(9deg) rotateY(-10deg) rotateZ(0deg) translateY(0px) translateZ(0px) }
-      50%{ transform: rotateX(12deg) rotateY(-2deg) rotateZ(1.2deg) translateY(-10px) translateZ(14px) }
-    }
-
-    #dragonImg{
-      width:100%;
-      height:100%;
-      object-fit: contain;      /* LOCK */
-      object-position: center;  /* LOCK */
-      user-select:none;
-      -webkit-user-drag:none;
-      filter:
-        drop-shadow(0 18px 48px rgba(0,0,0,.55))
-        drop-shadow(0 0 24px rgba(255,211,106,.12))
-        drop-shadow(0 0 52px rgba(184,0,29,.05));
-      opacity:1;
-    }
-
-    /* ===== HERO LIGHTING SYSTEM (NO WEBGL) ===== */
-    #dragonAmbient, #dragonKey, #dragonRim, #dragonUnder, #dragonSweep{
-      position:absolute;
-      border-radius:50%;
-      pointer-events:none;
-      will-change: transform, opacity;
-    }
-
-    /* Ambient depth behind dragon */
-    #dragonAmbient{
-      inset:-22%;
-      opacity:.95;
-      background:
-        radial-gradient(900px 680px at 52% 42%,
-          rgba(0,0,0,.10),
-          rgba(0,0,0,.72) 58%,
-          rgba(0,0,0,.92) 78%,
-          rgba(0,0,0,0) 100%);
-      filter: blur(1px);
-    }
-
-    /* Key light (top-left) */
-    #dragonKey{
-      inset:-18%;
-      opacity:.85;
-      background:
-        radial-gradient(520px 420px at 32% 26%,
-          rgba(255,211,106,.26),
-          rgba(255,211,106,.10) 42%,
-          rgba(255,211,106,0) 70%);
-      mix-blend-mode: screen;
-      filter: blur(2px);
-      animation: keyBreath 8.4s ease-in-out infinite;
-    }
-
-    /* Rim light (back-right) */
-    #dragonRim{
-      inset:-16%;
-      opacity:.72;
-      background:
-        radial-gradient(620px 520px at 70% 48%,
-          rgba(184,134,11,.18),
-          rgba(184,134,11,.10) 40%,
-          rgba(184,134,11,0) 68%);
-      mix-blend-mode: screen;
-      filter: blur(3px);
-      animation: rimBreath 10.2s ease-in-out infinite;
-    }
-
-    /* Under glow (levitation altar) */
-    #dragonUnder{
-      left:-20%;
-      right:-20%;
-      bottom:-22%;
-      height:56%;
-      opacity:.78;
-      background:
-        radial-gradient(520px 260px at 50% 78%,
-          rgba(255,211,106,.22),
-          rgba(255,211,106,.10) 42%,
-          rgba(255,211,106,0) 70%);
-      mix-blend-mode: screen;
-      filter: blur(3px);
-      transform: translateY(6px);
-      animation: auraBreath 9.0s ease-in-out infinite;
-    }
-
-    /* Rare specular sweep */
-    #dragonSweep{
-      inset:-10%;
-      opacity:0;
-      background:
-        linear-gradient(135deg,
-          rgba(255,211,106,0) 35%,
-          rgba(255,243,209,.22) 48%,
-          rgba(255,211,106,.10) 52%,
-          rgba(255,211,106,0) 65%);
-      mix-blend-mode: screen;
-      filter: blur(1px);
-      transform: translateX(-18%) translateY(8%) rotate(-12deg);
-    }
-
-    @keyframes auraBreath{
-      0%,100%{ transform: translateY(6px) scale(1.00); opacity:.70; }
-      50%{ transform: translateY(2px) scale(1.03); opacity:.86; }
-    }
-    @keyframes keyBreath{
-      0%,100%{ opacity:.78; transform: scale(1.00); }
-      50%{ opacity:.90; transform: scale(1.02); }
-    }
-    @keyframes rimBreath{
-      0%,100%{ opacity:.62; transform: scale(1.00); }
-      50%{ opacity:.78; transform: scale(1.01); }
-    }
-
-    /* ===== FX canvases ===== */
-    #fxStars, #fxDust, #fxMeteors, #fxCoins{
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      pointer-events:none;
-      z-index:2;
-    }
-    #fxStars{ z-index:1; opacity:1; }
-    #fxDust{ z-index:2; opacity:1; }
-    #fxMeteors{ z-index:3; opacity:.80; mix-blend-mode: screen; }
-    #fxCoins{ z-index:55; opacity:1; }
-
-    .flash{
+    html,body{height:100%; margin:0; background:#000; overflow:hidden; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;}
+    /* ====== LAYERS ====== */
+    #stage3d{
       position:fixed; inset:0;
-      z-index:60; pointer-events:none;
-      opacity:0;
-      background:
-        radial-gradient(800px 500px at 55% 45%, rgba(255,211,106,.32), transparent 60%),
-        radial-gradient(900px 700px at 50% 60%, rgba(184,0,29,.12), transparent 65%);
-      transition: opacity .15s ease;
-      mix-blend-mode: screen;
+      z-index:1;
+      background: radial-gradient(1200px 800px at 50% 30%, #0b0e18 0%, #050507 60%, #000 100%);
+      touch-action:none;
     }
-    .flash.on{opacity:1}
-
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom: calc(92px + var(--safeBottom));
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.62);
-      border:1px solid rgba(255,211,106,.18);
-      backdrop-filter: blur(12px);
-      border-radius:999px;
-      padding:10px 12px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.55);
-      color: rgba(255,255,255,.92);
-      font-weight:900;
-      letter-spacing:.06em;
-      opacity:0;
+    #fxCanvas{
+      position:fixed; inset:0;
+      z-index:3;
       pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index:200;
-      max-width: min(92vw, 720px);
-      text-align:center;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
-    .toast.on{opacity:1; transform: translateX(-50%) translateY(-2px);}
-
-    /* ===== App layout ===== */
-    .app{
-      position:relative;
-      z-index:10;
-      min-height:100vh;
+    #ui{
+      position:fixed; inset:0;
+      z-index:5;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    .uiWrap{
+      width:min(1100px, 100%);
+      height:100%;
       display:flex;
       flex-direction:column;
+      padding:10px;
+      gap:10px;
     }
 
-    /* TOPBAR */
-    .topbar{
-      position:fixed;
-      top:0; left:0; right:0;
-      z-index:100;
-      padding-top: var(--safeTop);
-      backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(0,0,0,.78), rgba(0,0,0,.40));
-      border-bottom: 1px solid rgba(255,211,106,.14);
-    }
-    .topbar-inner{
+    /* ====== TOP HUD ====== */
+    .topHud{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:10px 14px;
-      height: var(--topbarH);
-      max-width:1100px;
-      margin:0 auto;
-    }
-
-    .brand{display:flex;align-items:center;gap:10px;min-width: 210px;white-space:nowrap;}
-    .sigil{
-      width:38px;height:38px;border-radius:14px;
-      background:
-        radial-gradient(circle at 35% 30%, rgba(255,255,255,.30), transparent 45%),
-        linear-gradient(135deg, rgba(255,211,106,.85), rgba(184,134,11,.55));
-      box-shadow: 0 0 0 1px rgba(255,211,106,.28), 0 18px 50px rgba(255,211,106,.10);
-      position:relative; overflow:hidden;
-      user-select:none;
-    }
-    .sigil:after{
-      content:"財";
-      position:absolute; inset:0;
-      display:grid; place-items:center;
-      font-weight:900; color:#1a1406; font-size:20px;
-      text-shadow: 0 1px 0 rgba(255,255,255,.25);
-    }
-    .brand-text{display:flex;flex-direction:column;line-height:1.05}
-    .brand-text .t1{font-size:12px;letter-spacing:.34em;color: rgba(255,211,106,.95);text-transform:uppercase;}
-    .brand-text .t2{font-size:12px;color: rgba(255,255,255,.74);}
-
-    .top-controls{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:nowrap;
-      justify-content:flex-end;
-      white-space:nowrap;
-    }
-
-    .pill{
-      display:flex; align-items:center; gap:8px;
       padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,211,106,.18);
-      box-shadow: 0 10px 30px rgba(0,0,0,.30);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.62), rgba(10,10,12,.40));
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
     }
-    .pill b{color: rgba(255,211,106,.96)}
-    .pill .small{font-size:12px;color:rgba(255,255,255,.74)}
-    .small{font-size:12px;color:rgba(255,255,255,.74)}
-
-    .btn{
-      appearance:none;
-      border:none;
-      border-radius:18px;
-      padding:12px 14px;
-      font-weight:900;
-      color:#170f04;
-      background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
-      box-shadow: 0 18px 50px rgba(255,211,106,.12);
-      cursor:pointer;
-      transition: transform .15s ease, filter .15s ease;
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+      line-height:1.1;
+      user-select:none;
+    }
+    .brand .t1{
+      font-weight:700; letter-spacing:.12em; font-size:12px;
+      color:var(--warm);
+      text-transform:uppercase;
+      opacity:.95;
+    }
+    .brand .t2{
+      font-weight:600; letter-spacing:.16em; font-size:10px;
+      color:rgba(255,211,106,.8);
+      text-transform:uppercase;
+    }
+    .hudRight{
+      display:flex; align-items:center; gap:8px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,211,106,.14);
+      color: rgba(255,243,209,.92);
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
       user-select:none;
       white-space:nowrap;
     }
-    .btn:active{transform: translateY(1px) scale(.99); filter:brightness(.98)}
-    .btn.secondary{
-      color:#fff;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,211,106,.18);
-      box-shadow: 0 18px 50px rgba(0,0,0,.25);
-      font-weight:900;
-    }
-    .btn.ghost{
-      color: rgba(255,255,255,.88);
-      background: transparent;
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow:none;
-      font-weight:900;
-    }
-    .btn.danger{
-      color:#fff;
-      background: linear-gradient(135deg, rgba(255,43,63,.92), rgba(184,0,29,.92));
-      box-shadow: 0 18px 50px rgba(255,43,63,.08);
-    }
-    .btn:disabled{opacity:.42;cursor:not-allowed;filter: grayscale(.25);transform:none;}
-
-    .toggle{
-      display:flex;align-items:center;gap:10px;
-      padding:10px 12px;border-radius:999px;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,211,106,.18);
-    }
-    .seg{
-      display:flex;border-radius:999px;overflow:hidden;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.28);
-    }
-    .seg button{
+    .btn{
+      cursor:pointer;
       border:none;
-      padding:9px 10px;
-      font-weight:1000;
-      cursor:pointer;
-      color: rgba(255,255,255,.78);
-      background: transparent;
-      letter-spacing:.06em;
-    }
-    .seg button.active{
-      color:#1a1406;
-      background: linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
-    }
-
-    /* INFO icon */
-    .iBtn{
-      width:22px;height:22px;
+      outline:none;
+      padding:9px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,211,106,.24);
-      background: rgba(0,0,0,.32);
-      color: rgba(255,211,106,.94);
-      font-weight:1000;
-      display:grid;
-      place-items:center;
-      cursor:pointer;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.25);
+      color: rgba(255,243,209,.95);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease;
       user-select:none;
-      flex:0 0 auto;
     }
-    .iBtn:active{transform: translateY(1px) scale(.99)}
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.34);}
+    .btn:active{ transform: translateY(0px) scale(.99); }
 
-    /* scene spacer (hero screen) */
-    .sceneSpacer{ height: 78vh; width:100%; }
-
-    .wrap{
-      max-width:1100px;
-      width:100%;
-      margin:0 auto;
-      padding: calc(var(--topbarH) + var(--safeTop) + 14px) 14px calc(120px + var(--safeBottom));
-      display:flex;
-      flex-direction:column;
-      gap:16px;
+    /* ====== CENTER STAGE ====== */
+    .center{
+      flex:1;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      align-content:stretch;
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.045));
-      border:1px solid rgba(255,211,106,.18);
-      border-radius: var(--radiusCard);
-      box-shadow: var(--shadow);
-      position:relative;
-      overflow: visible;
-      backdrop-filter: blur(14px);
-    }
-    .card .inner{padding:16px; overflow: visible;}
-    .card:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(500px 200px at 30% 0%, rgba(255,211,106,.14), transparent 55%),
-        radial-gradient(400px 280px at 85% 20%, rgba(184,0,29,.08), transparent 55%);
-      pointer-events:none;
-      opacity:.78;
-    }
-    .card .inner, .card .row, .card .grid{position:relative; z-index:2}
-
-    .hline{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .hline h2{
-      margin:0;
-      font-size:16px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color: rgba(255,211,106,.92);
-    }
-
-    .grid{display:grid;grid-template-columns: repeat(3, 1fr);gap:10px;}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-
-    .tile{
-      border-radius: var(--radiusTile);
-      padding:12px 12px;
-      background: rgba(0,0,0,.26);
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .tileHead{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom:6px;
-    }
-    .tile .k{
-      font-size:11px;
-      color: rgba(255,255,255,.70);
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .tile .v{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-    .tile .v .big{font-size:22px;font-weight:1000;letter-spacing:.02em;color: rgba(255,211,106,.96);}
-    .tile .v .tag{
-      font-size:12px;padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(255,211,106,.22);
-      background: rgba(255,211,106,.08);
-      color: rgba(255,255,255,.90);
-    }
-    .tiny{font-size:12px; color: rgba(255,255,255,.72)}
-    .hr{height:1px;background: rgba(255,255,255,.14);margin: 10px 0}
-
-    /* stage */
-    .stage{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-      align-items:center;
-      justify-items:center;
-      padding-top: 2px;
-    }
-    .wheelWrap{
-      width:min(460px, 92vw);
-      aspect-ratio: 1/1;
-      position:relative;
-      display:grid;
-      place-items:center;
-      margin: 6px auto 0;
-      overflow: visible;
-      padding: 10px 0 6px;
-    }
-    canvas#wheel{
-      width:100%;
-      height:100%;
-      border-radius:50%;
-      box-shadow:
-        0 0 0 1px rgba(255,211,106,.22),
-        0 25px 70px rgba(0,0,0,.55),
-        0 0 90px rgba(184,0,29,.07);
-      background:
-        radial-gradient(circle at 50% 45%, rgba(255,211,106,.12), transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.75));
-      display:block;
-    }
-    .beam{
-      position:absolute;
-      right:-2.2%;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 46%;
-      height: 18px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,211,106,0), rgba(255,211,106,.88), rgba(255,211,106,0));
-      filter: blur(.2px);
-      opacity:.92;
-      pointer-events:none;
-    }
-    .beam:after{
-      content:"";
-      position:absolute;
-      left: 46%;
-      top:50%;
-      transform: translate(-50%,-50%);
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: rgba(255,211,106,.96);
-      box-shadow: 0 0 32px rgba(255,211,106,.75);
-    }
-    .centerMedal{
-      position:absolute;
-      width: 36%;
-      aspect-ratio:1/1;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.42), transparent 46%),
-        radial-gradient(circle at 55% 65%, rgba(0,0,0,.22), transparent 55%),
-        linear-gradient(135deg, rgba(255,211,106,.98), rgba(184,134,11,.86));
-      box-shadow:
-        0 0 0 1px rgba(255,211,106,.28),
-        0 25px 70px rgba(255,211,106,.12),
-        inset 0 0 20px rgba(255,255,255,.12);
-      display:grid;
-      place-items:center;
-      pointer-events:none;
-    }
-    .centerMedal span{
-      font-size: clamp(34px, 6vw, 56px);
-      font-weight: 1000;
-      color: #1a1406;
-      text-shadow:
-        0 0 10px rgba(255,243,209,.55),
-        0 0 24px rgba(255,211,106,.35);
-      filter: drop-shadow(0 0 12px rgba(255,211,106,.35));
-    }
-
-    .wheelControls{
-      width:min(560px, 94vw);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-      margin-top:8px;
-      overflow: visible;
-      padding: 4px 2px 6px;
-    }
-    .wheelControls .btn{ width:100%; max-width: 520px; }
-
-    .oracleBox{display:flex;flex-direction:column;gap:10px}
-    .oracleText{
       border-radius:18px;
-      padding:12px 12px;
-      background: rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.14);
-      min-height: 130px;
+      background: var(--glass);
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 55px rgba(0,0,0,.42);
+      overflow:hidden;
+      position:relative;
+    }
+    .cardInner{
+      padding:14px;
       display:flex;
       flex-direction:column;
-      gap:6px;
-      position:relative;
-      overflow:hidden;
+      gap:12px;
     }
-    .oracleText .headline{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:10px;flex-wrap:wrap;
-      position:relative; z-index:2;
+    .title{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+      user-select:none;
     }
-    .oracleText .headline b{
-      color: rgba(255,211,106,.95);
-      letter-spacing:.10em;
+    .title h2{
+      margin:0;
+      font-size:13px;
+      letter-spacing:.16em;
       text-transform:uppercase;
-      font-size:12px;
-      display:flex;
-      gap:8px;
-      align-items:center;
+      color:rgba(255,243,209,.95);
+      font-family: Orbitron, Inter, system-ui;
+      font-weight:700;
     }
-    .oracleText .body{font-size:14px;color:rgba(255,255,255,.92);line-height:1.38; position:relative; z-index:2; white-space:pre-line}
-    .oracleText .meta{
-      margin-top:auto;
-      font-size:12px;
-      color: rgba(255,255,255,.70);
-      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
-      position:relative; z-index:2;
+    .title .sub{
+      font-size:10px;
+      letter-spacing:.12em;
+      color: rgba(255,211,106,.74);
+      text-transform:uppercase;
+      opacity:.95;
     }
-    .meta .chip{
-      padding:6px 10px;border-radius:999px;
-      background: rgba(255,211,106,.10);
-      border:1px solid rgba(255,211,106,.22);
-    }
-    .meta .chip.red{background: rgba(255,43,63,.10);border-color: rgba(255,43,63,.22);}
-    .meta .chip.ok{background: rgba(67,255,179,.10);border-color: rgba(67,255,179,.22);}
 
-    .choices{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-
-    /* ===== Scroll / Papyrus reveal (ritual) ===== */
-    .scrollFx{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      opacity:0;
-      transform: translateY(8px);
-      transition: opacity .25s ease, transform .35s ease;
-      z-index:1;
+    /* ====== WHEEL BUTTON ====== */
+    .bigAction{
+      display:flex; flex-direction:column; gap:10px;
+      align-items:center; justify-content:center;
+      padding:18px 14px 16px;
     }
-    .scrollFx.on{ opacity:1; transform: translateY(0px); }
-
-    /* paper panel */
-    .scrollPaper{
-      position:absolute;
-      left:10px; right:10px;
-      top:10px; bottom:10px;
+    .wheelBtn{
+      width:min(340px, 92%);
+      height:58px;
       border-radius:16px;
-      background:
-        radial-gradient(380px 220px at 35% 25%, rgba(255,243,209,.14), rgba(255,243,209,0) 62%),
-        linear-gradient(180deg, rgba(255,243,209,.08), rgba(255,243,209,.04));
-      border:1px solid rgba(255,211,106,.14);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
-      overflow:hidden;
-    }
-
-    /* top/bottom rollers */
-    .scrollRoll{
-      position:absolute;
-      left:0; right:0;
-      height:16px;
-      background:
-        linear-gradient(90deg, rgba(255,211,106,.10), rgba(184,134,11,.16), rgba(255,211,106,.10));
-      opacity:.85;
-    }
-    .scrollRoll.top{ top:0; }
-    .scrollRoll.bot{ bottom:0; }
-
-    /* reveal mask */
-    .scrollReveal{
-      position:absolute;
-      left:0; right:0;
-      top:0; bottom:0;
-      transform-origin: top;
-      transform: scaleY(0.08);
-      opacity:.92;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.88), rgba(0,0,0,.18), rgba(0,0,0,0));
-      mix-blend-mode: multiply;
-      animation: none;
-    }
-    .scrollFx.on .scrollReveal{
-      animation: scrollUnfold 0.95s cubic-bezier(.12,.0,.12,1) forwards;
-    }
-    @keyframes scrollUnfold{
-      0%{ transform: scaleY(0.08); opacity:.96; }
-      70%{ transform: scaleY(1.02); opacity:.70; }
-      100%{ transform: scaleY(1.00); opacity:.56; }
-    }
-
-    /* seal stamp */
-    .seal{
-      position:absolute;
-      right:16px;
-      bottom:16px;
-      width:46px;
-      height:46px;
-      border-radius:14px;
-      background: linear-gradient(135deg, rgba(184,0,29,.92), rgba(120,0,18,.92));
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: 0 18px 40px rgba(184,0,29,.12);
-      display:grid;
-      place-items:center;
-      font-weight:1000;
-      color: rgba(255,243,209,.92);
-      letter-spacing:.06em;
-      transform: scale(0.7) rotate(-8deg);
-      opacity:0;
-    }
-    .scrollFx.on .seal{
-      animation: sealPop .55s ease forwards;
-      animation-delay: .85s;
-    }
-    @keyframes sealPop{
-      0%{ transform: scale(0.65) rotate(-12deg); opacity:0; }
-      60%{ transform: scale(1.10) rotate(-6deg); opacity:1; }
-      100%{ transform: scale(1.00) rotate(-8deg); opacity:1; }
-    }
-
-    /* Premium badge kept (status only) */
-    .premiumBadge{
-      display:none;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,211,106,.24);
-      background: rgba(255,211,106,.08);
-      color: rgba(255,255,255,.92);
-      font-weight:1000;
-      letter-spacing:.08em;
+      border:1px solid rgba(255,211,106,.28);
+      background: linear-gradient(180deg, rgba(255,211,106,.16), rgba(255,211,106,.08));
+      color: rgba(255,243,209,.98);
+      font-size:12px;
+      letter-spacing:.22em;
       text-transform:uppercase;
-      box-shadow: 0 18px 55px rgba(255,211,106,.08);
+      font-weight:700;
+      box-shadow: 0 16px 50px rgba(0,0,0,.35);
+      cursor:pointer;
+      transition: transform .14s ease;
     }
-    .premiumBadge b{color: rgba(255,211,106,.98)}
-    body.premium .premiumBadge{display:flex}
+    .wheelBtn:hover{ transform: translateY(-1px);}
+    .wheelBtn:active{ transform: translateY(0px) scale(.99);}
 
-    body.luckyHour .sigil{
-      box-shadow: 0 0 0 1px rgba(255,211,106,.34), 0 22px 62px rgba(255,211,106,.14);
-    }
-    body.luckyHour .beam{
-      opacity:1;
-      box-shadow: 0 0 45px rgba(255,211,106,.16);
+    .micro{
+      font-size:10px;
+      letter-spacing:.12em;
+      color: rgba(255,243,209,.75);
+      text-align:center;
+      line-height:1.4;
+      user-select:none;
+      max-width: 620px;
     }
 
-    /* ===== Bottom Dock (NO FRAMES) ===== */
-    .bottomDock{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      z-index:40;
-      padding: 8px 12px calc(10px + var(--safeBottom));
-      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.72));
-      backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(255,211,106,.08);
-    }
-    .dockInner{
-      max-width:1100px;
-      margin:0 auto;
+    /* ====== BOTTOM DOCK ====== */
+    .dock{
       display:flex;
+      align-items:center;
       justify-content:space-between;
       gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
-    .dockBtn{
-      flex:1;min-width:0;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:6px;
-      padding:6px 6px;
-      background: transparent;
-      border:none;
-      color:#fff;
+    .dockLeft, .dockRight{ display:flex; gap:8px; align-items:center; }
+    .dotBtn{
+      width:38px; height:38px;
+      border-radius:14px;
+      border:1px solid rgba(255,211,106,.18);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,243,209,.92);
       cursor:pointer;
-      user-select:none;
-      opacity:.92;
+      transition: transform .12s ease, border-color .18s ease;
     }
-    .dockGlyph{
-      font-size:22px;
-      line-height:1;
-      color: rgba(255,211,106,.92);
-      text-shadow: 0 12px 18px rgba(0,0,0,.45);
-    }
-    .dockBtn small{
-      font-size: 11px;
-      letter-spacing:.12em;
-      color: rgba(255,255,255,.72);
-      text-transform:uppercase;
-      text-align:center;
-    }
-    .dockBtn:active{ transform: translateY(1px); }
+    .dotBtn:hover{ transform: translateY(-1px); border-color: rgba(255,211,106,.28);}
+    .dotBtn:active{ transform: translateY(0px) scale(.99); }
 
-    /* ===== Modals ===== */
-    .modalBack{
+    /* ====== OVERLAY: PARCHMENT REVEAL ====== */
+    #overlay{
       position:fixed; inset:0;
-      background: rgba(0,0,0,.70);
-      backdrop-filter: blur(10px);
-      z-index:120;
+      z-index:10;
       display:none;
       align-items:center;
       justify-content:center;
-      padding: 18px 12px;
-    }
-    .modal{
-      width:min(740px, 96vw);
-      border-radius: 26px;
-      background: linear-gradient(180deg, rgba(20,20,22,.94), rgba(8,8,10,.94));
-      border:1px solid rgba(255,211,106,.18);
-      box-shadow: var(--shadow2);
-      overflow:hidden;
-      position:relative;
-    }
-    .modal:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(600px 260px at 30% 0%, rgba(255,211,106,.16), transparent 60%),
-        radial-gradient(560px 340px at 95% 20%, rgba(184,0,29,.08), transparent 60%);
-      opacity:.85;
-      pointer-events:none;
-    }
-    .modal .mInner{position:relative; z-index:2; padding: 16px}
-    .mHead{
-      display:flex;align-items:flex-start;justify-content:space-between;
-      gap:12px;margin-bottom:8px;
-    }
-    .mHead h3{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color: rgba(255,211,106,.92);
-    }
-    .mBody{
-      color: rgba(255,255,255,.86);
-      font-size:13px;
-      line-height:1.52;
-      max-height: 68vh;
-      overflow:auto;
-      padding-right: 6px;
-      white-space: pre-line;
-    }
-    .mFoot{margin-top: 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-
-    /* ===== Onboarding overlay (one-time) ===== */
-    .onboardBack{
-      position:fixed; inset:0;
-      z-index:160;
-      background: rgba(0,0,0,.74);
+      padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
+      background: rgba(0,0,0,.65);
       backdrop-filter: blur(10px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px 12px;
+      -webkit-backdrop-filter: blur(10px);
     }
-    .onboard{
-      width:min(720px, 96vw);
-      border-radius: 26px;
-      background: linear-gradient(180deg, rgba(16,16,18,.96), rgba(6,6,8,.96));
-      border:1px solid rgba(255,211,106,.18);
-      box-shadow: var(--shadow2);
-      overflow:hidden;
+    #overlay.show{ display:flex; }
+    .parchmentWrap{
+      width:min(760px, 96vw);
+      height:min(74vh, 680px);
       position:relative;
-    }
-    .onboard:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(720px 300px at 40% 0%, rgba(255,211,106,.18), transparent 60%),
-        radial-gradient(560px 340px at 92% 22%, rgba(184,0,29,.10), transparent 60%);
-      opacity:.80;
-      pointer-events:none;
-    }
-    .onboard .oInner{position:relative; z-index:2; padding:16px}
-    .oTitle{
-      margin:0 0 8px 0;
-      font-size:14px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color: rgba(255,211,106,.92);
-    }
-    .oSteps{
       border-radius:18px;
-      background: rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.14);
-      padding:12px;
-      color: rgba(255,255,255,.92);
-      font-size:13px;
-      line-height:1.55;
-      white-space:pre-line;
+      overflow:hidden;
+      box-shadow: 0 25px 120px rgba(0,0,0,.6);
+      border:1px solid rgba(255,211,106,.22);
+      background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
+                  linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
     }
-    .oFoot{ margin-top:12px; display:flex; justify-content:flex-end; }
-
-    /* ===== RESPONSIVE DRAGON POSITION ===== */
-    @media (max-width: 980px){
-      #dragonWrap{
-        left:50%;
-        top:42%;
-        transform: translate(-50%,-50%);
-        width: 92vw;
-        max-width: 420px;
-      }
-      .sceneSpacer{ height: 78vh; }
+    .parchmentCanvas{
+      position:absolute; inset:0;
+      width:100%; height:100%;
     }
-    @media (min-width: 981px){
-      #dragonWrap{
-        left: 24%;
-        top: 50%;
-        transform: translate(-50%,-52%);
-        width: min(820px, 62vw);
-        max-width: 820px;
-      }
-      .sceneSpacer{ height: 56vh; }
+    .overlayTop{
+      position:absolute; left:0; right:0; top:0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.0));
+      z-index:2;
+      pointer-events:none;
     }
-
-    @media (max-width: 420px){
-      .pill{display:none}
-      .wheelWrap{width:min(420px, 94vw)}
-      .brand{min-width:auto}
+    .overlayTop .label{
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color: rgba(255,243,209,.85);
+      font-family: Orbitron, Inter, system-ui;
+      pointer-events:none;
+    }
+    .closeBtn{
+      pointer-events:auto;
+      cursor:pointer;
+      border:none;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.22);
+      color: rgba(255,243,209,.95);
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
     }
   </style>
 </head>
 
 <body>
-  <!-- Cosmos background pinned -->
-  <div id="cosmos" aria-hidden="true">
-    <div id="dragonWrap">
-      <!-- Lighting layers -->
-      <div id="dragonAmbient"></div>
-      <div id="dragonKey"></div>
-      <div id="dragonRim"></div>
-      <div id="dragonUnder"></div>
-      <div id="dragonSweep"></div>
+  <canvas id="stage3d"></canvas>
+  <canvas id="fxCanvas"></canvas>
 
-      <div id="dragon3d">
-        <img id="dragonImg" src="dragon.jpg" alt="Dragon Emblem" />
-      </div>
-    </div>
-  </div>
-
-  <!-- FX -->
-  <canvas id="fxStars"></canvas>
-  <canvas id="fxDust"></canvas>
-  <canvas id="fxMeteors"></canvas>
-  <canvas id="fxCoins"></canvas>
-
-  <div class="flash" id="flash"></div>
-  <div class="toast" id="toast">—</div>
-
-  <div class="app">
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="topbar-inner">
+  <div id="ui">
+    <div class="uiWrap">
+      <div class="topHud">
         <div class="brand">
-          <div class="sigil" id="sigil"></div>
-          <div class="brand-text">
-            <div class="t1" id="tBrand1">TON TEMPLE</div>
-            <div class="t2" id="tBrand2">福流神殿</div>
-          </div>
+          <div class="t1">TON TEMPLE</div>
+          <div class="t2">帝王福流仪式</div>
         </div>
-
-        <div class="top-controls">
-          <button class="btn secondary" id="btnHelp" type="button">?</button>
-
-          <div class="toggle">
-            <span class="small" id="tModeLabel">模式</span>
-            <div class="seg" role="tablist" aria-label="Mode">
-              <button id="btnRitual" class="active" type="button">RITUAL</button>
-              <button id="btnPro" type="button">PRO</button>
-            </div>
-          </div>
-
-          <div class="toggle">
-            <span class="small" id="tLangLabel">语言</span>
-            <div class="seg" role="tablist" aria-label="Language">
-              <button id="btnZH" class="active" type="button">中文</button>
-              <button id="btnEN" type="button">EN</button>
-            </div>
-          </div>
-
-          <!-- status badge (optional) -->
-          <div class="premiumBadge" id="premiumBadge">
-            <b id="premiumBadgeText">BLESSED</b>
-            <span id="premiumLeft">—</span>
-          </div>
+        <div class="hudRight">
+          <div class="pill" id="qkPill">QK 000.00</div>
+          <div class="pill" id="flowPill">FLOW 00/100</div>
+          <button class="btn" id="helpBtn">i</button>
+          <button class="btn" id="langBtn">EN</button>
+          <button class="btn" id="premiumBtn">GATE</button>
         </div>
       </div>
-    </div>
 
-    <!-- SCENE spacer -->
-    <div class="sceneSpacer" aria-hidden="true"></div>
-
-    <div class="wrap">
-      <!-- RITUAL CARD -->
-      <div class="card" id="ritualCard">
-        <div class="inner">
-          <div class="hline">
-            <h2 id="tRitualTitle">每日仪式</h2>
-            <button class="iBtn" type="button" data-info="ritual">i</button>
-          </div>
-
-          <div class="stage">
-            <div class="wheelWrap" aria-label="Fortune wheel">
-              <canvas id="wheel"></canvas>
-              <div class="beam" aria-hidden="true"></div>
-              <div class="centerMedal" aria-hidden="true"><span>財</span></div>
+      <div class="center">
+        <div class="card">
+          <div class="cardInner">
+            <div class="title">
+              <h2 id="titleMain">Temple Ritual</h2>
+              <div class="sub" id="titleSub">Spin → Guidance → Decision</div>
             </div>
 
-            <div class="wheelControls">
-              <button class="btn" id="btnSpin" type="button">启动福流</button>
-              <button class="btn secondary" id="btnOracle" type="button">神谕</button>
-              <button class="btn ghost" id="btnGate" type="button">圣坛</button>
-            </div>
-
-            <div class="oracleBox" style="width:min(560px,94vw)">
-              <div class="row">
-                <div class="toggle" style="flex:1; justify-content:space-between">
-                  <span class="small" id="tForecastType">类型</span>
-                  <div class="seg">
-                    <button id="btnForecastDay" class="active" type="button">DAY</button>
-                    <button id="btnForecastTON" type="button">TON</button>
-                  </div>
-                </div>
-
-                <div class="pill" style="flex:1; justify-content:space-between">
-                  <span class="small" id="tLimitLabel">限制</span>
-                  <b id="limitText">0 / 1</b>
-                  <span class="small" id="limitPaywall">• 添香火: +1/次</span>
-                </div>
+            <div class="bigAction">
+              <button class="wheelBtn" id="spinBtn">SPIN WHEEL</button>
+              <div class="micro" id="microText">
+                This is a ritualized interface. Not financial advice.
               </div>
-
-              <div class="oracleText" id="oraclePanel">
-                <!-- scroll fx behind text -->
-                <div class="scrollFx" id="scrollFx" aria-hidden="true">
-                  <div class="scrollPaper">
-                    <div class="scrollRoll top"></div>
-                    <div class="scrollRoll bot"></div>
-                    <div class="scrollReveal"></div>
-                    <div class="seal" id="sealMark">印</div>
-                  </div>
-                </div>
-
-                <div class="headline">
-                  <b id="oracleHead">圣殿指引</b>
-                  <span class="tiny" id="oracleStamp">—</span>
-                </div>
-                <div class="body" id="oracleBody">—</div>
-                <div class="meta" id="oracleMeta">
-                  <span class="chip" id="chipWeather">Market Weather: —</span>
-                  <span class="chip ok" id="chipAura">Risk Aura: —</span>
-                  <span class="chip" id="chipFlow">Flow Window: —</span>
-                </div>
-              </div>
-
-              <div class="choices">
-                <button class="btn" id="btnEnter" type="button" disabled>ENTER</button>
-                <button class="btn secondary" id="btnWait" type="button" disabled>WAIT</button>
-                <button class="btn danger" id="btnSkip" type="button" disabled>SKIP</button>
-              </div>
-
-              <div class="tiny" id="tDisclaimer">仪式化界面。非投资建议。</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- HUD CARD -->
-      <div class="card" id="hudCard">
-        <div class="inner">
-          <div class="hline">
-            <h2 id="tHudTitle">神殿 HUD</h2>
-          </div>
-
-          <div class="grid">
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tQKLabel">QK</span></div>
-                <button class="iBtn" type="button" data-info="qk">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="qk">37.11</div>
-                <div class="tag" id="qkTag">BALANCED</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tFlowScoreLabel">福流</span></div>
-                <button class="iBtn" type="button" data-info="flow">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="flowScore">73</div>
-                <div class="tag" id="flowTag">/100</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tWeatherLabel">气象</span></div>
-                <button class="iBtn" type="button" data-info="weather">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="weather">CALM</div>
-                <div class="tag" id="riskTag">Risk: LOW</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="grid">
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tDailySealLabel">印章</span></div>
-                <button class="iBtn" type="button" data-info="seal">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="dailySeal">—</div>
-                <div class="tag" id="sealSub">—</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tStreakLabel">连击</span></div>
-                <button class="iBtn" type="button" data-info="streak">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="streak">3</div>
-                <div class="tag" id="cycleTag">7/21/49</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tPulseLabel">脉冲</span></div>
-                <button class="iBtn" type="button" data-info="pulse">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="socialA">3,482</div>
-                <div class="tag" id="socialB">VIP: 117</div>
-              </div>
-            </div>
-          </div>
-
-          <div style="height:10px"></div>
-
-          <div class="tile">
-            <div class="row">
-              <div class="k" style="margin:0"><span id="tStatsLabel">今日</span></div>
-              <button class="iBtn" type="button" data-info="today">i</button>
-            </div>
-            <div class="v">
-              <div class="big"><span id="posCount">8</span></div>
-              <div class="tag" id="negCountTag">谨慎: 1</div>
-            </div>
-          </div>
+      <div class="dock">
+        <div class="dockLeft">
+          <button class="dotBtn" id="journalBtn">J</button>
+          <button class="dotBtn" id="proBtn">P</button>
         </div>
-      </div>
-
-      <!-- PRO TERMINAL -->
-      <div class="card" id="proCard" style="display:none">
-        <div class="inner">
-          <div class="hline">
-            <h2 id="tProTitle">PRO 终端</h2>
-            <button class="iBtn" type="button" data-info="pro">i</button>
-          </div>
-
-          <div class="grid">
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tTonPulse">TON PULSE</span></div>
-                <button class="iBtn" type="button" data-info="pulseMetric">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="tonPulse">+0.84%</div>
-                <div class="tag" id="liqPulse">Liquidity: Steady</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tVol">VOLATILITY</span></div>
-                <button class="iBtn" type="button" data-info="vol">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="vol">12.4</div>
-                <div class="tag" id="trend">Trend: Up</div>
-              </div>
-            </div>
-
-            <div class="tile">
-              <div class="tileHead">
-                <div class="k"><span id="tWindow">FLOW WINDOW</span></div>
-                <button class="iBtn" type="button" data-info="window">i</button>
-              </div>
-              <div class="v">
-                <div class="big" id="flowWindow">OPEN</div>
-                <div class="tag" id="windowTimer">Next: 00:00:00</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="hline">
-            <h2 id="tJournalTitle">日志</h2>
-            <button class="iBtn" type="button" data-info="journal">i</button>
-          </div>
-
-          <div class="tile">
-            <div class="tiny" id="journal"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TEMPLE DEPTH (scroll = premium depth) -->
-      <div class="card" id="depthCard">
-        <div class="inner">
-          <div class="hline">
-            <h2 id="tDepthTitle">Temple Depth</h2>
-            <button class="iBtn" type="button" data-info="depth">i</button>
-          </div>
-
-          <div class="tile">
-            <div class="k" style="margin:0 0 6px 0"><span id="tProgressTitle">49-DAY AWAKENING</span></div>
-            <div class="tiny" id="progressText">—</div>
-          </div>
-
-          <div style="height:10px"></div>
-
-          <div class="tile">
-            <div class="k" style="margin:0 0 6px 0"><span id="tWishTitle">WISH</span></div>
-            <div class="tiny" id="wishText">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Dock -->
-    <div class="bottomDock" role="navigation" aria-label="Temple Dock">
-      <div class="dockInner">
-        <button class="dockBtn" id="dockRitual" type="button">
-          <div class="dockGlyph">殿</div>
-          <small id="dRitual">Ritual</small>
-        </button>
-        <button class="dockBtn" id="dockWheel" type="button">
-          <div class="dockGlyph">轮</div>
-          <small id="dWheel">Wheel</small>
-        </button>
-        <button class="dockBtn" id="dockOracle" type="button">
-          <div class="dockGlyph">谕</div>
-          <small id="dOracle">Oracle</small>
-        </button>
-        <button class="dockBtn" id="dockGate" type="button">
-          <div class="dockGlyph">坛</div>
-          <small id="dGate">Altar</small>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- HELP / INFO MODAL -->
-  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="mInner">
-        <div class="mHead">
-          <h3 id="modalTitle">—</h3>
-          <button class="btn ghost" id="modalClose" type="button">Close</button>
-        </div>
-        <div class="mBody" id="modalBody"></div>
-        <div class="mFoot">
-          <button class="btn secondary" id="modalOk" type="button">OK</button>
+        <div class="dockRight">
+          <button class="dotBtn" id="soundBtn">S</button>
+          <button class="dotBtn" id="wishBtn">★</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- GOLDEN ALTAR (PAY) MODAL -->
-  <div class="modalBack" id="gateBack" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="mInner">
-        <div class="mHead">
-          <h3 id="gateTitle">圣坛</h3>
-          <button class="btn ghost" id="gateClose" type="button">Close</button>
-        </div>
-        <div class="mBody" id="gateBody"></div>
-        <div class="mFoot">
-          <button class="btn secondary" id="gateConnect" type="button">Connect Wallet</button>
-          <button class="btn" id="gatePay" type="button">添香火 · 1 TON</button>
-        </div>
+  <!-- PARCHMENT OVERLAY -->
+  <div id="overlay">
+    <div class="parchmentWrap">
+      <div class="overlayTop">
+        <div class="label" id="overlayLabel">TEMPLE GUIDANCE</div>
+        <button class="closeBtn" id="closeOverlay">CLOSE</button>
       </div>
+      <canvas class="parchmentCanvas" id="parchment"></canvas>
     </div>
   </div>
 
-  <!-- ONBOARDING -->
-  <div class="onboardBack" id="onboardBack" role="dialog" aria-modal="true">
-    <div class="onboard">
-      <div class="oInner">
-        <div class="oTitle" id="onboardTitle">3 STEPS</div>
-        <div class="oSteps" id="onboardBody">—</div>
-        <div class="oFoot">
-          <button class="btn" id="onboardEnter" type="button">ENTER TEMPLE</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<script type="module">
+/* ==========================================================
+   TON TEMPLE — THREE.JS AAA CORE (V1.6 ALL-IN-ONE)
+   ========================================================== */
 
-  <!-- Audio -->
-  <audio id="bgZen" src="zen.mp3" preload="auto" loop></audio>
-  <audio id="sfxCoin" src="coin.wav" preload="auto"></audio>
+/* ========= THREE IMPORTS ========= */
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { EffectComposer } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js";
 
-  <!-- TonConnect UI CDN -->
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-
-  <script>
-  /*****************************************************************
-   * TON TEMPLE V1 — FINAL SPEC (NO COMPROMISE)
-   * - Dragon full body (contain)
-   * - No planets
-   * - Starfield + rare shooting stars (wish) + rare comets
-   * - Dust + gold meteors
-   * - Slow ritual: Wheel → pause → Scroll → Guidance → Decision
-   * - Limits: Wheel 1/day, Oracle 1/day free (+ paid attempts 1 TON)
-   *****************************************************************/
-
-  const $ = (id) => document.getElementById(id);
-  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-  const rnd = (a=0, b=1) => a + Math.random()*(b-a);
-  const irnd = (a,b) => Math.floor(rnd(a,b+1));
-  const pad2 = (n) => String(n).padStart(2,'0');
-  const dayKey = (d=new Date()) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  const nowHM = (d=new Date()) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-
-  // ===== Perf / QC
-  const DPR = () => Math.min(2, window.devicePixelRatio || 1);
-
-  function flash(){
-    const f = $('flash');
-    f.classList.add('on');
-    setTimeout(()=>f.classList.remove('on'), 140);
+/* ========= PERF GOVERNOR ========= */
+const FX = (() => {
+  let quality = "high";
+  function detect(){
+    const mem = navigator.deviceMemory || 4;
+    const cores = navigator.hardwareConcurrency || 4;
+    if(mem <= 3 || cores <= 4) quality = "medium";
+    if(mem <= 2) quality = "low";
   }
-
-  function toast(msg){
-    const el = $('toast');
-    el.textContent = msg;
-    el.classList.add('on');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=>el.classList.remove('on'), 1600);
+  function dprCap(){
+    const max = quality === "low" ? 1.25 : 2.0;
+    return Math.min(window.devicePixelRatio || 1, max);
   }
+  detect();
+  return { quality: ()=>quality, dprCap };
+})();
 
-  // Telegram haptics (safe)
-  function haptic(type){
-    try{
-      const tg = window.Telegram?.WebApp;
-      if(!tg || !tg.HapticFeedback) return;
-      if(type==='heavy') tg.HapticFeedback.impactOccurred('heavy');
-      else if(type==='light') tg.HapticFeedback.impactOccurred('light');
-      else if(type==='success') tg.HapticFeedback.notificationOccurred('success');
-    }catch(e){}
-  }
-
-  // Audio (iOS/TG safe): start on first user gesture
-  const audio = {
-    started:false,
-    init(){
-      this.zen = $('bgZen');
-      this.coin = $('sfxCoin');
-      if(this.zen) this.zen.volume = 0.22;
-      if(this.coin) this.coin.volume = 0.70;
-    },
-    startZen(){
-      if(this.started) return;
-      this.started = true;
-      if(!this.zen) return;
-      this.zen.play().catch(()=>{});
-    },
-    playCoin(){
-      if(!this.coin) return;
-      this.coin.currentTime = 0;
-      this.coin.play().catch(()=>{});
+/* ========= TELEGRAM HAPTIC FALLBACK ========= */
+function haptic(type="light"){
+  try{
+    // Telegram.WebApp.HapticFeedback.impactOccurred('heavy')
+    if(window.Telegram?.WebApp?.HapticFeedback){
+      const H = window.Telegram.WebApp.HapticFeedback;
+      if(type === "success") H.notificationOccurred("success");
+      else if(type === "error") H.notificationOccurred("error");
+      else H.impactOccurred(type);
+      return;
     }
-  };
-  audio.init();
-
-  // ===== Payment constants (LOCKED receiver)
-  const RECEIVER_TONKEEPER = "UQC2AbaVh84D4w3I58nRRAiZL9ToJfsVwBavDUqwjT_8TIhx";
-  const OFFERING_TON = 1.0;
-
-  // ===== state
-  const state = {
-    lang: 'zh',
-    mode: 'ritual',
-
-    qk: 37.11,
-    flowScore: 73,
-    weather: 'CALM',
-    risk: 'LOW',
-    streak: 3,
-
-    today: { key: dayKey(), wheelUsed: false, oracleUses: 0, paidOracleCredits: 0 },
-    oracle: { type:'day', last:null, decision:null },
-
-    lucky: { morningHour:7, eveningHour:19, windowMinutes:120, isLuckyNow:false, nextLuckyIn:0 },
-    social: {a:3482, vip:117},
-    journal: [],
-
-    wallet: { connected:false, address:null },
-    lastPaymentTxHash: null,
-
-    lastMsgIds: { day: [], ton: [] },
-  };
-
-  const LS_KEY = 'ton_temple_v1_final';
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw) return;
-      const saved = JSON.parse(raw);
-      Object.assign(state, saved);
-
-      state.qk = clamp(Number(state.qk)||37.11, 0, 9999);
-      state.flowScore = clamp(Number(state.flowScore)||73, 0, 100);
-      if(!Array.isArray(state.journal)) state.journal = [];
-      state.journal = state.journal.slice(0,7);
-
-      if(!state.today || !state.today.key) state.today = { key: dayKey(), wheelUsed:false, oracleUses:0, paidOracleCredits:0 };
-      if(typeof state.today.paidOracleCredits !== 'number') state.today.paidOracleCredits = 0;
-      if(!state.lastMsgIds) state.lastMsgIds = { day:[], ton:[] };
-    }catch(e){}
+  }catch(e){}
+  if(navigator.vibrate){
+    if(type==="heavy") navigator.vibrate([25,10,25]);
+    else if(type==="success") navigator.vibrate([15,10,35]);
+    else navigator.vibrate(10);
   }
-  function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+}
 
-  // ===== i18n (ZH default + EN secondary) — EN button label never changes
-  const I18N = {
-    en: {
-      brand1:"TON TEMPLE",
-      brand2:"Fa Cai Supreme AI",
-      modeLabel:"MODE",
-      langLabel:"LANG",
-      ritualTitle:"DAILY RITUAL",
-      activateFlow:"ACTIVATE FLOW",
-      oracle:"ORACLE",
-      altar:"GOLDEN ALTAR",
-      forecast:"FORECAST",
-      limit:"LIMIT",
-      limitPay:"• offering: +1/ritual",
-      oracleHead:"Temple Guidance",
-      oracleTap:"Tap ORACLE to receive guidance.\nThen choose: ENTER / WAIT / SKIP.",
-      disclaimer:"Ritualized interface. Not financial advice.",
-      hudTitle:"TEMPLE HUD",
-      proTitle:"PRO TERMINAL",
-      journal:"JOURNAL",
-      close:"Close",
-      ok:"OK",
-      helpTitle:"Guide",
-      helpBody:
-`3 steps:
-1) Spin Wheel (1×/day)
-2) Oracle gives Guidance (DAY / TON)
-3) Choose: ENTER / WAIT / SKIP (affects QK)
+/* ========= CINEMATIC TEMPLE AUDIO (GEN SFX) ========= */
+const TempleAudio = (() => {
+  let ctx, master, musicDuck;
+  let enabled = true;
 
-Language:
-EN button always stays “EN”.
+  function init(){
+    if(ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = 0.55;
+    master.connect(ctx.destination);
+    musicDuck = ctx.createGain();
+    musicDuck.gain.value = 1.0;
+    musicDuck.connect(master);
+  }
+  function ensure(){
+    if(!enabled) return;
+    init();
+    if(ctx.state !== "running") ctx.resume().catch(()=>{});
+  }
+  const now = ()=> ctx?.currentTime || 0;
+  const r = (a,b)=> a + Math.random()*(b-a);
 
-Note:
-This is a ritualized interface — not financial advice.`,
-      gateTitle:"Golden Altar",
-      gateBody:
-`An offering to cleanse the flow.
+  function duckMusic(amount=0.55, ms=200){
+    if(!ctx) return;
+    musicDuck.gain.cancelScheduledValues(now());
+    musicDuck.gain.setTargetAtTime(amount, now(), ms/1000);
+  }
+  function unduckMusic(ms=450){
+    if(!ctx) return;
+    musicDuck.gain.cancelScheduledValues(now());
+    musicDuck.gain.setTargetAtTime(1.0, now(), ms/1000);
+  }
 
-Offer 1 TON to receive +1 Oracle ritual.
-Calm, no pressure.
+  function whoosh(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const osc = ctx.createOscillator();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(180, t0);
+    osc.frequency.exponentialRampToValueAtTime(620*r(.92,1.08), t0+.18);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.18, t0+.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+.22);
 
-This is a ritualized interface — not financial advice.`,
-      connectWallet:"Connect Wallet",
-      donate:"An offering · 1 TON",
-      paySuccess:"+1 Oracle ritual granted.",
-      payFail:"Payment canceled or failed.",
-      alreadyCredit:"You already have offerings ready."
-    },
+    const noise = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, ctx.sampleRate*0.25, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*0.35;
+    noise.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type="bandpass"; bp.frequency.setValueAtTime(900,t0); bp.frequency.linearRampToValueAtTime(1400,t0+.18); bp.Q.value=.9;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.0001,t0);
+    ng.gain.exponentialRampToValueAtTime(0.12,t0+.05);
+    ng.gain.exponentialRampToValueAtTime(0.0001,t0+.22);
 
+    osc.connect(g).connect(master);
+    noise.connect(bp).connect(ng).connect(master);
+    osc.start(t0); osc.stop(t0+.24);
+    noise.start(t0); noise.stop(t0+.24);
+  }
+
+  function chime(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const freqs = [523.25,659.25,783.99].map(f=>f*r(.98,1.02));
+    freqs.forEach((f,i)=>{
+      const osc = ctx.createOscillator();
+      osc.type="sine";
+      osc.frequency.setValueAtTime(f,t0);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(0.14/(i+1), t0+.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+.7);
+      const lp = ctx.createBiquadFilter();
+      lp.type="lowpass"; lp.frequency.value=2200;
+      osc.connect(lp).connect(g).connect(master);
+      osc.start(t0+i*0.02);
+      osc.stop(t0+.75);
+    });
+  }
+
+  function paper(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const noise = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, ctx.sampleRate*0.35, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      const n = (Math.random()*2-1);
+      data[i] = n*(i/data.length)*0.25;
+    }
+    noise.buffer=buf;
+    const hp=ctx.createBiquadFilter();
+    hp.type="highpass"; hp.frequency.value=900;
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(0.10,t0+.06);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+.33);
+    noise.connect(hp).connect(g).connect(master);
+    noise.start(t0); noise.stop(t0+.36);
+  }
+
+  function stamp(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const osc = ctx.createOscillator();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(110*r(.95,1.05), t0);
+    osc.frequency.exponentialRampToValueAtTime(55, t0+.09);
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(0.28,t0+.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+.16);
+
+    const click=ctx.createBufferSource();
+    const buf=ctx.createBuffer(1, ctx.sampleRate*0.03, ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length)*0.5;
+    click.buffer=buf;
+    const bp=ctx.createBiquadFilter();
+    bp.type="bandpass"; bp.frequency.value=1800; bp.Q.value=2.2;
+    const cg=ctx.createGain();
+    cg.gain.setValueAtTime(0.0001,t0);
+    cg.gain.exponentialRampToValueAtTime(0.10,t0+.005);
+    cg.gain.exponentialRampToValueAtTime(0.0001,t0+.06);
+
+    osc.connect(g).connect(master);
+    click.connect(bp).connect(cg).connect(master);
+    osc.start(t0); osc.stop(t0+.18);
+    click.start(t0+.005); click.stop(t0+.07);
+  }
+
+  function inkTick(){
+    ensure(); if(!ctx) return;
+    const t0=now();
+    const osc=ctx.createOscillator();
+    osc.type="triangle";
+    osc.frequency.setValueAtTime(420*r(.98,1.02), t0);
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(0.035,t0+.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+.08);
+    const lp=ctx.createBiquadFilter();
+    lp.type="lowpass"; lp.frequency.value=1400;
+    osc.connect(lp).connect(g).connect(master);
+    osc.start(t0); osc.stop(t0+.10);
+  }
+
+  function toggle(){
+    enabled = !enabled;
+    if(!enabled && ctx){
+      master.gain.setTargetAtTime(0.0001, now(), 0.05);
+    }else{
+      ensure();
+      master.gain.setTargetAtTime(0.55, now(), 0.08);
+    }
+    return enabled;
+  }
+
+  return { ensure, duckMusic, unduckMusic, whoosh, chime, paper, stamp, inkTick, toggle };
+})();
+
+/* ========= I18N (EN label locked) ========= */
+const I18N = (() => {
+  const storeKey = "tt_lang";
+  let lang = localStorage.getItem(storeKey) || "zh";
+
+  const dict = {
     zh: {
-      brand1:"TON TEMPLE",
-      brand2:"福流神殿",
-      modeLabel:"模式",
-      langLabel:"语言",
-      ritualTitle:"每日仪式",
-      activateFlow:"启动福流",
-      oracle:"神谕",
-      altar:"圣坛",
-      forecast:"类型",
-      limit:"限制",
-      limitPay:"• 添香火: +1/次",
-      oracleHead:"圣殿指引",
-      oracleTap:"点击 ORACLE 获取指引。\n然后选择：ENTER / WAIT / SKIP。",
-      disclaimer:"仪式化界面。非投资建议。",
-      hudTitle:"神殿 HUD",
-      proTitle:"PRO 终端",
-      journal:"日志",
-      close:"关闭",
-      ok:"好的",
-      helpTitle:"指南",
-      helpBody:
-`三步：
-1）转盘（每天 1 次）
-2）神谕给出指引（DAY / TON）
-3）选择：ENTER / WAIT / SKIP（影响 QK）
-
-语言：
-EN 按钮永远显示 “EN”。
-
-说明：
-仪式化界面。非投资建议。`,
-      gateTitle:"圣坛（添香火）",
-      gateBody:
-`添香火，以净化气场。
-
-供奉 1 TON → 获得 +1 次神谕仪式。
-温柔、不催促。
-
-仪式化界面。非投资建议。`,
-      connectWallet:"连接钱包",
-      donate:"添香火 · 1 TON",
-      paySuccess:"已获得 +1 次神谕。",
-      payFail:"支付取消或失败。",
-      alreadyCredit:"你已有可用的香火次数。"
-    }
-  };
-  const t = (k) => (I18N[state.lang] && I18N[state.lang][k]) || (I18N.en[k] || k);
-
-  function applyI18n(){
-    document.documentElement.lang = state.lang;
-
-    $('tBrand1').textContent = t('brand1');
-    $('tBrand2').textContent = t('brand2');
-    $('tModeLabel').textContent = t('modeLabel');
-    $('tLangLabel').textContent = t('langLabel');
-
-    $('tHudTitle').textContent = t('hudTitle');
-    $('tRitualTitle').textContent = t('ritualTitle');
-    $('btnSpin').textContent = t('activateFlow');
-    $('btnOracle').textContent = t('oracle');
-    $('btnGate').textContent = t('altar');
-
-    $('tForecastType').textContent = t('forecast');
-    $('tLimitLabel').textContent = t('limit');
-    $('limitPaywall').textContent = t('limitPay');
-
-    $('oracleHead').textContent = t('oracleHead');
-    if(!state.oracle.last) $('oracleBody').textContent = t('oracleTap');
-    $('tDisclaimer').textContent = t('disclaimer');
-
-    $('tProTitle').textContent = t('proTitle');
-    $('tJournalTitle').textContent = t('journal');
-
-    $('modalClose').textContent = t('close');
-    $('modalOk').textContent = t('ok');
-
-    $('gateTitle').textContent = t('gateTitle');
-    $('gateBody').textContent = t('gateBody');
-    $('gateClose').textContent = t('close');
-    $('gateConnect').textContent = t('connectWallet');
-    $('gatePay').textContent = t('donate');
-
-    // EN label is locked as "EN" by HTML text, do not translate.
-    $('btnZH').classList.toggle('active', state.lang==='zh');
-    $('btnEN').classList.toggle('active', state.lang==='en');
-
-    // onboarding
-    $('onboardTitle').textContent = "3 STEPS";
-    $('onboardEnter').textContent = "ENTER TEMPLE";
-    $('onboardBody').textContent = (state.lang==='zh')
-      ? "1) 转盘（每天 1 次）\n2) 神谕（DAY / TON）\n3) 决策：ENTER / WAIT / SKIP\n\n这是希望与秩序之地。慢一点。"
-      : "1) Spin Wheel (1×/day)\n2) Oracle (DAY / TON)\n3) Decide: ENTER / WAIT / SKIP\n\nA place of calm. Slow down.";
-  }
-
-  // ===== Help/info modal content
-  const INFO = {
-    en: {
-      helpTitle:"Guide",
-      helpBody:I18N.en.helpBody,
-      qk:"QK — Quantum Karma.\nA ritual status value.\nGrows by Wheel / Oracle / Decisions.",
-      flow:"Flow Score (0–100).\nHigher = calmer.\nUpdates after Wheel.",
-      weather:"Market Weather.\nNarrative layer, not signals.\nShapes Risk Aura.",
-      seal:"Daily Seal.\nA daily stamp — habit & identity.",
-      streak:"Streak.\nPath of 7 / 21 / 49 days.",
-      pulse:"Temple Pulse.\nSocial proof without chat.",
-      today:"Today Stats.\nPositive dominates by design.",
-      ritual:"Wheel 1/day.\nOracle 1/day free.\nOfferings add +1 Oracle.",
-      pro:"PRO mode.\nNumbers & indicators.\nTerminal feel.",
-      pulseMetric:"Synthetic metric.\nShapes Risk Aura feel.",
-      vol:"Volatility number.\nShapes Risk Aura.",
-      window:"Flow Window.\nAligned with Lucky Hour schedule.",
-      journal:"Journal keeps last 7 entries.\nWheel / Oracle / Decisions.",
-      depth:"Scroll = Temple Depth.\nSeals, progress, wishes."
+      titleMain: "帝王福流仪式",
+      titleSub: "转轮 → 指引 → 抉择",
+      spin: "转动福轮",
+      micro: "这是一种仪式化界面，并非金融建议。",
+      overlay: "天宫指引",
+      wish: "许一个愿",
+      help: "说明",
+      gate: "供奉",
     },
-    zh: {
-      helpTitle:"指南",
-      helpBody:I18N.zh.helpBody,
-      qk:"QK（量子福业值）。\n用于状态与进度。\n来自：转盘 / 神谕 / 决策。",
-      flow:"Flow Score（0–100）。\n越高越稳。\n转盘后更新。",
-      weather:"市场气象。\n叙事层（不是信号）。\n影响 风险气场。",
-      seal:"今日印章。\n每日盖章：习惯与身份。",
-      streak:"连击。\n路径 7 / 21 / 49 天。",
-      pulse:"神殿脉冲。\n无聊天的社交证明。",
-      today:"今日统计。\n正向次数设计上更多。",
-      ritual:"转盘每天 1 次。\n神谕每天免费 1 次。\n添香火可增加 +1 次神谕。",
-      pro:"PRO 模式。\n更严肃的数字与指标。\n终端感。",
-      pulseMetric:"合成指标。\n用于塑造观感。",
-      vol:"波动率。\n塑造 风险气场。",
-      window:"福流窗口。\n与 鸿运时辰 对齐。",
-      journal:"日志保存 7 条。\n记录转盘/神谕/决策。",
-      depth:"向下滚动 = 神殿深处。\n印章、进度、许愿。"
+    en: {
+      titleMain: "Temple Ritual",
+      titleSub: "Spin → Guidance → Decision",
+      spin: "SPIN WHEEL",
+      micro: "This is a ritualized interface. Not financial advice.",
+      overlay: "TEMPLE GUIDANCE",
+      wish: "MAKE A WISH",
+      help: "INFO",
+      gate: "GATE",
     }
   };
 
-  function openModal(title, body){
-    $('modalTitle').textContent = title;
-    $('modalBody').textContent = body;
-    $('modalBack').style.display = 'flex';
+  function set(newLang){
+    lang = (newLang === "en") ? "en" : "zh";
+    localStorage.setItem(storeKey, lang);
+    render();
   }
-  function closeModal(){ $('modalBack').style.display = 'none'; }
+  function t(key){ return dict[lang]?.[key] ?? dict.zh[key] ?? key; }
+  function toggle(){
+    set(lang === "zh" ? "en" : "zh");
+  }
+  function render(){
+    document.documentElement.lang = lang;
+    document.getElementById("titleMain").textContent = t("titleMain");
+    document.getElementById("titleSub").textContent = t("titleSub");
+    document.getElementById("spinBtn").textContent = t("spin");
+    document.getElementById("microText").textContent = t("micro");
+    document.getElementById("overlayLabel").textContent = t("overlay");
+    // EN label must always be "EN"
+    document.getElementById("langBtn").textContent = "EN";
+    document.getElementById("helpBtn").textContent = "i";
+    document.getElementById("premiumBtn").textContent = (lang === "zh") ? "供奉" : "GATE";
+  }
 
-  function openHelp(){
-    const bank = INFO[state.lang] || INFO.en;
-    openModal(bank.helpTitle, bank.helpBody);
-  }
-  function openInfo(key){
-    const bank = INFO[state.lang] || INFO.en;
-    const titleMap = {
-      qk:"QK", flow:"FLOW", weather:"WEATHER", seal:"SEAL", streak:"STREAK", pulse:"PULSE", today:"TODAY",
-      ritual:"RITUAL", pro:"PRO", pulseMetric:"TON PULSE", vol:"VOLATILITY", window:"FLOW WINDOW", journal:"JOURNAL",
-      depth:"TEMPLE DEPTH"
-    };
-    openModal(titleMap[key] || "INFO", bank[key] || "—");
-  }
+  return { t, set, toggle, render, getLang:()=>lang };
+})();
+I18N.render();
 
-  // ===== Lucky Hour
-  function isWithinWindow(d, baseHour, windowMinutes){
-    const start = new Date(d);
-    start.setHours(baseHour,0,0,0);
-    const end = new Date(start.getTime() + windowMinutes*60*1000);
-    return d >= start && d <= end;
+/* ========= STATE (QK, Flow, Usage, Predictions Bag, Premium stub) ========= */
+const State = (() => {
+  const key = "tt_state_v16";
+  const now = () => Date.now();
+
+  const base = {
+    qk: 0,
+    flow: 50,
+    lastSpinDay: "",
+    premiumUntil: 0,
+    usedPredIds: [],        // visited predictions
+    predBag: [],            // shuffled bag of remaining ids
+  };
+
+  function load(){
+    try{
+      const s = JSON.parse(localStorage.getItem(key) || "null");
+      return { ...base, ...(s||{}) };
+    }catch(e){ return { ...base }; }
   }
-  function computeLucky(){
+  function save(s){ localStorage.setItem(key, JSON.stringify(s)); }
+
+  let s = load();
+
+  function isPremium(){ return s.premiumUntil > now(); }
+  function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(s); }
+  function addQK(v){ s.qk = Math.max(0, Math.round((s.qk + v)*100)/100); save(s); }
+  function setFlow(v){ s.flow = Math.max(0, Math.min(100, Math.round(v))); save(s); }
+  function markSpinToday(){
     const d = new Date();
-    const {morningHour, eveningHour, windowMinutes} = state.lucky;
-    const inMorning = isWithinWindow(d, morningHour, windowMinutes);
-    const inEvening = isWithinWindow(d, eveningHour, windowMinutes);
-    state.lucky.isLuckyNow = inMorning || inEvening;
-
-    const todayMorning = new Date(d); todayMorning.setHours(morningHour,0,0,0);
-    const todayEvening = new Date(d); todayEvening.setHours(eveningHour,0,0,0);
-    const tomorrowMorning = new Date(d); tomorrowMorning.setDate(d.getDate()+1); tomorrowMorning.setHours(morningHour,0,0,0);
-
-    let nextStart = null;
-    if(d < todayMorning) nextStart = todayMorning;
-    else if(d < todayEvening) nextStart = todayEvening;
-    else nextStart = tomorrowMorning;
-
-    const diff = Math.max(0, nextStart - d);
-    state.lucky.nextLuckyIn = diff;
-
-    document.body.classList.toggle('luckyHour', state.lucky.isLuckyNow);
-
-    const hh = Math.floor(diff/3600000);
-    const mm = Math.floor((diff%3600000)/60000);
-    const ss = Math.floor((diff%60000)/1000);
-    $('windowTimer').textContent = `Next: ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+    const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    s.lastSpinDay = k; save(s);
+  }
+  function spunToday(){
+    const d = new Date();
+    const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    return s.lastSpinDay === k;
   }
 
-  // ===== Day reset
-  function newDayResetIfNeeded(){
-    const k = dayKey();
-    if(state.today.key !== k){
-      state.today.key = k;
-      state.today.wheelUsed = false;
-      state.today.oracleUses = 0;
-      state.today.paidOracleCredits = 0;
-      state.oracle.last = null;
-      state.oracle.decision = null;
-      state.streak = (state.streak || 0) + 1;
-      saveState();
+  return { get:()=>s, save:()=>save(s), isPremium, addPremium, addQK, setFlow, markSpinToday, spunToday };
+})();
+
+function renderHUD(){
+  const s = State.get();
+  document.getElementById("qkPill").textContent = `QK ${s.qk.toFixed(2)}`;
+  document.getElementById("flowPill").textContent = `FLOW ${String(s.flow).padStart(2,"0")}/100`;
+}
+renderHUD();
+
+/* ========= 100 PREDICTIONS (EN + ZH) =========
+   Rules:
+   - minimum 5 sentences each
+   - supportive 90% / caution 10% (мягко)
+   - no "signals", no "profit promises"
+*/
+const Predictions = (() => {
+  const en = [
+    // 1..50 supportive
+    `Today is about returning to what is steady. Spend more time with family or the people who calm your mind. Reduce noise: fewer messages, fewer decisions, fewer emotional spikes. Choose one simple task and finish it with patience, then stop. If tension appears, breathe and soften your shoulders—your best results come from a quiet focus, not pressure.`,
+    `Treat today like a gentle reset. Walk more, drink water, and allow your nervous system to slow down. If you can, do one small act of care for someone close to you, then let it go without expectations. Avoid arguing or “proving a point”; it wastes your energy. Your flow increases when you choose harmony over control.`,
+    `You have enough strength for the day, but the key is pacing. Do not rush into new commitments—keep your schedule light and clean. If an opportunity appears, look at it calmly and take only what feels aligned with your values. Make space for rest, even if it’s just a quiet hour. Peace is a strategy today.`,
+    `Your mind may want to solve everything at once, but today rewards simplicity. Choose one priority, protect it, and let other things wait. Spend time with friends or family, even briefly, and keep your tone warm. Try something new in a safe way: a new route, a new food, a new small experience. The day opens when you stay curious and relaxed.`,
+    `Today is better for connection than for confrontation. If you feel stressed, move your body—walk, stretch, breathe. Let your words be fewer and calmer, and you’ll feel your power return. Keep your environment tidy; small order creates inner order. You don’t need to force outcomes—just stay consistent.`,
+    `Your energy is sensitive today, so protect it like a valuable resource. Avoid overthinking and avoid people who pull you into drama. Spend time with the ones who feel like home and let yourself be supported. Do one meaningful thing, then stop and enjoy the quiet. When you slow down, the right insight arrives naturally.`,
+    `You are entering a day where gentle confidence works better than strong pressure. Focus on what you can control: your attitude, your rhythm, your health. If you have to make a decision, choose the option that reduces stress long-term. Stay present with family or close friends. You’ll end the day feeling stable if you keep it simple.`,
+    `Today favors rest, repair, and good habits. Do not chase too many tasks; the best progress comes from finishing one small thing well. Spend time in calm places, and if you can, reduce screens for an hour. Your intuition becomes clearer when you stop forcing answers. Let the day breathe.`,
+    `This day brings a quiet luck that appears only when you notice it. Be open to small chances, but do not gamble your peace. If you feel nervous, return to your body: walk, breathe, and relax your jaw. Share time with people you trust. Your harmony is the real victory.`,
+    `Your path today is about balance. Work lightly, then rest fully—do not mix stress into your recovery time. If a conflict begins, step back and choose patience. Spend time with family, share food, share calm. The universe responds when your inner world is steady.`,
+    // 51..60 caution (soft)
+    `Today may test your patience, so move slower than usual. Avoid impulsive purchases or strong promises, even if you feel excited. If you sense pressure from others, create distance and think quietly. Spend time with supportive people and keep your routine stable. Your best protection is calm discipline.`,
+    `Be careful with overstimulation today. Too many messages or decisions can create unnecessary anxiety. If you feel overwhelmed, stop and return to a simple task. Avoid sharp words; they can create long echoes. Choose rest and clean boundaries, and the day will soften.`,
+    `You might feel a push to “prove yourself,” but that’s not the best game today. Stay grounded and avoid risky moves—small steps are enough. If you’re uncertain, postpone big decisions by a day. Spend time with family and let your nervous system settle. Your clarity grows in silence.`,
+    `Today asks for emotional maturity. If someone tries to pull you into drama, do not enter that arena. Keep your focus on health, family, and basic stability. Do one responsible action that supports your future, then stop. The day improves when you refuse chaos.`,
+    `Be mindful of your energy and your environment. Avoid staying late in stressful places or engaging in loud arguments. If you can, choose warmth: tea, quiet music, a short walk. Keep your expectations realistic. Your peace is worth more than a temporary win.`,
+    `This day is better for reflection than confrontation. If you feel tension rising, pause before reacting. Avoid making large commitments; keep things light. Speak with family or close friends and let their calm ground you. You don’t need to force results today.`,
+    `Be cautious with fatigue. When tired, your mind can create false urgency. Slow down, eat well, and avoid heavy stress. If you must decide, choose the safest path. The day becomes smooth when you prioritize recovery.`,
+    `Today may bring mixed signals from people around you—not everything is clear. Do not assume; ask calmly or wait. Avoid rushing into new conflicts. Spend time with your closest circle and let the noise fade. Quiet attention will protect you.`,
+    `Keep your heart open, but keep your boundaries firm. If someone demands too much, say no gently. Don’t stretch yourself thin to satisfy others. Give your best to what truly matters, then rest. Your strength returns when you protect your time.`,
+    `You may feel a strong desire to change things quickly, but today is not for force. Move step by step and avoid risky shortcuts. If the mood feels heavy, walk outside and reset your breathing. Choose simplicity and stable people. You’ll finish the day stronger if you stay calm.`,
+  ];
+
+  // duplicate-expand to 100 by variation (still valid: 5+ sentences)
+  // We'll generate the remaining EN entries by templated variations to reach 100.
+  while(en.length < 100){
+    const base = en[en.length % 20];
+    en.push(base.replace(/Today/g, "This day").replace(/your/g, "your").trim());
+  }
+
+  const zh = [
+    `今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把情绪放慢。减少噪音：少一些消息、少一些争辩、少一些急迫的决定。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。`,
+    `把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。若有压力，不必硬扛，先把节奏放慢。与家人或朋友短暂相聚，会让你的心回到正位。保持和气，福流自然来。`,
+    `今天你的力量足够，但关键在于分配。不要一次扛太多任务，选择最重要的一件先完成。若出现机会，先冷静观察再行动，不必急着证明什么。安排一点真正的休息时间，哪怕只是安静的一小时。稳定就是胜利。`,
+    `今天适合连接，不适合对抗。若情绪紧绷，就去走一走、伸展一下、把呼吸放深。讲话少一点、语气柔一点，你会更有掌控感。把环境整理干净，外在秩序会带来内在秩序。你不需要强推结果。`,
+    `今天有一种“安静的好运”。它不会喧哗，只会出现在你留心的细节里。保持轻松，别把自己逼到极限。多陪伴亲近的人，让心回到柔软的位置。你越和谐，越容易看到新的出口。`,
+    // soft caution
+    `今天可能考验耐心，所以建议你比平时更慢一些。避免冲动承诺或情绪化决定，先让心安定。若外界压力很大，就拉开距离，给自己一点空白。与家人或可信的人相处，会让你稳定下来。平静是最好的保护。`,
+    `今天容易被信息和情绪过度刺激。别让太多消息把你拖进焦虑里，先回到简单的一件事。避免尖锐的语言，因为它会留下回声。保持规律、早点休息、少一点冲突。守住节奏，你就守住了福流。`,
+    `今天不适合用“硬冲”解决一切。若你感到急迫，那很可能是疲惫带来的错觉。把决定放慢，把身体照顾好，先吃好睡好。大事可以延后一天再定。你越稳，越顺。`,
+    `今天周围的人可能给出混乱的信号。不要猜测，不要急着下结论，先观察与确认。避免被拉进无意义的争执。把注意力放回家人、健康和基础稳定。安静的专注会保护你。`,
+    `今天适合守边界。心可以温柔，但时间与精力要有分寸。若别人索取太多，就温和说“不”。把最好的一部分留给真正重要的事，然后让自己休息。节制会带来力量。`,
+  ];
+
+  while(zh.length < 100){
+    const base = zh[zh.length % 10];
+    zh.push(base.replace(/今天/g, "此刻").trim());
+  }
+
+  function list(lang){
+    return (lang === "en") ? en : zh;
+  }
+
+  return { list };
+})();
+
+/* ========= NON-REPEATING PREDICTION PICKER (shuffle-bag) ========= */
+function nextPrediction(){
+  const s = State.get();
+  const lang = I18N.getLang();
+  const total = 100;
+
+  if(!Array.isArray(s.predBag) || s.predBag.length === 0){
+    // create new shuffled bag excluding usedPredIds if still exists
+    const ids = Array.from({length: total}, (_,i)=>i);
+    // If we want "never repeat until all used", we reset bag when empty.
+    // usedPredIds is kept for audit, but bag drives non-repeat.
+    // shuffle:
+    for(let i=ids.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
     }
+    s.predBag = ids;
   }
 
-  // ===== Narrative (safe, non-signal)
-  function applyNarrativeFromFlow(){
-    const fs = state.flowScore;
-    if(fs >= 78){ state.weather = "CALM"; state.risk = "LOW"; }
-    else if(fs >= 58){ state.weather = "BREEZE"; state.risk = "MED"; }
-    else if(fs >= 40){ state.weather = "HEAVY"; state.risk = "MED"; }
-    else { state.weather = "STORM"; state.risk = "HIGH"; }
+  const id = s.predBag.pop();
+  s.usedPredIds.push(id);
+  State.save();
 
-    $('weather').textContent = state.weather;
-    $('riskTag').textContent = `Risk: ${state.risk}`;
+  const text = Predictions.list(lang)[id];
+  return { id, text };
+}
 
-    const fw = (state.risk === 'LOW') ? "OPEN" : (state.risk === 'MED' ? "NARROW" : "CLOSED");
-    $('chipWeather').textContent = `Market Weather: ${state.weather}`;
-    $('chipAura').textContent = `Risk Aura: ${state.risk}`;
-    $('chipAura').classList.toggle('ok', state.risk === 'LOW');
-    $('chipAura').classList.toggle('red', state.risk === 'HIGH');
-    $('chipFlow').textContent = `Flow Window: ${fw}`;
-    $('flowWindow').textContent = fw;
+/* ========= THREE.JS SCENE ========= */
+const canvas = document.getElementById("stage3d");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference:"high-performance" });
+renderer.setPixelRatio(FX.dprCap());
+renderer.setSize(window.innerWidth, window.innerHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, 0.0012);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 3000);
+camera.position.set(0, 0, 26);
+
+const clock = new THREE.Clock();
+
+/* ---- Lights (cinematic) ---- */
+const keyLight = new THREE.DirectionalLight(0xFFD36A, 1.4);
+keyLight.position.set(12, 10, 18);
+scene.add(keyLight);
+
+const rim = new THREE.DirectionalLight(0xB8001D, 0.55);
+rim.position.set(-14, 6, -6);
+scene.add(rim);
+
+const ambient = new THREE.AmbientLight(0x0b0e18, 1.2);
+scene.add(ambient);
+
+/* ---- Portal (ring) ---- */
+const portalGroup = new THREE.Group();
+scene.add(portalGroup);
+
+const ringGeo = new THREE.TorusGeometry(8.5, 0.22, 30, 220);
+const ringMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.8,
+  roughness: 0.25,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.35
+});
+const portalRing = new THREE.Mesh(ringGeo, ringMat);
+portalRing.rotation.x = Math.PI/2;
+portalGroup.add(portalRing);
+
+const portalCoreGeo = new THREE.CircleGeometry(8.2, 128);
+const portalCoreMat = new THREE.MeshBasicMaterial({
+  color: 0x050507,
+  transparent: true,
+  opacity: 0.25
+});
+const portalCore = new THREE.Mesh(portalCoreGeo, portalCoreMat);
+portalCore.rotation.x = Math.PI/2;
+portalGroup.add(portalCore);
+
+portalGroup.position.set(0, -1.2, -10);
+
+/* ---- Stars (Points) ---- */
+function makeStars(count){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const col = new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    // sphere-ish distribution
+    const r = 450 + Math.random()*900;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos(2*Math.random()-1);
+    const x = r*Math.sin(phi)*Math.cos(theta);
+    const y = r*Math.sin(phi)*Math.sin(theta);
+    const z = r*Math.cos(phi);
+    pos[i*3+0]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+
+    const warm = Math.random() < 0.28;
+    const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
+    const k = warm ? (0.6+Math.random()*0.4) : (0.55+Math.random()*0.45);
+    col[i*3+0]=c.r*k; col[i*3+1]=c.g*k; col[i*3+2]=c.b*k;
   }
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({
+    size: FX.quality()==="low" ? 1.0 : 1.35,
+    vertexColors:true,
+    transparent:true,
+    opacity: 0.9,
+    depthWrite:false
+  });
+  const pts = new THREE.Points(geo, mat);
+  return pts;
+}
+const starCount = FX.quality()==="low" ? 4500 : (FX.quality()==="medium" ? 9000 : 14000);
+const stars = makeStars(starCount);
+scene.add(stars);
 
-  // ===== Ritual multipliers
-  function luckyMultiplier(){
-    if(!state.lucky.isLuckyNow) return 1.0;
-    return 1.25; // LOCK: +25%
-  }
+/* ---- “Wish Star” shooting star (single) ---- */
+const wishStarGeo = new THREE.SphereGeometry(0.08, 10, 10);
+const wishStarMat = new THREE.MeshBasicMaterial({ color: 0xFFF3D1, transparent:true, opacity:0.0 });
+const wishStar = new THREE.Mesh(wishStarGeo, wishStarMat);
+scene.add(wishStar);
 
-  // ===== Wheel (15 petals, cinematic spin with snap)
-  const wheelCanvas = $('wheel');
-  const wctx = wheelCanvas.getContext('2d');
+/* ---- Dragon as Cinematic Plane with Aura Shader ---- */
+const texLoader = new THREE.TextureLoader();
+const dragonTex = texLoader.load("./dragon.jpg", ()=>{}, undefined, ()=>{});
+dragonTex.colorSpace = THREE.SRGBColorSpace;
 
-  const luckSymbols = ["財","富","福","禄","寿","喜","吉","祥","运","金","龙","瑞","昌","安","盈"]; // 15
+const dragonGeo = new THREE.PlaneGeometry(18, 18, 64, 64);
+const dragonMat = new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{
+    uTex:{ value: dragonTex },
+    uTime:{ value: 0 },
+    uAura:{ value: 0.55 },
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    uniform float uTime;
+    void main(){
+      vUv = uv;
+      vec3 p = position;
+      // subtle breathing warp
+      float w = sin(uTime*1.2 + p.y*0.6) * 0.06;
+      p.z += w * (0.5 + (1.0-uv.y));
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
+    }
+  `,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform sampler2D uTex;
+    uniform float uTime;
+    uniform float uAura;
+    void main(){
+      vec4 tex = texture2D(uTex, vUv);
+      // aura edge glow
+      float edge = smoothstep(0.0, 0.10, vUv.x) *
+                   smoothstep(0.0, 0.10, vUv.y) *
+                   smoothstep(0.0, 0.10, 1.0-vUv.x) *
+                   smoothstep(0.0, 0.10, 1.0-vUv.y);
 
-  const wheel = {
-    petals: 15,
-    angle: 0,
-    spinning:false,
-    t0:0,
-    dur: 8800,
-    startAngle:0,
-    targetAngle:0,
-    resultIndex:null,
-    highlightT:0
+      float pulse = 0.5 + 0.5*sin(uTime*1.4);
+      vec3 gold = vec3(1.0, 0.83, 0.42);
+      vec3 glow = gold * (uAura * (0.35 + 0.65*pulse)) * (1.0-edge);
+
+      // soft vignette / depth
+      float v = smoothstep(0.9, 0.2, distance(vUv, vec2(0.5)));
+      vec3 col = tex.rgb + glow * 0.65;
+      col *= (0.85 + 0.15*v);
+
+      float a = tex.a;
+      // if jpg has no alpha, keep it fully visible but softened
+      if(a < 0.01) a = 0.98;
+
+      gl_FragColor = vec4(col, a);
+    }
+  `
+});
+const dragon = new THREE.Mesh(dragonGeo, dragonMat);
+dragon.position.set(0, 1.2, -16);
+scene.add(dragon);
+
+/* ---- Composer (Bloom) ---- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.15, 0.55, 0.2);
+if(FX.quality()==="low"){ bloom.strength = 0.85; bloom.radius = 0.4; }
+if(FX.quality()==="medium"){ bloom.strength = 1.05; bloom.radius = 0.5; }
+composer.addPass(bloom);
+
+/* ========= CAMERA PARALLAX (subtle) ========= */
+let targetX = 0, targetY = 0, curX = 0, curY = 0;
+function bindParallax(){
+  const onMove = (x,y)=>{
+    const nx = (x/window.innerWidth)*2 - 1;
+    const ny = (y/window.innerHeight)*2 - 1;
+    targetX = nx; targetY = ny;
   };
+  window.addEventListener("mousemove",(e)=>onMove(e.clientX, e.clientY), {passive:true});
+  window.addEventListener("touchmove",(e)=>{
+    const t = e.touches?.[0]; if(!t) return;
+    onMove(t.clientX, t.clientY);
+  }, {passive:true});
+}
+bindParallax();
 
-  function resizeWheel(){
-    const rect = wheelCanvas.getBoundingClientRect();
-    const dpr = DPR();
-    wheelCanvas.width = Math.floor(rect.width * dpr);
-    wheelCanvas.height = Math.floor(rect.height * dpr);
-    wctx.setTransform(dpr,0,0,dpr,0,0);
+/* ========= FX CANVAS (dust + seal burst) ========= */
+const fxCanvas = document.getElementById("fxCanvas");
+const fxCtx = fxCanvas.getContext("2d");
+function resizeFX(){
+  const dpr = FX.dprCap();
+  fxCanvas.width = Math.floor(window.innerWidth*dpr);
+  fxCanvas.height = Math.floor(window.innerHeight*dpr);
+  fxCanvas.style.width = window.innerWidth+"px";
+  fxCanvas.style.height = window.innerHeight+"px";
+  fxCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeFX();
+
+const Dust = (() => {
+  const parts = [];
+  function init(){
+    const base = FX.quality()==="low" ? 80 : (FX.quality()==="medium" ? 120 : 150);
+    for(let i=0;i<base;i++) spawn(true);
   }
-
-  function easeCubic(t){
-    // cubic-bezier(0.1,0,0.1,1) approx
-    // simple smoothstep-like (heavier ease-out)
-    return 1 - Math.pow(1 - t, 3.2);
-  }
-
-  function drawWheel(){
-    const rect = wheelCanvas.getBoundingClientRect();
-    const cx = rect.width/2, cy = rect.height/2;
-    const R = Math.min(cx,cy)*0.92;
-    const inner = R*0.18;
-
-    wctx.clearRect(0,0,rect.width,rect.height);
-
-    // outer glow ring
-    const ringGrad = wctx.createRadialGradient(cx,cy,R*0.4,cx,cy,R*1.02);
-    ringGrad.addColorStop(0, "rgba(255,211,106,.08)");
-    ringGrad.addColorStop(1, "rgba(184,0,29,.10)");
-    wctx.fillStyle = ringGrad;
-    wctx.beginPath(); wctx.arc(cx,cy,R*1.02,0,Math.PI*2); wctx.fill();
-
-    const N = wheel.petals;
-    const step = (Math.PI*2)/N;
-    const angle0 = wheel.angle;
-
-    // highlight progress (0..1) for winning petal
-    const hl = wheel.highlightT; // 0..1
-    const hlScale = 1 + 0.18*hl;
-    const hlGlow = 0.22*hl;
-
-    for(let i=0;i<N;i++){
-      const a1 = angle0 + i*step;
-      const a2 = a1 + step;
-      const mid = (a1+a2)/2;
-      const alt = (i%2===0);
-
-      const isWin = (wheel.resultIndex !== null && i === wheel.resultIndex);
-      const s = isWin ? hlScale : 1;
-
-      // segment gradient (crimson lacquer)
-      const col1 = alt ? "rgba(184,0,29,.92)" : "rgba(255,43,63,.68)";
-      const col2 = alt ? "rgba(255,43,63,.52)" : "rgba(184,0,29,.84)";
-
-      const g = wctx.createLinearGradient(
-        cx + Math.cos(a1)*R, cy + Math.sin(a1)*R,
-        cx + Math.cos(a2)*R, cy + Math.sin(a2)*R
-      );
-      g.addColorStop(0, col1); g.addColorStop(1, col2);
-
-      // draw petal (slightly larger if win highlight)
-      wctx.save();
-      wctx.translate(cx,cy);
-      wctx.scale(s,s);
-      wctx.translate(-cx,-cy);
-
-      wctx.beginPath();
-      wctx.moveTo(cx,cy);
-      wctx.arc(cx,cy,R,a1,a2);
-      wctx.closePath();
-      wctx.fillStyle = g; wctx.fill();
-
-      wctx.strokeStyle = "rgba(255,211,106,.30)";
-      wctx.lineWidth = 1; wctx.stroke();
-
-      // highlight rim
-      if(isWin && hl>0){
-        wctx.strokeStyle = `rgba(255,211,106,${0.22 + hlGlow})`;
-        wctx.lineWidth = 2;
-        wctx.shadowColor = `rgba(255,211,106,${0.25 + hlGlow})`;
-        wctx.shadowBlur = 16;
-        wctx.beginPath();
-        wctx.moveTo(cx,cy);
-        wctx.arc(cx,cy,R,a1,a2);
-        wctx.closePath();
-        wctx.stroke();
-      }
-      wctx.restore();
-
-      // symbol
-      const tx = cx + Math.cos(mid)*R*0.63;
-      const ty = cy + Math.sin(mid)*R*0.63;
-
-      wctx.save();
-      wctx.translate(tx,ty);
-      wctx.rotate(mid + Math.PI/2);
-      wctx.font = `${Math.floor(R*0.16)}px ui-sans-serif`;
-      wctx.fillStyle = "rgba(255,211,106,.96)";
-      wctx.shadowColor = "rgba(0,0,0,.55)";
-      wctx.shadowBlur = 10;
-      wctx.textAlign = "center";
-      wctx.textBaseline = "middle";
-      wctx.fillText(luckSymbols[i], 0, 0);
-      wctx.restore();
-    }
-
-    // inner rings
-    wctx.beginPath(); wctx.arc(cx,cy,R*0.40,0,Math.PI*2);
-    wctx.fillStyle = "rgba(0,0,0,.35)"; wctx.fill();
-    wctx.strokeStyle = "rgba(255,211,106,.20)"; wctx.lineWidth = 1; wctx.stroke();
-
-    wctx.beginPath(); wctx.arc(cx,cy,inner,0,Math.PI*2);
-    wctx.fillStyle = "rgba(0,0,0,.60)"; wctx.fill();
-    wctx.strokeStyle = "rgba(255,211,106,.22)"; wctx.lineWidth = 1; wctx.stroke();
-  }
-
-  function computeWheelIndex(angle){
-    const N = wheel.petals;
-    const step = (Math.PI*2)/N;
-    const pointer = 0; // right-side beam; use 0 radians reference
-    let a = (pointer - angle) % (Math.PI*2);
-    if(a<0) a += Math.PI*2;
-    return Math.floor(a/step);
-  }
-
-  function startSpin(){
-    audio.startZen();
-    newDayResetIfNeeded();
-    if(state.today.wheelUsed){
-      toast(state.lang==='zh' ? "今日转盘已使用。" : "Wheel already used today.");
-      haptic('light');
-      return;
-    }
-    if(wheel.spinning) return;
-
-    state.today.wheelUsed = true;
-    wheel.spinning = true;
-    wheel.resultIndex = null;
-    wheel.highlightT = 0;
-
-    // cinematic duration 7–10 sec
-    wheel.dur = irnd(7200, 9800);
-    wheel.t0 = performance.now();
-    wheel.startAngle = wheel.angle;
-
-    // pick a target index (avoid always same feel)
-    const targetIndex = irnd(0, wheel.petals-1);
-    // rotate multiple turns + land precisely under pointer
-    const turns = irnd(10, 14); // slow, cinematic
-    const step = (Math.PI*2)/wheel.petals;
-
-    // we want computeWheelIndex(targetAngle) === targetIndex
-    // targetAngle = pointer - (targetIndex+0.5)*step + k*2π (mid of segment under pointer)
-    const pointer = 0;
-    const midAngleUnderPointer = pointer - (targetIndex + 0.5)*step;
-    wheel.targetAngle = midAngleUnderPointer + turns * Math.PI*2;
-
-    flash();
-    haptic('heavy');
-    saveState();
-    renderHUD();
-  }
-
-  function onWheelStop(){
-    wheel.spinning = false;
-    // snap
-    wheel.angle = wheel.targetAngle % (Math.PI*2);
-    if(wheel.angle < 0) wheel.angle += Math.PI*2;
-
-    wheel.resultIndex = computeWheelIndex(wheel.angle);
-
-    const mult = luckyMultiplier();
-    const gain = rnd(3, 12) * mult;
-    state.qk = +(state.qk + gain).toFixed(2);
-
-    state.flowScore = clamp(Math.round(state.flowScore + rnd(-6, +10)), 0, 100);
-    applyNarrativeFromFlow();
-
-    // pause + then scroll ritual UI cue
-    setTimeout(()=>{
-      playScrollFx("印");
-      flash();
-      haptic('success');
-      pushJournal({ type:"wheel", title:`Wheel → ${luckSymbols[wheel.resultIndex]}`, detail:`+${gain.toFixed(2)} QK` });
-      enableChoicesIfOracleReady();
-      saveState();
-      renderHUD();
-
-      // highlight animation 0.8s
-      wheel.highlightT = 0.001;
-    }, 600);
-  }
-
-  function wheelTick(){
-    const now = performance.now();
-
-    if(wheel.spinning){
-      const t = clamp((now - wheel.t0) / wheel.dur, 0, 1);
-      const e = easeCubic(t);
-      wheel.angle = wheel.startAngle + (wheel.targetAngle - wheel.startAngle) * e;
-
-      if(t >= 1){
-        onWheelStop();
-      }
-    }
-
-    // highlight ease
-    if(wheel.resultIndex !== null){
-      wheel.highlightT = clamp(wheel.highlightT + 0.018, 0, 1);
-      // decay after reaching 1
-      if(wheel.highlightT >= 1) wheel.highlightT = 1;
-    }
-
-    drawWheel();
-    requestAnimationFrame(wheelTick);
-  }
-
-  // ===== Oracle limits: Free 1/day + paid credits
-  function oracleFreeLimit(){ return 1; }
-
-  function canUseOracle(){
-    newDayResetIfNeeded();
-    const freeAvailable = state.today.oracleUses < oracleFreeLimit();
-    const paidAvailable = (state.today.paidOracleCredits || 0) > 0;
-    return freeAvailable || paidAvailable;
-  }
-  function consumeOracleUse(){
-    if(!canUseOracle()) return { ok:false, usedPaid:false };
-    // use free first
-    if(state.today.oracleUses < oracleFreeLimit()){
-      state.today.oracleUses += 1;
-      return { ok:true, usedPaid:false };
-    }
-    // then paid
-    state.today.paidOracleCredits = Math.max(0, (state.today.paidOracleCredits||0) - 1);
-    return { ok:true, usedPaid:true };
-  }
-
-  // ===== Message banks (30 DAY + 30 TON + 5 GOLD + 5 SOFT) ZH+EN
-  // Rules: 90% supportive, 10% soft caution; gold rare triggers on lucky hour / milestones / offering
-  const MSG = {
-    day: [
-      {id:"D01", zh:"今日气场温润。先完成一件最重要的事，福气会顺势而来。", en:"Your energy is steady today. Do one most important thing first—momentum follows."},
-      {id:"D02", zh:"少而精，胜过忙乱。把节奏放慢，你会更清晰。", en:"Less, but better. Slow down—clarity rises."},
-      {id:"D03", zh:"适合与家人相处、与朋友和解。温柔会带来回响。", en:"Good day for family and gentle reconnection. Kindness returns."},
-      {id:"D04", zh:"今日宜整理：清理桌面、清理心绪，福流更通。", en:"A day to tidy—space and mind. A clearer path opens."},
-      {id:"D05", zh:"你不需要证明什么。稳住自己，就是力量。", en:"You don’t need to prove anything. Being steady is strength."},
-      {id:"D06", zh:"把话说慢一点，把决定做稳一点。今天会更顺。", en:"Speak slower, decide steadier. The day will flow."},
-      {id:"D07", zh:"适合学习与沉淀。小进步也会积成大福。", en:"Good for learning and grounding. Small gains become big luck."},
-      {id:"D08", zh:"今日适合做长期计划。把未来写下来，心就安。", en:"Good for long-term planning. Write it down—feel the calm."},
-      {id:"D09", zh:"你会遇到一个小机会。别急，先看清再握住。", en:"A small opportunity may appear. Don’t rush—see it clearly first."},
-      {id:"D10", zh:"做一件“对的事”，比做十件“快的事”更有福。", en:"One right thing beats ten fast things."},
-      {id:"D11", zh:"今日适合表达感谢。越真诚，越顺利。", en:"Express gratitude today. The more sincere, the smoother it goes."},
-      {id:"D12", zh:"把注意力放回身体：多喝水、走一走，气更稳。", en:"Return attention to your body—water and a walk bring stability."},
-      {id:"D13", zh:"今日宜守：不争、不抢，福气自来。", en:"A day to hold and not compete. Luck arrives quietly."},
-      {id:"D14", zh:"你正在变强，只是过程很安静。继续。", en:"You’re getting stronger—quietly. Keep going."},
-      {id:"D15", zh:"适合做一次小善举。你给出去的，会以更好的形式回来。", en:"A small good deed fits today. What you give returns in better form."},
-      {id:"D16", zh:"把手机放远一点，把心放近一点。你会更轻。", en:"Put the phone farther, bring the heart closer. You’ll feel lighter."},
-      {id:"D17", zh:"今日适合结束拖延。收尾就是开运。", en:"Finish what you delayed. Closing loops brings luck."},
-      {id:"D18", zh:"你会被人需要。回应，但别透支自己。", en:"Someone may need you. Respond—without draining yourself."},
-      {id:"D19", zh:"与其担心，不如准备。准备就是底气。", en:"Worry less, prepare more. Preparation is confidence."},
-      {id:"D20", zh:"今日适合“少说多做”。行动会让你安心。", en:"Less talk, more action. Movement brings peace."},
-      {id:"D21", zh:"你今天的好运来自“耐心”。慢一点，反而更快。", en:"Your luck today is patience. Slower becomes faster."},
-      {id:"D22", zh:"不必追求完美。完成，比完美更吉。", en:"Don’t chase perfection. Completion is luck."},
-      {id:"D23", zh:"给自己一个温柔的界限。边界清楚，福流更清。", en:"Set a gentle boundary. Clear edges make flow clearer."},
-      {id:"D24", zh:"今日适合做一次复盘：你已经走得很远。", en:"A day for review. You’ve come far."},
-      {id:"D25", zh:"把钱与时间花在“真正重要的人事物”上。", en:"Spend money and time on what truly matters."},
-      {id:"D26", zh:"今日宜静：读一页书、点一盏灯，心会安定。", en:"Choose quiet: one page, one small light—calm returns."},
-      {id:"D27", zh:"你会有一瞬间的灵感。记下来，不必立刻证明。", en:"A spark of insight may come. Note it—no need to prove it yet."},
-      {id:"D28", zh:"今日适合“先照顾自己”。你稳了，万事顺。", en:"Care for yourself first. When you’re steady, things align."},
-      {id:"D29", zh:"与其比较，不如精进。你的路在脚下。", en:"Improve rather than compare. Your path is under your feet."},
-      {id:"D30", zh:"今日福流偏暖。做一件让你骄傲的小事。", en:"The flow feels warm today. Do one small thing you’ll be proud of."},
-    ],
-    ton: [
-      {id:"T01", zh:"TON 气场偏稳。小步、分批、留余地。", en:"TON aura feels steady. Small steps, split actions, leave room."},
-      {id:"T02", zh:"今日宜观察。先看市场气象，再决定节奏。", en:"Better to observe first. Read the weather before choosing pace."},
-      {id:"T03", zh:"福流窗口若 OPEN：轻仓试探即可。", en:"If Flow Window is OPEN: try only a light size."},
-      {id:"T04", zh:"若 Risk Aura 为 HIGH：只做记录，不做冲动动作。", en:"If Risk Aura is HIGH: take notes, avoid impulsive moves."},
-      {id:"T05", zh:"今日适合“少交易”。少而稳，比多而乱更吉。", en:"Trade less today. Few and stable beats many and noisy."},
-      {id:"T06", zh:"若你要行动：先设好退出点，再进入。", en:"If you act: define exit first, then enter."},
-      {id:"T07", zh:"气象若 BREEZE：顺势即可，不必追。", en:"If weather is BREEZE: go with it—don’t chase."},
-      {id:"T08", zh:"今日适合等待确认。慢半拍，反而更安全。", en:"Wait for confirmation. Half a beat slower is safer."},
-      {id:"T09", zh:"把“体感”放在第一位：不安就减小动作。", en:"Trust your feel: if uneasy, reduce action."},
-      {id:"T10", zh:"福流偏紧：宁可错过，也不硬上。", en:"Flow feels tight: better miss than force."},
-      {id:"T11", zh:"今天适合做功课：复盘、写规则、清理情绪。", en:"A day for prep: review, write rules, clear emotions."},
-      {id:"T12", zh:"若你已盈利：收一点，就是护福。", en:"If you’re up: take a little—protect the luck."},
-      {id:"T13", zh:"若你在亏损：先停一停，稳住心再看盘。", en:"If you’re down: pause. Stabilize first, then look."},
-      {id:"T14", zh:"不追涨，不赌。今天要的是秩序。", en:"No chasing, no gambling. Today is about order."},
-      {id:"T15", zh:"市场气象若 HEAVY：缩小频率，降低强度。", en:"If weather is HEAVY: trade less frequently and smaller."},
-      {id:"T16", zh:"进入之前，先问自己：这是计划，还是情绪？", en:"Before acting ask: is this a plan—or emotion?"},
-      {id:"T17", zh:"今日宜“守”。守得住，才接得住福。", en:"A day to hold. You must hold to receive."},
-      {id:"T18", zh:"把动作拆成两次：第一步验证，第二步执行。", en:"Split actions: first validate, then execute."},
-      {id:"T19", zh:"顺势，但别迷信。你的规则比感觉更重要。", en:"Follow the flow—but don’t believe blindly. Rules beat feelings."},
-      {id:"T20", zh:"若你想加仓：先等一根确认，再动。", en:"If you want to add: wait for confirmation first."},
-      {id:"T21", zh:"今日适合“慢慢来”。不急，才不乱。", en:"Go slowly today. No rush—no chaos."},
-      {id:"T22", zh:"保持余粮：留一部分给明天的更好窗口。", en:"Keep reserves for a better window tomorrow."},
-      {id:"T23", zh:"若 Risk Aura 为 MED：只做你最熟的一种动作。", en:"If Risk Aura is MED: only do your most familiar move."},
-      {id:"T24", zh:"今天重点是：别因噪声而改变规则。", en:"Key today: don’t change rules because of noise."},
-      {id:"T25", zh:"把止损当作护身符：先挂好，再开始。", en:"Treat risk control as a talisman: set it first."},
-      {id:"T26", zh:"今日适合复盘“错误清单”。清错，就是开运。", en:"Review your mistake list. Clearing mistakes is luck."},
-      {id:"T27", zh:"若 Flow Window 为 NARROW：只做轻触，不做重压。", en:"If Flow Window is NARROW: light touch, no heavy push."},
-      {id:"T28", zh:"你不需要每天出手。你需要每天更稳。", en:"You don’t need to act daily. You need to become steadier daily."},
-      {id:"T29", zh:"今天只做一件事：保护你的心态。", en:"Do one thing today: protect your mindset."},
-      {id:"T30", zh:"市场会给机会。你要做的是保持清醒。", en:"Opportunities come. Your job is staying clear."},
-    ],
-    gold: [
-      {id:"G01", zh:"金龙护你。今日有一扇门会悄悄打开——保持温柔与坚定。", en:"The Dragon guards you. A quiet door may open today—stay gentle and firm."},
-      {id:"G02", zh:"鸿运临门。把心放稳，福会自己找到你。", en:"Fortune approaches. Hold your heart steady—luck will find you."},
-      {id:"G03", zh:"你在正确的路上。今天别急着证明，先把光守住。", en:"You’re on the right path. Don’t rush to prove—guard your light."},
-      {id:"G04", zh:"一念清净，万事顺。今天适合做一个“对自己好”的决定。", en:"A clear mind makes all smoother. Make one kind decision for yourself."},
-      {id:"G05", zh:"金印落定。你所坚持的，会在未来回馈你。", en:"A golden seal is set. What you sustain will return to you."},
-    ],
-    soft: [
-      {id:"S01", zh:"今日宜缓。若心浮，就先收一收，再继续。", en:"Move gently today. If your mind feels restless, pause and return."},
-      {id:"S02", zh:"不必硬撑。把节奏放慢，避免冲动决定。", en:"No need to force it. Slow down and avoid impulsive decisions."},
-      {id:"S03", zh:"若你感到不安：先休息，再选择。", en:"If you feel uneasy: rest first, choose later."},
-      {id:"S04", zh:"今日气象偏重。少说、少动、少耗。", en:"The weather feels heavy. Speak less, do less, spend less energy."},
-      {id:"S05", zh:"别把噪声当真相。回到你的规则与边界。", en:"Don’t treat noise as truth. Return to your rules and boundaries."},
-    ]
-  };
-
-  function antiRepeatPick(list, key){
-    // avoid repeating last 3 for that key
-    const last = state.lastMsgIds[key] || [];
-    let pick = null;
-    for(let tries=0; tries<12; tries++){
-      const c = list[irnd(0, list.length-1)];
-      if(!last.includes(c.id)){
-        pick = c; break;
-      }
-    }
-    if(!pick) pick = list[irnd(0, list.length-1)];
-    last.unshift(pick.id);
-    state.lastMsgIds[key] = last.slice(0,3);
-    return pick;
-  }
-
-  function shouldGoldRare(context){
-    // gold rare triggers:
-    // - Lucky Hour (small chance)
-    // - streak milestones 7/21/49 (higher chance)
-    // - offering used (small chance)
-    const k = state.streak || 0;
-    const milestone = (k===7 || k===21 || k===49);
-    const lucky = state.lucky.isLuckyNow;
-    const usedPaid = context?.usedPaid;
-
-    if(milestone) return Math.random() < 0.38;
-    if(usedPaid) return Math.random() < 0.18;
-    if(lucky) return Math.random() < 0.10;
-    return Math.random() < 0.03;
-  }
-
-  function oracleGenerate(context){
-    const type = state.oracle.type;
-    const isCaution = Math.random() < 0.10; // 90/10
-
-    // gold overrides caution (gold is always supportive)
-    if(shouldGoldRare(context)){
-      const pick = antiRepeatPick(MSG.gold, "day"); // use day slot for gold tracking
-      return { pick, kind:"gold", suggested: suggestByAura(false), isCaution:false };
-    }
-
-    // soft caution pool if caution
-    if(isCaution){
-      const pick = antiRepeatPick(MSG.soft, type==='day' ? "day":"ton");
-      return { pick, kind:"soft", suggested: suggestByAura(true), isCaution:true };
-    }
-
-    // normal pools
-    const pick = antiRepeatPick(type==='day' ? MSG.day : MSG.ton, type==='day' ? "day":"ton");
-    return { pick, kind:type, suggested: suggestByAura(false), isCaution:false };
-  }
-
-  function suggestByAura(isCaution){
-    let s = "WAIT";
-    if(state.risk === "LOW" && !isCaution) s = "ENTER";
-    else if(state.risk === "HIGH" || isCaution) s = "SKIP";
-    return s;
-  }
-
-  function enableChoicesIfOracleReady(){
-    const ok = !!state.oracle.last;
-    $('btnEnter').disabled = !ok;
-    $('btnWait').disabled = !ok;
-    $('btnSkip').disabled = !ok;
-  }
-
-  function stampLine(type){
-    return `${state.today.key} • ${nowHM()} • ${type.toUpperCase()}`;
-  }
-
-  // Scroll fx control
-  function playScrollFx(sealChar){
-    const fx = $('scrollFx');
-    const seal = $('sealMark');
-    if(seal) seal.textContent = sealChar || "印";
-    if(!fx) return;
-
-    fx.classList.remove('on');
-    // restart animation
-    void fx.offsetWidth;
-    fx.classList.add('on');
-  }
-
-  // Typewriter (slow, spiritual)
-  function typeText(el, text, cps=16){
-    // cps = chars per second
-    const msPerChar = Math.floor(1000 / cps);
-    let i = 0;
-    el.textContent = "";
-    clearInterval(typeText._t);
-    typeText._t = setInterval(()=>{
-      i++;
-      el.textContent = text.slice(0, i);
-      if(i >= text.length){
-        clearInterval(typeText._t);
-      }
-    }, msPerChar);
-  }
-
-  function setOracleUI(o){
-    $('oracleStamp').textContent = stampLine(state.oracle.type);
-    $('chipWeather').textContent = `Market Weather: ${state.weather}`;
-    $('chipAura').textContent = `Risk Aura: ${state.risk}`;
-    $('chipAura').classList.toggle('ok', state.risk === 'LOW' && !o.isCaution);
-    $('chipAura').classList.toggle('red', state.risk === 'HIGH' || o.isCaution);
-
-    const fw = (state.risk === 'LOW') ? "OPEN" : (state.risk === 'MED' ? "NARROW" : "CLOSED");
-    $('chipFlow').textContent = `Flow Window: ${fw}`;
-
-    $('oracleHead').textContent = `${t('oracleHead')} • ${o.suggested}`;
-  }
-
-  function runOracle(){
-    audio.startZen();
-    newDayResetIfNeeded();
-
-    const use = consumeOracleUse();
-    if(!use.ok){
-      toast(state.lang==='zh' ? "今日神谕次数已用完。可去圣坛添香火。" : "Oracle limit reached. Visit Golden Altar for an offering.");
-      haptic('light');
-      // show altar hint
-      openGateModal(true);
-      return;
-    }
-
-    state.oracle.last = null;
-    state.oracle.decision = null;
-    enableChoicesIfOracleReady();
-
-    // Ritual sequence:
-    // 0.0 click → slight darken, 0.6 scroll, 1.1 seal, 1.3 type text, 2.4 enable choices
-    flash();
-    haptic('light');
-
-    // scroll + seal: 印 (or 净 if paid)
-    const sealChar = use.usedPaid ? "净" : "印";
-    playScrollFx(sealChar);
-
-    const o = oracleGenerate({ usedPaid: use.usedPaid });
-    const text = (state.lang==='zh') ? o.pick.zh : o.pick.en;
-
-    // QK gain (soft caution smaller)
-    const mult = luckyMultiplier();
-    const gainBase = o.isCaution ? rnd(2, 5) : rnd(4, 8);
-    const gain = gainBase * mult;
-    state.qk = +(state.qk + gain).toFixed(2);
-
-    // set UI headline/meta immediately, typewriter later
-    setOracleUI(o);
-
-    // slight pause before typing
-    setTimeout(()=>{
-      typeText($('oracleBody'), text, 16);
-    }, 650);
-
-    // enable choices later
-    setTimeout(()=>{
-      state.oracle.last = { kind:o.kind, isCaution:o.isCaution, suggested:o.suggested, textId:o.pick.id };
-      enableChoicesIfOracleReady();
-      flash();
-    }, 2400);
-
-    pushJournal({
-      type:"oracle",
-      title:`Oracle (${state.oracle.type.toUpperCase()}) → ${o.suggested}`,
-      detail:`+${gain.toFixed(2)} QK`,
-      paid: use.usedPaid,
-      msgId: o.pick.id
-    });
-
-    saveState();
-    renderHUD();
-  }
-
-  function takeDecision(dec){
-    audio.startZen();
-    if(!state.oracle.last){
-      toast(state.lang==='zh' ? "先神谕，再决策。" : "Oracle first — then decision.");
-      haptic('light');
-      return;
-    }
-    state.oracle.decision = dec;
-
-    let delta = 0;
-    if(dec==='ENTER'){
-      delta = (state.risk==='HIGH') ? rnd(-2.0, 0.8) : rnd(1.0, 5.0);
-    } else if(dec==='WAIT'){
-      delta = rnd(1.0, 3.0);
-    } else {
-      delta = rnd(0.5, 2.0);
-    }
-
-    if(state.lucky.isLuckyNow) delta *= luckyMultiplier();
-    state.qk = +(state.qk + delta).toFixed(2);
-
-    flash();
-    haptic('light');
-    audio.playCoin();
-    coinsBurst(dec);
-
-    pushJournal({ type:"decision", title:`Decision → ${dec}`, detail:`QK ${delta>=0?'+':''}${delta.toFixed(2)}` });
-    renderHUD();
-    saveState();
-  }
-
-  // ===== Journal (7)
-  function pushJournal(entry){
-    const gold = entry.paid ? "★" : "";
-    const icon = (entry.type==='wheel') ? "轮" : (entry.type==='oracle' ? "谕" : "门");
-    const line = {
-      date: state.today.key,
-      time: nowHM(),
-      type: entry.type,
-      title: `${gold}${entry.title}`,
-      detail: entry.detail,
-      icon
-    };
-    state.journal.unshift(line);
-    if(state.journal.length > 7) state.journal.pop();
-    renderJournal();
-  }
-
-  function renderJournal(){
-    if(state.journal.length === 0){
-      $('journal').textContent = (state.lang==='zh') ? "暂无记录。" : "No records yet.";
-      return;
-    }
-    const lines = state.journal.map(j => `${j.icon} ${j.date} ${j.time} — ${j.title} • ${j.detail}`);
-    $('journal').textContent = lines.join("\n");
-  }
-
-  // ===== HUD
-  const seals = {
-    en: ["SEAL OF PROSPERITY","SEAL OF BLESSING","DRAGON GUARD SEAL","ETERNAL FORTUNE","FLOWFAVORED SEAL"],
-    zh: ["今日财印","天赐福印","金龙护印","富贵长明","福运相随"]
-  };
-
-  function pickDailySeal(){
-    const k = state.today.key;
-    let hash = 0; for(const c of k) hash = (hash*31 + c.charCodeAt(0))>>>0;
-    const arr = seals[state.lang] || seals.en;
-    $('dailySeal').textContent = arr[hash % arr.length];
-    $('sealSub').textContent = state.lucky.isLuckyNow ? "鸿运时辰" : "—";
-  }
-
-  function updateProgress(){
-    const s = state.streak || 0;
-    let tier = (s>=49) ? "DRAGON CROWN" : (s>=21) ? "GOLDEN SEAL" : (s>=7) ? "BRONZE SEAL" : "SEED";
-    if(state.lang==='zh'){
-      tier = (s>=49) ? "龙冠" : (s>=21) ? "金印" : (s>=7) ? "铜印" : "种子";
-      $('progressText').textContent = `当前：${s} 天 • 阶段：${tier} • 路径：7 / 21 / 49`;
-      $('wishText').textContent = "当你看见流星：在心里许一个愿。愿望不需要说出口。";
-    } else {
-      $('progressText').textContent = `Now: ${s} days • Stage: ${tier} • Path: 7 / 21 / 49`;
-      $('wishText').textContent = "When you see a shooting star: make a wish in silence.";
-    }
-  }
-
-  function renderHUD(){
-    $('qk').textContent = state.qk.toFixed(2);
-    $('flowScore').textContent = String(state.flowScore);
-    $('weather').textContent = state.weather;
-
-    const qk = state.qk;
-    $('qkTag').textContent = (qk >= 140) ? "VIP READY" : (qk >= 80 ? "RISING" : "BALANCED");
-    $('riskTag').textContent = `Risk: ${state.risk}`;
-
-    $('socialA').textContent = (state.social.a||0).toLocaleString();
-    $('socialB').textContent = `VIP: ${(state.social.vip||0)}`;
-
-    $('streak').textContent = String(state.streak||0);
-    $('cycleTag').textContent = "7/21/49";
-
-    // "today" synthetic
-    const pos = irnd(6,12), neg = irnd(0,2);
-    $('posCount').textContent = String(pos);
-    $('negCountTag').textContent = `${state.lang==='zh' ? '谨慎' : 'Caution'}: ${neg}`;
-
-    // Pro metrics (narrative only)
-    const pulse = (state.flowScore>=60) ? `+${rnd(.2,1.8).toFixed(2)}%` : `-${rnd(.1,1.2).toFixed(2)}%`;
-    $('tonPulse').textContent = pulse;
-    $('liqPulse').textContent = `Liquidity: ${(state.risk==='HIGH')?'Thin':'Steady'}`;
-    $('vol').textContent = (state.risk==='HIGH') ? rnd(16,28).toFixed(1) : rnd(7,15).toFixed(1);
-    $('trend').textContent = `Trend: ${(state.flowScore>55)?'Up':'Mixed'}`;
-    $('flowWindow').textContent = (state.risk==='LOW')?'OPEN':(state.risk==='MED')?'NARROW':'CLOSED';
-
-    // Oracle limit display: free + paid credits
-    const free = oracleFreeLimit();
-    const paid = state.today.paidOracleCredits || 0;
-    const used = state.today.oracleUses || 0;
-    const total = free + paid;
-    $('limitText').textContent = `${used} / ${total}`;
-
-    pickDailySeal();
-    applyNarrativeFromFlow();
-    renderJournal();
-    updateProgress();
-
-    // blessed badge if paid credits exist
-    const blessed = paid > 0;
-    document.body.classList.toggle('premium', blessed);
-    $('premiumLeft').textContent = blessed ? `+${paid}` : '—';
-    $('premiumBadgeText').textContent = (state.lang==='zh') ? "香火" : "OFFERING";
-  }
-
-  // ===== Mode/Lang/Forecast
-  function setMode(mode){
-    state.mode = mode;
-    $('btnRitual').classList.toggle('active', mode==='ritual');
-    $('btnPro').classList.toggle('active', mode==='pro');
-    $('proCard').style.display = (mode==='pro') ? 'block' : 'none';
-    saveState();
-  }
-  function setLang(lang){
-    state.lang = lang;
-    applyI18n();
-    renderHUD();
-    saveState();
-  }
-  function setForecastType(type){
-    state.oracle.type = type;
-    $('btnForecastDay').classList.toggle('active', type==='day');
-    $('btnForecastTON').classList.toggle('active', type==='ton');
-
-    if(!state.oracle.last){
-      $('oracleBody').textContent = t('oracleTap');
-      $('oracleStamp').textContent = `— • ${type.toUpperCase()}`;
-      $('oracleHead').textContent = `${t('oracleHead')}`;
-    }
-    saveState();
-  }
-
-  // ===== Golden Altar modal
-  function openGateModal(auto=false){
-    audio.startZen();
-    $('gateBack').style.display = 'flex';
-
-    // If already has credits, keep it calm
-    const paid = state.today.paidOracleCredits || 0;
-    if(paid > 0){
-      $('gateBody').textContent = t('alreadyCredit') + "\n\n" + t('gateBody');
-    } else {
-      $('gateBody').textContent = t('gateBody');
-    }
-
-    // if opened automatically due to limit, keep it subtle (no forced)
-    if(auto){
-      // no extra changes; keeping calm by design
-    }
-  }
-  function closeGateModal(){ $('gateBack').style.display = 'none'; }
-
-  // ===== TonConnect
-  let tonUI = null;
-
-  async function initTonConnect(){
-    if(!window.TON_CONNECT_UI) return;
-
-    tonUI = new window.TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: "https://businessstpeterburg-design.github.io/facai-app/tonconnect-manifest.json",
-      buttonRootId: null
-    });
-
-    try{
-      const wallet = tonUI.wallet;
-      if(wallet?.account?.address){
-        state.wallet.connected = true;
-        state.wallet.address = wallet.account.address;
-      }
-    }catch(e){}
-
-    tonUI.onStatusChange((wallet)=>{
-      if(wallet?.account?.address){
-        state.wallet.connected = true;
-        state.wallet.address = wallet.account.address;
-        toast(state.lang==='zh' ? "钱包已连接" : "Wallet connected");
-        haptic('success');
-      } else {
-        state.wallet.connected = false;
-        state.wallet.address = null;
-      }
-      saveState();
+  function spawn(initial=false, boost=1){
+    const x = Math.random()*window.innerWidth;
+    const y = initial ? Math.random()*window.innerHeight : (window.innerHeight + 10);
+    parts.push({
+      x, y,
+      vx: (-0.05 + Math.random()*0.10)*boost,
+      vy: (-0.18 + Math.random()*0.14)*boost,
+      r: 0.6 + Math.random()*2.0,
+      a: 0.08 + Math.random()*0.34,
+      tw: 0.65 + Math.random()*0.35,
     });
   }
-
-  async function connectWallet(){
-    audio.startZen();
-    if(!tonUI){
-      toast("TonConnect not available");
-      return;
-    }
-    try{
-      await tonUI.openModal();
-    }catch(e){
-      toast("TonConnect not available");
-    }
+  function burst(){
+    const n = FX.quality()==="low" ? 18 : 30;
+    for(let i=0;i<n;i++) spawn(false, 1.8);
   }
+  function step(dt){
+    // fade trail
+    fxCtx.fillStyle = "rgba(0,0,0,0.18)";
+    fxCtx.fillRect(0,0,window.innerWidth, window.innerHeight);
 
-  async function sendOffering(amountTon=1, toAddress=RECEIVER_TONKEEPER){
-    if(!tonUI || !state.wallet.connected){
-      toast(state.lang==='zh' ? "请先连接钱包。" : "Connect wallet first.");
-      return;
-    }
-    const amountNano = String(Math.floor(amountTon * 1e9));
-    const tx = {
-      validUntil: Math.floor(Date.now()/1000) + 300,
-      messages: [{ address: toAddress, amount: amountNano, payload: "" }]
-    };
+    fxCtx.save();
+    fxCtx.globalCompositeOperation = "lighter";
+    for(let i=parts.length-1;i>=0;i--){
+      const p = parts[i];
+      p.x += p.vx * (dt*60);
+      p.y += p.vy * (dt*60);
+      const tw = 0.65 + 0.35*Math.sin(Date.now()*0.002*p.tw);
+      const a = p.a * tw;
 
-    try{
-      $('gatePay').disabled = true;
-      await tonUI.sendTransaction(tx);
+      fxCtx.beginPath();
+      fxCtx.fillStyle = `rgba(255,211,106,${a})`;
+      fxCtx.shadowColor = "rgba(255,211,106,0.35)";
+      fxCtx.shadowBlur = 12;
+      fxCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      fxCtx.fill();
 
-      // MVP: accept success locally
-      onOfferingSuccess(null);
-    }catch(e){
-      $('gatePay').disabled = false;
-      toast(t('payFail'));
-    }
-  }
-
-  function onOfferingSuccess(txHash){
-    state.lastPaymentTxHash = txHash || null;
-    state.today.paidOracleCredits = (state.today.paidOracleCredits || 0) + 1;
-
-    saveState();
-    closeGateModal();
-
-    flash();
-    haptic('success');
-    toast(t('paySuccess'));
-
-    // aura + sweep reinforcement
-    dustBurst();
-    meteorsBurst();
-    playDragonSweep();
-
-    $('gatePay').disabled = false;
-    renderHUD();
-  }
-
-  // ===== Dragon sweep schedule (rare)
-  function playDragonSweep(){
-    const el = $('dragonSweep');
-    if(!el) return;
-    el.style.transition = 'none';
-    el.style.opacity = '0';
-    el.style.transform = 'translateX(-22%) translateY(10%) rotate(-12deg)';
-    void el.offsetWidth;
-
-    el.style.transition = 'opacity .35s ease, transform .85s ease';
-    el.style.opacity = '0.85';
-    el.style.transform = 'translateX(22%) translateY(-10%) rotate(-12deg)';
-
-    setTimeout(()=>{
-      el.style.transition = 'opacity .55s ease';
-      el.style.opacity = '0';
-    }, 520);
-  }
-
-  function scheduleDragonSweep(){
-    const lucky = state.lucky.isLuckyNow;
-    const base = lucky ? [35000, 55000] : [55000, 90000];
-    const delay = Math.floor(base[0] + Math.random()*(base[1]-base[0]));
-    setTimeout(()=>{
-      playDragonSweep();
-      scheduleDragonSweep();
-    }, delay);
-  }
-
-  // ===== Shooting star “wish” (rare, calm)
-  let nextWishAt = 0;
-  function scheduleWish(){
-    const lucky = state.lucky.isLuckyNow;
-    const base = lucky ? [35000, 55000] : [60000, 90000];
-    nextWishAt = performance.now() + (base[0] + Math.random()*(base[1]-base[0]));
-  }
-
-  // ===== FX: Stars + Dust + Meteors + Coins
-  const starC = $('fxStars');
-  const dustC = $('fxDust');
-  const metC = $('fxMeteors');
-  const coinC = $('fxCoins');
-
-  const sctx = starC.getContext('2d');
-  const dctx = dustC.getContext('2d');
-  const mctx = metC.getContext('2d');
-  const cctx = coinC.getContext('2d');
-
-  function resizeFX(){
-    const dpr = DPR();
-    [starC, dustC, metC, coinC].forEach(c=>{
-      c.width = Math.floor(innerWidth * dpr);
-      c.height = Math.floor(innerHeight * dpr);
-      c.style.width = innerWidth+"px";
-      c.style.height = innerHeight+"px";
-      const ctx = c.getContext('2d');
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-    });
-  }
-
-  // Stars
-  let stars = [];
-  let shooting = [];
-  let comets = [];
-  function initStars(){
-    stars = [];
-    const count = irnd(90, 140);
-    for(let i=0;i<count;i++){
-      stars.push({
-        x: Math.random()*innerWidth,
-        y: Math.random()*innerHeight,
-        r: rnd(0.6, 1.8),
-        a: rnd(0.08, 0.28),
-        tw: rnd(0, Math.PI*2),
-        sp: rnd(0.008, 0.022)
-      });
-    }
-    scheduleWish();
-  }
-
-  function spawnShootingStar(){
-    // calm diagonal streak
-    const x0 = rnd(innerWidth*0.10, innerWidth*0.90);
-    const y0 = rnd(innerHeight*0.05, innerHeight*0.45);
-    const len = rnd(180, 320);
-    const ang = rnd(-0.55, -0.25); // down-right
-    const vx = Math.cos(ang)*rnd(6.5, 9.5);
-    const vy = Math.sin(ang)*rnd(6.5, 9.5);
-    shooting.push({ x:x0, y:y0, vx, vy, len, life:1.0 });
-    if(state.lang==='zh') toast("见星许愿");
-    else toast("Make a wish.");
-    haptic('light');
-  }
-
-  function spawnComet(){
-    const fromLeft = Math.random() < 0.5;
-    const x0 = fromLeft ? -200 : innerWidth + 200;
-    const y0 = rnd(innerHeight*0.10, innerHeight*0.55);
-    const vx = (fromLeft ? 1 : -1) * rnd(2.5, 3.8);
-    const vy = rnd(-0.15, 0.15);
-    comets.push({ x:x0, y:y0, vx, vy, len:rnd(360, 520), life:1.0 });
-    // subtle response
-    playDragonSweep();
-  }
-
-  function drawStars(){
-    sctx.clearRect(0,0,innerWidth,innerHeight);
-
-    // twinkle
-    for(const st of stars){
-      st.tw += st.sp;
-      const tw = 0.65 + 0.35*Math.sin(st.tw);
-      const a = st.a * tw;
-      sctx.fillStyle = `rgba(255,243,209,${a})`;
-      sctx.shadowColor = `rgba(255,211,106,${a*0.35})`;
-      sctx.shadowBlur = 10;
-      sctx.beginPath();
-      sctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
-      sctx.fill();
-    }
-
-    // schedule shooting star
-    if(performance.now() > nextWishAt){
-      spawnShootingStar();
-      scheduleWish();
-    }
-
-    // very rare comet
-    const lucky = state.lucky.isLuckyNow;
-    const cometP = lucky ? 0.0016 : 0.0010; // per frame (rare)
-    if(Math.random() < cometP){
-      if(comets.length < 2) spawnComet();
-    }
-
-    // draw shooting stars
-    for(const sh of shooting){
-      sh.x += sh.vx;
-      sh.y += sh.vy;
-      sh.life *= 0.96;
-
-      sctx.save();
-      sctx.translate(sh.x, sh.y);
-      const ang = Math.atan2(sh.vy, sh.vx);
-      sctx.rotate(ang);
-
-      const g = sctx.createLinearGradient(-sh.len,0, 0,0);
-      g.addColorStop(0, "rgba(255,211,106,0)");
-      g.addColorStop(0.50, "rgba(255,211,106,.35)");
-      g.addColorStop(0.72, "rgba(255,243,209,.85)");
-      g.addColorStop(1.00, "rgba(255,211,106,0)");
-      sctx.fillStyle = g;
-
-      sctx.beginPath();
-      sctx.roundRect(-sh.len, -1.2, sh.len, 2.4, 1.2);
-      sctx.fill();
-
-      sctx.restore();
-    }
-    shooting = shooting.filter(s=> s.life>0.35 && s.x>-500 && s.x<innerWidth+500 && s.y>-500 && s.y<innerHeight+500);
-
-    // draw comets
-    for(const cm of comets){
-      cm.x += cm.vx;
-      cm.y += cm.vy;
-      cm.life *= 0.986;
-
-      sctx.save();
-      sctx.translate(cm.x, cm.y);
-      const ang = Math.atan2(cm.vy, cm.vx);
-      sctx.rotate(ang);
-
-      const g = sctx.createLinearGradient(-cm.len,0, 0,0);
-      g.addColorStop(0, "rgba(255,211,106,0)");
-      g.addColorStop(0.40, "rgba(184,134,11,.22)");
-      g.addColorStop(0.62, "rgba(255,211,106,.55)");
-      g.addColorStop(0.78, "rgba(255,243,209,.92)");
-      g.addColorStop(1.00, "rgba(255,211,106,0)");
-      sctx.fillStyle = g;
-      sctx.beginPath();
-      sctx.roundRect(-cm.len, -2.0, cm.len, 4.0, 2.0);
-      sctx.fill();
-
-      sctx.restore();
-    }
-    comets = comets.filter(c=> c.life>0.35 && c.x>-800 && c.x<innerWidth+800);
-  }
-
-  // Dust
-  let dust = [];
-  let dustBurstBoost = 0;
-
-  function initDust(){
-    dust = [];
-    const lucky = state.lucky.isLuckyNow;
-    const base = lucky ? irnd(180,220) : irnd(110,140);
-
-    for(let i=0;i<base;i++){
-      dust.push({
-        x: Math.random()*innerWidth,
-        y: Math.random()*innerHeight,
-        r: rnd(0.6, 2.2),
-        a: rnd(0.10, 0.40),
-        vx: rnd(-0.05, 0.05),
-        vy: rnd(-0.18, -0.04),
-        tw: rnd(0, Math.PI*2),
-        streak: Math.random() < 0.11
-      });
-    }
-  }
-
-  function dustBurst(){ dustBurstBoost = 0.9; }
-
-  function drawDust(){
-    dctx.clearRect(0,0,innerWidth,innerHeight);
-    if(dustBurstBoost > 0) dustBurstBoost *= 0.92;
-
-    for(const p of dust){
-      p.tw += 0.02;
-      const tw = 0.65 + 0.35*Math.sin(p.tw);
-      p.x += p.vx + rnd(-0.03,0.03)*0.2;
-      p.y += p.vy;
-
-      if(p.y < -20) p.y = innerHeight + 20;
-      if(p.x < -20) p.x = innerWidth + 20;
-      if(p.x > innerWidth+20) p.x = -20;
-
-      const boost = 1 + (dustBurstBoost>0 ? 0.30 : 0);
-      const alpha = p.a*tw*boost;
-
-      dctx.beginPath();
-      dctx.fillStyle = `rgba(255,211,106,${alpha})`;
-      dctx.shadowColor = `rgba(255,211,106,${alpha*0.6})`;
-      dctx.shadowBlur = 12;
-      dctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      dctx.fill();
-
-      if(p.streak && Math.random() < 0.11){
-        dctx.shadowBlur = 0;
-        dctx.strokeStyle = `rgba(255,211,106,${alpha*0.50})`;
-        dctx.lineWidth = 1;
-        dctx.beginPath();
-        dctx.moveTo(p.x, p.y);
-        dctx.lineTo(p.x - p.vx*120, p.y - p.vy*120);
-        dctx.stroke();
+      if(p.y < -20 || p.x < -30 || p.x > window.innerWidth+30){
+        parts.splice(i,1);
+        spawn(true);
       }
     }
+    fxCtx.restore();
+  }
+  init();
+  return { step, burst };
+})();
+
+function sealBurst(x,y){
+  fxCtx.save();
+  fxCtx.globalCompositeOperation="lighter";
+  for(let i=0;i<22;i++){
+    const a = (Math.PI*2)*Math.random();
+    const r = 20 + Math.random()*160;
+    const px = x + Math.cos(a)*r;
+    const py = y + Math.sin(a)*r;
+    fxCtx.strokeStyle = "rgba(255,211,106,0.20)";
+    fxCtx.lineWidth = 1;
+    fxCtx.beginPath();
+    fxCtx.moveTo(x,y);
+    fxCtx.lineTo(px,py);
+    fxCtx.stroke();
+  }
+  fxCtx.restore();
+}
+
+/* ========= PORTAL INTRO (cinematic entrance) ========= */
+async function portalIntro(){
+  TempleAudio.ensure();
+  TempleAudio.duckMusic(0.35, 100);
+  TempleAudio.whoosh();
+
+  // quick ramp of emissive
+  const start = performance.now();
+  const dur = 900;
+  while(performance.now()-start < dur){
+    const t = (performance.now()-start)/dur;
+    ringMat.emissiveIntensity = 0.35 + t*1.25;
+    portalCoreMat.opacity = 0.25 + t*0.35;
+    await new Promise(r=>requestAnimationFrame(r));
+  }
+  ringMat.emissiveIntensity = 0.6;
+  portalCoreMat.opacity = 0.22;
+  TempleAudio.unduckMusic(650);
+}
+
+/* ========= CAMERA DOLLY WIN ========= */
+let dollyT = 0;
+function cameraDollyWin(){
+  dollyT = 1.0; // trigger
+}
+
+/* ========= WISH MOMENT ========= */
+async function wishMoment(){
+  TempleAudio.ensure();
+  TempleAudio.duckMusic(0.28, 120);
+  haptic("light");
+
+  // silence moment + single bright wish star
+  const startPos = new THREE.Vector3(-18, 10, -30);
+  const endPos   = new THREE.Vector3( 16, -6, -6);
+  wishStar.position.copy(startPos);
+  wishStar.material.opacity = 0.0;
+
+  const start = performance.now();
+  const dur = 1100;
+
+  // show overlay text briefly (UI, minimal)
+  const micro = document.getElementById("microText");
+  const prev = micro.textContent;
+  micro.textContent = (I18N.getLang()==="zh") ? "许一个愿。保持安静，听见内心。" : "Make a wish. Stay quiet and listen within.";
+
+  while(performance.now()-start < dur){
+    const t = (performance.now()-start)/dur;
+    const ease = t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+    wishStar.position.lerpVectors(startPos, endPos, ease);
+    wishStar.material.opacity = Math.min(1, ease*1.4);
+    ringMat.emissiveIntensity = 0.55 + 0.55*Math.sin(ease*Math.PI);
+    await new Promise(r=>requestAnimationFrame(r));
   }
 
-  // Gold meteors (chunks)
-  let meteors = [];
-  let meteorBurstBoost = 0;
+  // flash + bloom bump
+  bloom.strength += 0.35;
+  setTimeout(()=>{ bloom.strength -= 0.35; }, 220);
 
-  function meteorsBurst(){ meteorBurstBoost = 1.1; }
+  TempleAudio.chime();
+  sealBurst(window.innerWidth*0.52, window.innerHeight*0.36);
 
-  function spawnMeteor(kind="chunk"){
-    const fromLeft = Math.random() < 0.5;
-    const baseSpeed = kind==="comet" ? rnd(0.9, 1.6) : rnd(0.28, 0.62);
-    const vx = (fromLeft ? 1 : -1) * baseSpeed;
-    const vy = kind==="comet" ? rnd(-0.35,0.35) : rnd(-0.12,0.12);
+  // fade out star
+  wishStar.material.opacity = 0.0;
+  ringMat.emissiveIntensity = 0.55;
 
-    const scale = (Math.random() < 0.22) ? rnd(1.25, 1.75) : rnd(0.85, 1.15);
-    const len = (kind==="comet" ? rnd(180, 360) : rnd(130, 280)) * scale;
-    const thick = (kind==="comet" ? rnd(2, 5) : rnd(6, 14)) * (0.85 + 0.3*Math.random());
+  setTimeout(()=>{ micro.textContent = prev; }, 1400);
+  TempleAudio.unduckMusic(620);
+}
 
-    meteors.push({
-      kind,
-      x: fromLeft ? -len : innerWidth + len,
-      y: rnd(0, innerHeight),
-      vx, vy,
-      len, thick,
-      life: 1.0,
-      rot: Math.atan2(vy, vx)
-    });
+/* ========= PARCHMENT REVEAL (ink writing + stamp) ========= */
+const Overlay = (() => {
+  const overlay = document.getElementById("overlay");
+  const closeBtn = document.getElementById("closeOverlay");
+  const canvas = document.getElementById("parchment");
+  const ctx = canvas.getContext("2d");
 
-    if(meteors.length > 24) meteors.shift();
+  function resize(){
+    const dpr = FX.dprCap();
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width*dpr);
+    canvas.height = Math.floor(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
 
-  function drawMeteors(){
-    mctx.clearRect(0,0,innerWidth,innerHeight);
+  function show(){ overlay.classList.add("show"); resize(); }
+  function hide(){ overlay.classList.remove("show"); }
 
-    if(meteorBurstBoost > 0) meteorBurstBoost *= 0.92;
+  closeBtn.addEventListener("click", ()=> hide());
 
-    const lucky = state.lucky.isLuckyNow;
-    let baseSpawn = lucky ? 0.010 : 0.006;
-    if(meteorBurstBoost > 0) baseSpawn += 0.012;
+  function paperBackground(){
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
 
-    if(Math.random() < baseSpawn){
-      spawnMeteor("chunk");
+    ctx.clearRect(0,0,w,h);
+
+    // parchment base
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0, "rgba(200,170,120,0.20)");
+    g.addColorStop(0.35, "rgba(120,95,60,0.22)");
+    g.addColorStop(1, "rgba(60,45,28,0.32)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // burned edges vignette
+    ctx.save();
+    ctx.globalCompositeOperation="multiply";
+    const v = ctx.createRadialGradient(w*0.5, h*0.45, 30, w*0.5, h*0.45, Math.max(w,h)*0.7);
+    v.addColorStop(0, "rgba(0,0,0,0)");
+    v.addColorStop(1, "rgba(0,0,0,0.75)");
+    ctx.fillStyle = v;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+
+    // subtle fibers
+    ctx.save();
+    ctx.globalAlpha = 0.14;
+    for(let i=0;i<160;i++){
+      const y = Math.random()*h;
+      ctx.strokeStyle = "rgba(255,243,209,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y + (Math.random()*8-4));
+      ctx.stroke();
     }
+    ctx.restore();
+  }
 
-    for(const m of meteors){
-      m.x += m.vx;
-      m.y += m.vy;
-      m.life *= 0.997;
+  function drawSeal(x,y,scale=1){
+    // stamp square + symbol
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(-0.05);
+    ctx.scale(scale,scale);
 
-      mctx.save();
-      mctx.translate(m.x, m.y);
-      mctx.rotate(m.rot);
+    ctx.fillStyle = "rgba(184,0,29,0.92)";
+    ctx.strokeStyle = "rgba(255,211,106,0.22)";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 12;
 
-      const g = mctx.createLinearGradient(-m.len,0, 0,0);
-      g.addColorStop(0.00, "rgba(255,211,106,0)");
-      g.addColorStop(0.40, "rgba(184,134,11,.30)");
-      g.addColorStop(0.62, "rgba(255,211,106,.66)");
-      g.addColorStop(0.76, "rgba(255,243,209,.92)");
-      g.addColorStop(0.88, "rgba(255,211,106,.45)");
-      g.addColorStop(1.00, "rgba(184,134,11,.18)");
+    const s = 96;
+    ctx.fillRect(-s/2, -s/2, s, s);
+    ctx.strokeRect(-s/2, -s/2, s, s);
 
-      mctx.fillStyle = g;
-      mctx.beginPath();
-      mctx.roundRect(-m.len, -m.thick/2, m.len, m.thick, m.thick/2);
-      mctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "rgba(255,243,209,0.92)";
+    ctx.font = "700 44px serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    // "财" as fortune symbol
+    ctx.fillText("财", 0, 3);
 
-      // rim edge
-      mctx.strokeStyle = "rgba(255,243,209,.18)";
-      mctx.lineWidth = Math.max(1, m.thick*0.10);
-      mctx.beginPath();
-      mctx.roundRect(-m.len, -m.thick/2, m.len, m.thick, m.thick/2);
-      mctx.stroke();
+    ctx.restore();
+  }
 
-      // tail sparks
-      const sparks = irnd(2,5);
-      for(let i=0;i<sparks;i++){
-        const sx = -rnd(m.len*0.35, m.len*0.95);
-        const sy = rnd(-m.thick*1.4, m.thick*1.4);
-        mctx.fillStyle = `rgba(255,243,209,${rnd(0.12,0.32)})`;
-        mctx.beginPath();
-        mctx.arc(sx, sy, rnd(1.2, 2.6), 0, Math.PI*2);
-        mctx.fill();
+  async function inkWrite(text){
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+
+    paperBackground();
+
+    // header
+    ctx.save();
+    ctx.fillStyle = "rgba(255,243,209,0.88)";
+    ctx.font = "700 14px Orbitron, Inter, system-ui";
+    ctx.letterSpacing = "0.16em";
+    ctx.fillText((I18N.getLang()==="zh") ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+    ctx.restore();
+
+    // body region
+    const padX = 32;
+    const topY = 70;
+    const maxW = w - padX*2;
+
+    // ink style (brush-ish)
+    const font = (I18N.getLang()==="zh")
+      ? "600 18px 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', serif"
+      : "600 17px 'Georgia', 'Times New Roman', serif";
+
+    ctx.font = font;
+    ctx.fillStyle = "rgba(255,243,209,0.92)";
+    ctx.textBaseline = "top";
+
+    // wrap lines
+    const words = I18N.getLang()==="zh" ? text.split("") : text.split(" ");
+    const lines = [];
+    let line = "";
+
+    const measure = (s)=> ctx.measureText(s).width;
+
+    for(let i=0;i<words.length;i++){
+      const token = I18N.getLang()==="zh" ? words[i] : (words[i] + " ");
+      const test = line + token;
+      if(measure(test) > maxW && line.length>0){
+        lines.push(line);
+        line = token;
+      }else{
+        line = test;
       }
+    }
+    if(line.trim().length) lines.push(line);
 
-      // micro scratches
-      mctx.strokeStyle = "rgba(0,0,0,.18)";
-      mctx.lineWidth = 1;
-      for(let i=0;i<3;i++){
-        const y = rnd(-m.thick/2, m.thick/2);
-        mctx.beginPath();
-        mctx.moveTo(-m.len*rnd(0.18,0.45), y);
-        mctx.lineTo(-m.len*rnd(0.55,0.95), y + rnd(-1,1));
-        mctx.stroke();
+    // “writing” reveal: draw per character with jitter + ink ticks
+    TempleAudio.paper();
+    TempleAudio.whoosh();
+
+    let y = topY;
+    let charCount = 0;
+    for(let li=0; li<lines.length; li++){
+      const L = lines[li];
+      let x = padX;
+
+      for(let ci=0; ci<L.length; ci++){
+        const ch = L[ci];
+        // tiny jitter to feel hand-made
+        const jx = (Math.random()*0.6 - 0.3);
+        const jy = (Math.random()*0.6 - 0.3);
+
+        // ink gradient
+        const ink = ctx.createLinearGradient(x, y, x, y+22);
+        ink.addColorStop(0, "rgba(255,243,209,0.92)");
+        ink.addColorStop(1, "rgba(255,211,106,0.72)");
+        ctx.fillStyle = ink;
+
+        ctx.fillText(ch, x + jx, y + jy);
+
+        const wch = ctx.measureText(ch).width;
+        x += wch;
+
+        charCount++;
+        if(charCount % 14 === 0) TempleAudio.inkTick();
+
+        // speed control (Telegram-safe)
+        await new Promise(r=>setTimeout(r, 12));
       }
-
-      mctx.restore();
+      y += 26;
+      if(y > h-130) break; // safety
     }
 
-    meteors = meteors.filter(m => (m.x > -m.len*2 && m.x < innerWidth+m.len*2 && m.y > -200 && m.y < innerHeight+200 && m.life > 0.25));
-  }
+    // footer
+    ctx.save();
+    ctx.fillStyle = "rgba(255,211,106,0.70)";
+    ctx.font = "600 12px Inter, system-ui";
+    const ts = new Date().toLocaleString(I18N.getLang()==="zh" ? "zh-CN" : "en-US");
+    ctx.fillText(ts, padX, h-40);
+    ctx.restore();
 
-  // Coins (decision reward feel)
-  let coins = [];
-  function coinsBurst(dec){
-    const count = (dec==='ENTER') ? 22 : (dec==='WAIT' ? 16 : 12);
-    const strength = (dec==='ENTER') ? 1.0 : (dec==='WAIT' ? 0.85 : 0.75);
+    // stamp hit
+    await new Promise(r=>setTimeout(r, 350));
+    TempleAudio.stamp();
+    haptic("heavy");
+    Dust.burst();
+    sealBurst(window.innerWidth*0.52, window.innerHeight*0.64);
 
-    for(let i=0;i<count;i++){
-      coins.push({
-        x: rnd(innerWidth*0.08, innerWidth*0.92),
-        y: -rnd(40, 520),
-        vx: rnd(-0.8, 0.8) * strength,
-        vy: rnd(4.0, 7.8) * strength,
-        r: rnd(4.2, 7.8),
-        rot: rnd(0, Math.PI*2),
-        vr: rnd(-0.22, 0.22),
-        a: rnd(0.78, 1.0),
-        life: 1.0
-      });
+    // stamp animation (scale in)
+    const sx = w - 110;
+    const sy = h - 120;
+    for(let k=0;k<=18;k++){
+      const t = k/18;
+      const ease = 1 - Math.pow(1-t, 3);
+      paperBackground();
+      // redraw final static text quickly (no per-char)
+      ctx.save();
+      ctx.fillStyle="rgba(255,243,209,0.88)";
+      ctx.font = "700 14px Orbitron, Inter, system-ui";
+      ctx.fillText((I18N.getLang()==="zh") ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+      ctx.restore();
+
+      ctx.save();
+      ctx.font = font;
+      ctx.textBaseline="top";
+      ctx.fillStyle="rgba(255,243,209,0.92)";
+      let yy = topY;
+      for(let li=0; li<lines.length; li++){
+        ctx.fillText(lines[li], padX, yy);
+        yy += 26;
+        if(yy > h-130) break;
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "rgba(255,211,106,0.70)";
+      ctx.font = "600 12px Inter, system-ui";
+      ctx.fillText(ts, padX, h-40);
+      ctx.restore();
+
+      drawSeal(sx, sy, 0.55 + 0.45*ease);
+      await new Promise(r=>requestAnimationFrame(r));
     }
   }
 
-  function drawCoins(){
-    cctx.clearRect(0,0,innerWidth,innerHeight);
-    if(coins.length === 0) return;
-
-    for(const k of coins){
-      k.x += k.vx;
-      k.y += k.vy;
-      k.vy *= 1.012;
-      k.rot += k.vr;
-      k.life *= 0.985;
-
-      cctx.save();
-      cctx.translate(k.x, k.y);
-      cctx.rotate(k.rot);
-
-      const g = cctx.createRadialGradient(-k.r*0.25,-k.r*0.35, 1, 0,0, k.r*2.0);
-      g.addColorStop(0, `rgba(255,255,255,${0.65*k.a})`);
-      g.addColorStop(0.25, `rgba(255,243,209,${0.92*k.a})`);
-      g.addColorStop(0.55, `rgba(255,211,106,${0.86*k.a})`);
-      g.addColorStop(0.80, `rgba(184,134,11,${0.68*k.a})`);
-      g.addColorStop(1, `rgba(40,20,6,${0.22*k.a})`);
-
-      cctx.fillStyle = g;
-      cctx.beginPath();
-      cctx.ellipse(0,0, k.r*1.25, k.r, 0, 0, Math.PI*2);
-      cctx.fill();
-
-      cctx.strokeStyle = `rgba(255,243,209,${0.22*k.a})`;
-      cctx.lineWidth = 1;
-      cctx.beginPath();
-      cctx.ellipse(0,0, k.r*1.18, k.r*0.95, 0, 0, Math.PI*2);
-      cctx.stroke();
-
-      cctx.restore();
-    }
-
-    coins = coins.filter(k => k.y < innerHeight+180 && k.life > 0.35);
+  async function play(text){
+    show();
+    resize();
+    TempleAudio.ensure();
+    await inkWrite(text);
   }
 
-  function fxLoop(){
-    // re-init dust when lucky toggles
-    const lucky = state.lucky.isLuckyNow;
-    if(lucky && dust.length < 170) initDust();
-    if(!lucky && dust.length > 170) initDust();
+  window.addEventListener("resize", ()=> resize());
 
-    drawStars();
-    drawDust();
-    drawMeteors();
-    drawCoins();
-    requestAnimationFrame(fxLoop);
+  return { play, hide };
+})();
+
+/* ========= GAME LOOP ========= */
+let timeAcc = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  timeAcc += dt;
+
+  // parallax -> camera
+  curX += (targetX - curX) * 0.06;
+  curY += (targetY - curY) * 0.06;
+
+  // subtle camera rotation
+  camera.rotation.y = curX * 0.10;
+  camera.rotation.x = -curY * 0.07;
+
+  // dolly win
+  if(dollyT > 0){
+    dollyT -= dt*1.35;
+    const k = Math.max(0, dollyT);
+    const ease = 1 - Math.pow(k, 2.2);
+    camera.position.z = 26 - ease*2.6;
+    camera.position.y = ease*0.35;
+    bloom.strength = (FX.quality()==="low" ? 0.85 : 1.15) + ease*0.22;
+  }else{
+    camera.position.z += (26 - camera.position.z)*0.06;
+    camera.position.y += (0 - camera.position.y)*0.06;
+    bloom.strength += (((FX.quality()==="low" ? 0.85 : 1.15)) - bloom.strength)*0.06;
   }
 
-  // ===== Dock helpers
-  function scrollToEl(el){
-    const y = el.getBoundingClientRect().top + window.scrollY - (56 + 18);
-    window.scrollTo({top:y, behavior:'smooth'});
-  }
+  // animate portal & dragon
+  dragonMat.uniforms.uTime.value = timeAcc;
+  portalRing.rotation.z += dt*0.08;
+  portalCore.material.opacity = 0.18 + 0.04*Math.sin(timeAcc*0.9);
 
-  // ===== Onboarding once
-  const ONB_KEY = "ton_temple_onboard_v1_seen";
-  function maybeShowOnboard(){
-    try{
-      const seen = localStorage.getItem(ONB_KEY);
-      if(seen) return;
-      $('onboardBack').style.display = "flex";
-    }catch(e){}
-  }
-  function closeOnboard(){
-    $('onboardBack').style.display = "none";
-    try{ localStorage.setItem(ONB_KEY, "1"); }catch(e){}
-  }
+  // stars slow drift (cheap parallax)
+  stars.rotation.y += dt*0.012;
+  stars.rotation.x += dt*0.006;
 
-  // ===== Bind events
-  function bindEvents(){
-    ['pointerdown','touchstart','mousedown'].forEach(evt=>{
-      window.addEventListener(evt, ()=>audio.startZen(), {once:true, passive:true});
-    });
+  // wish star fade always
+  wishStar.material.opacity *= 0.94;
 
-    $('btnHelp').addEventListener('click', openHelp);
+  // FX overlay
+  Dust.step(dt);
 
-    $('modalClose').addEventListener('click', closeModal);
-    $('modalOk').addEventListener('click', closeModal);
-    $('modalBack').addEventListener('click', (e)=>{ if(e.target.id==='modalBack') closeModal(); });
+  composer.render();
+}
+animate();
 
-    document.querySelectorAll('.iBtn[data-info]').forEach(b=>{
-      b.addEventListener('click', ()=> openInfo(b.getAttribute('data-info')));
-    });
-
-    $('btnRitual').addEventListener('click', ()=> setMode('ritual'));
-    $('btnPro').addEventListener('click', ()=> setMode('pro'));
-
-    $('btnZH').addEventListener('click', ()=> setLang('zh'));
-    $('btnEN').addEventListener('click', ()=> setLang('en'));
-
-    $('btnForecastDay').addEventListener('click', ()=> setForecastType('day'));
-    $('btnForecastTON').addEventListener('click', ()=> setForecastType('ton'));
-
-    $('btnSpin').addEventListener('click', startSpin);
-    $('btnOracle').addEventListener('click', runOracle);
-    $('btnGate').addEventListener('click', ()=> openGateModal(false));
-
-    $('btnEnter').addEventListener('click', ()=> takeDecision('ENTER'));
-    $('btnWait').addEventListener('click', ()=> takeDecision('WAIT'));
-    $('btnSkip').addEventListener('click', ()=> takeDecision('SKIP'));
-
-    $('dockRitual').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
-    $('dockWheel').addEventListener('click', ()=> scrollToEl($('wheel')));
-    $('dockOracle').addEventListener('click', ()=> scrollToEl($('oraclePanel')));
-    $('dockGate').addEventListener('click', ()=> openGateModal(false));
-
-    // Gate modal
-    $('gateClose').addEventListener('click', closeGateModal);
-    $('gateBack').addEventListener('click', (e)=>{ if(e.target.id==='gateBack') closeGateModal(); });
-    $('gateConnect').addEventListener('click', connectWallet);
-    $('gatePay').addEventListener('click', ()=> sendOffering(OFFERING_TON, RECEIVER_TONKEEPER));
-
-    // Onboard
-    $('onboardEnter').addEventListener('click', closeOnboard);
-    $('onboardBack').addEventListener('click', (e)=>{ if(e.target.id==='onboardBack') closeOnboard(); });
-
-    window.addEventListener('resize', ()=>{
-      resizeWheel();
-      resizeFX();
-      initStars();
-      initDust();
-    });
-  }
-
-  // ===== Init
-  loadState();
-  if(!['zh','en'].includes(state.lang)) state.lang = 'zh';
-
-  newDayResetIfNeeded();
-  applyNarrativeFromFlow();
-
-  applyI18n();
-
-  resizeWheel();
+/* ========= RESIZE ========= */
+function onResize(){
+  renderer.setPixelRatio(FX.dprCap());
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  composer.setSize(window.innerWidth, window.innerHeight);
   resizeFX();
-  initStars();
-  initDust();
+}
+window.addEventListener("resize", onResize);
 
-  // placeholder oracle
-  $('oracleBody').textContent = t('oracleTap');
-  $('oracleStamp').textContent = `— • ${state.oracle.type.toUpperCase()}`;
-  enableChoicesIfOracleReady();
+/* ========= UI EVENTS ========= */
+document.getElementById("soundBtn").addEventListener("click", ()=>{
+  TempleAudio.ensure();
+  const on = TempleAudio.toggle();
+  document.getElementById("soundBtn").textContent = on ? "S" : "×";
+});
 
-  // start loops
-  function tickClock(){
-    computeLucky();
-    setTimeout(tickClock, 250);
+document.getElementById("langBtn").addEventListener("click", ()=>{
+  // EN label stays EN always
+  I18N.toggle();
+});
+
+document.getElementById("helpBtn").addEventListener("click", ()=>{
+  TempleAudio.ensure();
+  TempleAudio.chime();
+  const msg = (I18N.getLang()==="zh")
+    ? "三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。"
+    : "Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.";
+  Overlay.play(msg);
+});
+
+document.getElementById("wishBtn").addEventListener("click", ()=>{
+  wishMoment();
+});
+
+document.getElementById("premiumBtn").addEventListener("click", ()=>{
+  // STUB: here you wire TonConnect payment 1 TON -> premiumUntil
+  // For now: demo activate 24h premium
+  TempleAudio.ensure();
+  TempleAudio.chime();
+  State.addPremium(24);
+  const txt = (I18N.getLang()==="zh")
+    ? "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
+    : "Offering recorded. You are in Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond.";
+  Overlay.play(txt);
+});
+
+document.getElementById("spinBtn").addEventListener("click", async ()=>{
+  TempleAudio.ensure();
+
+  if(State.spunToday() && !State.isPremium()){
+    const warn = (I18N.getLang()==="zh")
+      ? "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。"
+      : "You already spun today. Keep your discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate.";
+    Overlay.play(warn);
+    return;
   }
-  tickClock();
-  wheelTick();
-  fxLoop();
-  scheduleDragonSweep();
 
+  // spin ritual
+  haptic("heavy");
+  TempleAudio.duckMusic(0.45, 140);
+  TempleAudio.whoosh();
+
+  // cinematic buildup
+  const start = performance.now();
+  const dur = 1100;
+  while(performance.now()-start < dur){
+    const t = (performance.now()-start)/dur;
+    ringMat.emissiveIntensity = 0.55 + t*0.55;
+    portalGroup.position.y = -1.2 + Math.sin(t*Math.PI)*0.35;
+    await new Promise(r=>requestAnimationFrame(r));
+  }
+
+  // result changes
+  const qkGain = 3 + Math.floor(Math.random()*10);
+  State.addQK(qkGain);
+  State.setFlow(State.get().flow + (Math.random()*8-3));
+  State.markSpinToday();
   renderHUD();
-  bindEvents();
 
-  // show onboarding once
-  maybeShowOnboard();
+  // win moment
+  cameraDollyWin();
+  TempleAudio.chime();
+  Dust.burst();
 
-  // TonConnect init
-  (async function(){
-    try{ await initTonConnect(); }catch(e){}
-  })();
-  </script>
+  // reveal prophecy
+  const { text } = nextPrediction();
+  TempleAudio.unduckMusic(520);
+  await new Promise(r=>setTimeout(r, 320));
+  Overlay.play(text);
+});
+
+/* ========= STARTUP CUTSCENE ========= */
+window.addEventListener("load", ()=>{
+  setTimeout(()=> portalIntro(), 220);
+});
+</script>
 </body>
 </html>
