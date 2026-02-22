@@ -1,1004 +1,256 @@
-<!doctype html>
-<html lang="zh">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>TON TEMPLE / FA CAI SUPREME AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TON TEMPLE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <style>
-    :root{
-      --obsidian:#050505;
-      --gold:#FFD36A;
-      --gold2:#B8860B;
-      --crimson:#B8001D;
-      --warm:#FFF3D1;
-      --glass: rgba(10,10,12,.52);
-      --glassBorder: rgba(255,211,106,.18);
-    }
-    html,body{height:100%; margin:0; background:#000; overflow:hidden; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;}
-    #stage3d{
-      position:fixed; inset:0;
-      z-index:1;
-      background: radial-gradient(1200px 800px at 50% 30%, #0b0e18 0%, #050507 60%, #000 100%);
-      touch-action:none;
-    }
-    #fxCanvas{
-      position:fixed; inset:0;
-      z-index:3;
-      pointer-events:none;
-    }
-    #ui{
-      position:fixed; inset:0;
-      z-index:5;
-      display:flex;
-      align-items:stretch;
-      justify-content:center;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    }
-    .uiWrap{
-      width:min(1100px, 100%);
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      padding:10px;
-      gap:10px;
-    }
-    .topHud{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:16px;
-      background: linear-gradient(180deg, rgba(10,10,12,.62), rgba(10,10,12,.40));
-      border:1px solid var(--glassBorder);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
-    .brand{display:flex; flex-direction:column; gap:2px; line-height:1.1; user-select:none;}
-    .brand .t1{font-weight:700; letter-spacing:.12em; font-size:12px; color:var(--warm); text-transform:uppercase; opacity:.95;}
-    .brand .t2{font-weight:600; letter-spacing:.16em; font-size:10px; color:rgba(255,211,106,.8); text-transform:uppercase;}
-    .hudRight{display:flex; align-items:center; gap:8px;}
-    .pill{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,.25);
-      border:1px solid rgba(255,211,106,.14);
-      color: rgba(255,243,209,.92);
-      font-size:11px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn{
-      cursor:pointer;
-      border:none;
-      outline:none;
-      padding:9px 12px;
-      border-radius:999px;
-      background: rgba(255,211,106,.10);
-      border:1px solid rgba(255,211,106,.25);
-      color: rgba(255,243,209,.95);
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      transition: transform .12s ease, background .18s ease, border-color .18s ease;
-      user-select:none;
-    }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.34);}
-    .btn:active{ transform: translateY(0px) scale(.99); }
+<style>
+html,body{
+margin:0;
+padding:0;
+background:#050505;
+overflow:hidden;
+font-family:Inter, sans-serif;
+color:#FFD36A;
+}
 
-    .center{flex:1; display:grid; grid-template-columns:1fr; gap:10px; align-content:stretch;}
-    .card{
-      border-radius:18px;
-      background: var(--glass);
-      border:1px solid var(--glassBorder);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 14px 55px rgba(0,0,0,.42);
-      overflow:hidden;
-      position:relative;
-    }
-    .cardInner{padding:14px; display:flex; flex-direction:column; gap:12px;}
-    .title{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; user-select:none;}
-    .title h2{
-      margin:0; font-size:13px; letter-spacing:.16em; text-transform:uppercase;
-      color:rgba(255,243,209,.95);
-      font-family: Orbitron, Inter, system-ui;
-      font-weight:700;
-    }
-    .title .sub{font-size:10px; letter-spacing:.12em; color: rgba(255,211,106,.74); text-transform:uppercase; opacity:.95;}
+#ui{
+position:absolute;
+top:0;
+left:0;
+right:0;
+bottom:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+pointer-events:none;
+}
 
-    .bigAction{display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; padding:18px 14px 16px;}
-    .wheelBtn{
-      width:min(340px, 92%);
-      height:58px;
-      border-radius:16px;
-      border:1px solid rgba(255,211,106,.28);
-      background: linear-gradient(180deg, rgba(255,211,106,.16), rgba(255,211,106,.08));
-      color: rgba(255,243,209,.98);
-      font-size:12px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      font-weight:700;
-      box-shadow: 0 16px 50px rgba(0,0,0,.35);
-      cursor:pointer;
-      transition: transform .14s ease;
-    }
-    .wheelBtn:hover{ transform: translateY(-1px);}
-    .wheelBtn:active{ transform: translateY(0px) scale(.99);}
-    .micro{
-      font-size:10px;
-      letter-spacing:.12em;
-      color: rgba(255,243,209,.75);
-      text-align:center;
-      line-height:1.4;
-      user-select:none;
-      max-width: 620px;
-    }
+button{
+pointer-events:auto;
+background:linear-gradient(145deg,#B8860B,#FFD36A);
+border:none;
+padding:18px 40px;
+border-radius:14px;
+font-size:18px;
+letter-spacing:.2em;
+cursor:pointer;
+color:#000;
+font-weight:600;
+}
 
-    .dock{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:10px 12px;
-      border-radius:16px;
-      background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
-      border:1px solid var(--glassBorder);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-    .dockLeft, .dockRight{ display:flex; gap:8px; align-items:center; }
-    .dotBtn{
-      width:38px; height:38px;
-      border-radius:14px;
-      border:1px solid rgba(255,211,106,.18);
-      background: rgba(0,0,0,.22);
-      color: rgba(255,243,209,.92);
-      cursor:pointer;
-      transition: transform .12s ease, border-color .18s ease;
-    }
-    .dotBtn:hover{ transform: translateY(-1px); border-color: rgba(255,211,106,.28);}
-    .dotBtn:active{ transform: translateY(0px) scale(.99); }
+#papyrus{
+position:absolute;
+width:80%;
+max-width:700px;
+height:60%;
+background:linear-gradient(#d8c9a3,#bfa67a);
+border-radius:12px;
+display:none;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+padding:40px;
+color:#2b1b05;
+box-shadow:0 0 40px rgba(255,211,106,0.4);
+animation:drop .7s ease-out;
+}
 
-    #overlay{
-      position:fixed; inset:0;
-      z-index:10;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
-      background: rgba(0,0,0,.65);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    #overlay.show{ display:flex; }
-    .parchmentWrap{
-      width:min(760px, 96vw);
-      height:min(74vh, 680px);
-      position:relative;
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow: 0 25px 120px rgba(0,0,0,.6);
-      border:1px solid rgba(255,211,106,.22);
-      background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
-                  linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
-    }
-    .parchmentCanvas{position:absolute; inset:0; width:100%; height:100%;}
-    .overlayTop{
-      position:absolute; left:0; right:0; top:0;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:10px 12px;
-      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.0));
-      z-index:2;
-      pointer-events:none;
-    }
-    .overlayTop .label{
-      font-size:10px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color: rgba(255,243,209,.85);
-      font-family: Orbitron, Inter, system-ui;
-      pointer-events:none;
-    }
-    .closeBtn{
-      pointer-events:auto;
-      cursor:pointer;
-      border:none;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(255,211,106,.10);
-      border:1px solid rgba(255,211,106,.22);
-      color: rgba(255,243,209,.95);
-      font-size:10px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-    }
-  </style>
+@keyframes drop{
+0%{transform:translateY(-100px) scale(.9);opacity:0;}
+100%{transform:translateY(0) scale(1);opacity:1;}
+}
+
+#seal{
+position:absolute;
+width:120px;
+height:120px;
+background:#B8001D;
+border-radius:8px;
+display:none;
+justify-content:center;
+align-items:center;
+color:#FFD36A;
+font-size:26px;
+font-weight:bold;
+animation:slam .4s ease-out;
+}
+
+@keyframes slam{
+0%{transform:translateY(-200px) scale(.6);}
+70%{transform:translateY(20px) scale(1.1);}
+100%{transform:translateY(0) scale(1);}
+}
+</style>
 </head>
-
 <body>
-  <canvas id="stage3d"></canvas>
-  <canvas id="fxCanvas"></canvas>
 
-  <div id="ui">
-    <div class="uiWrap">
-      <div class="topHud">
-        <div class="brand">
-          <div class="t1">TON TEMPLE</div>
-          <div class="t2">帝王福流仪式</div>
-        </div>
-        <div class="hudRight">
-          <div class="pill" id="qkPill">QK 000.00</div>
-          <div class="pill" id="flowPill">FLOW 50/100</div>
-          <button class="btn" id="helpBtn">i</button>
-          <button class="btn" id="langBtn">EN</button>
-          <button class="btn" id="premiumBtn">GATE</button>
-        </div>
-      </div>
+<div id="ui">
+<button id="spinBtn">SPIN WHEEL</button>
+<div id="papyrus">
+<div id="text"></div>
+</div>
+<div id="seal">福</div>
+</div>
+
+<script>
+/* =======================
+   THREE CORE
+======================= */
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
+camera.position.z = 8;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputEncoding = THREE.sRGBEncoding;
+document.body.appendChild(renderer.domElement);
+
+/* =======================
+   LIGHT
+======================= */
+
+const ambient = new THREE.AmbientLight(0xFFD36A,.4);
+scene.add(ambient);
+
+const light = new THREE.PointLight(0xFFD36A,1.5,100);
+light.position.set(0,5,5);
+scene.add(light);
+
+/* =======================
+   PORTAL
+======================= */
+
+const portalGeo = new THREE.TorusGeometry(3,0.3,32,100);
+const portalMat = new THREE.MeshStandardMaterial({
+color:0xFFD36A,
+emissive:0xB8860B,
+metalness:.8,
+roughness:.2
+});
+const portal = new THREE.Mesh(portalGeo,portalMat);
+scene.add(portal);
+
+/* =======================
+   STARFIELD
+======================= */
+
+const starsGeo = new THREE.BufferGeometry();
+const starCount = 2000;
+const positions = [];
+for(let i=0;i<starCount;i++){
+positions.push((Math.random()-0.5)*100);
+positions.push((Math.random()-0.5)*100);
+positions.push((Math.random()-0.5)*100);
+}
+starsGeo.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+const starsMat = new THREE.PointsMaterial({color:0xFFD36A,size:.1});
+const stars = new THREE.Points(starsGeo,starsMat);
+scene.add(stars);
+
+/* =======================
+   WHEEL
+======================= */
+
+const wheelGeo = new THREE.CylinderGeometry(2.5,2.5,.5,40);
+const wheelMat = new THREE.MeshStandardMaterial({
+color:0xB8001D,
+metalness:.7,
+roughness:.3,
+emissive:0x300000
+});
+const wheel = new THREE.Mesh(wheelGeo,wheelMat);
+wheel.rotation.x = Math.PI/2;
+scene.add(wheel);
+
+/* =======================
+   DRAGON AURA (sphere pulse)
+======================= */
+
+const dragonGeo = new THREE.SphereGeometry(1.2,32,32);
+const dragonMat = new THREE.MeshStandardMaterial({
+color:0xFFD36A,
+emissive:0xFFD36A,
+transparent:true,
+opacity:.3
+});
+const dragon = new THREE.Mesh(dragonGeo,dragonMat);
+dragon.position.set(0,0,-2);
+scene.add(dragon);
+
+/* =======================
+   ANIMATION LOOP
+======================= */
+
+let spinVelocity = 0;
+let spinning = false;
+
+function animate(){
+requestAnimationFrame(animate);
+
+portal.rotation.z += 0.003;
+stars.rotation.y += 0.0005;
+
+dragon.scale.setScalar(1 + Math.sin(Date.now()*0.003)*0.1);
+
+if(spinning){
+wheel.rotation.z += spinVelocity;
+spinVelocity *= 0.99;
+if(spinVelocity < 0.002){
+spinning = false;
+showPapyrus();
+}
+}
+
+renderer.render(scene,camera);
+}
+animate();
+
+/* =======================
+   SPIN LOGIC
+======================= */
+
+document.getElementById("spinBtn").onclick = ()=>{
+spinVelocity = .4;
+spinning = true;
+};
+
+/* =======================
+   PAPYRUS + SEAL
+======================= */
+
+function showPapyrus(){
+const p = document.getElementById("papyrus");
+const t = document.getElementById("text");
+p.style.display="flex";
+t.innerText="";
+let message = "Today the energy around you encourages calm decisions and steady movement. Avoid unnecessary conflicts. Stay grounded. Seek clarity before action. Opportunity appears through patience and awareness.";
+let i=0;
+
+let typer = setInterval(()=>{
+t.innerText += message[i];
+i++;
+if(i>=message.length){
+clearInterval(typer);
+dropSeal();
+}
+},20);
+}
+
+function dropSeal(){
+const seal = document.getElementById("seal");
+seal.style.display="flex";
+seal.style.top="50%";
+seal.style.left="50%";
+seal.style.transform="translate(-50%,-50%)";
+}
+</script>
 
-      <div class="center">
-        <div class="card">
-          <div class="cardInner">
-            <div class="title">
-              <h2 id="titleMain">帝王福流仪式</h2>
-              <div class="sub" id="titleSub">转轮 → 指引 → 抉择</div>
-            </div>
-
-            <div class="bigAction">
-              <button class="wheelBtn" id="spinBtn">转动福轮</button>
-              <div class="micro" id="microText">
-                这是一种仪式化界面，并非金融建议。
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dock">
-        <div class="dockLeft">
-          <button class="dotBtn" id="journalBtn">J</button>
-          <button class="dotBtn" id="proBtn">P</button>
-        </div>
-        <div class="dockRight">
-          <button class="dotBtn" id="soundBtn">S</button>
-          <button class="dotBtn" id="wishBtn">★</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="overlay">
-    <div class="parchmentWrap">
-      <div class="overlayTop">
-        <div class="label" id="overlayLabel">天宫指引</div>
-        <button class="closeBtn" id="closeOverlay">CLOSE</button>
-      </div>
-      <canvas class="parchmentCanvas" id="parchment"></canvas>
-    </div>
-  </div>
-
-  <!-- ✅ NO MODULES. MAX COMPAT. -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-
-  <script>
-  (function(){
-    const VERSION = "v16_telegram_safe"; // change this to bust cache
-    const $ = (id)=>document.getElementById(id);
-
-    // ---------- SAFETY: show errors on screen ----------
-    function fatal(err){
-      console.error(err);
-      const micro = $("microText");
-      micro.textContent = "BOOT ERROR: open console / WebView blocked scripts. " + (err && err.message ? err.message : "");
-      micro.style.color = "rgba(255,120,120,.95)";
-    }
-
-    // ---------- PERF / DPR CAP ----------
-    const Perf = (()=>{
-      let q = "high";
-      const mem = navigator.deviceMemory || 4;
-      const cores = navigator.hardwareConcurrency || 4;
-      if(mem <= 3 || cores <= 4) q = "medium";
-      if(mem <= 2) q = "low";
-      const dprCap = ()=> Math.min(window.devicePixelRatio || 1, (q==="low") ? 1.25 : 2.0);
-      return { q, dprCap };
-    })();
-
-    // ---------- HAPTIC ----------
-    function haptic(type="light"){
-      try{
-        if(window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback){
-          const H = Telegram.WebApp.HapticFeedback;
-          if(type==="success") H.notificationOccurred("success");
-          else if(type==="error") H.notificationOccurred("error");
-          else H.impactOccurred(type);
-          return;
-        }
-      }catch(e){}
-      if(navigator.vibrate){
-        if(type==="heavy") navigator.vibrate([25,10,25]);
-        else if(type==="success") navigator.vibrate([15,10,35]);
-        else navigator.vibrate(10);
-      }
-    }
-
-    // ---------- I18N (EN label locked) ----------
-    const I18N = (()=>{
-      const storeKey = "tt_lang";
-      let lang = localStorage.getItem(storeKey) || "zh";
-      const dict = {
-        zh: {
-          titleMain:"帝王福流仪式",
-          titleSub:"转轮 → 指引 → 抉择",
-          spin:"转动福轮",
-          micro:"这是一种仪式化界面，并非金融建议。",
-          overlay:"天宫指引",
-          gate:"供奉",
-          helpMsg:"三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。",
-          wishMsg:"许一个愿。保持安静，听见内心。"
-        },
-        en: {
-          titleMain:"Temple Ritual",
-          titleSub:"Spin → Guidance → Decision",
-          spin:"SPIN WHEEL",
-          micro:"This is a ritualized interface. Not financial advice.",
-          overlay:"TEMPLE GUIDANCE",
-          gate:"GATE",
-          helpMsg:"Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.",
-          wishMsg:"Make a wish. Stay quiet and listen within."
-        }
-      };
-      function t(k){ return (dict[lang] && dict[lang][k]) ? dict[lang][k] : dict.zh[k]; }
-      function set(nl){
-        lang = (nl==="en") ? "en" : "zh";
-        localStorage.setItem(storeKey, lang);
-        render();
-      }
-      function toggle(){ set(lang==="zh" ? "en" : "zh"); }
-      function render(){
-        document.documentElement.lang = lang;
-        $("titleMain").textContent = t("titleMain");
-        $("titleSub").textContent = t("titleSub");
-        $("spinBtn").textContent = t("spin");
-        $("microText").textContent = t("micro");
-        $("overlayLabel").textContent = t("overlay");
-        $("langBtn").textContent = "EN"; // LOCKED
-        $("helpBtn").textContent = "i";
-        $("premiumBtn").textContent = (lang==="zh") ? "供奉" : "GATE";
-      }
-      return { t, toggle, render, getLang:()=>lang };
-    })();
-    I18N.render();
-
-    // ---------- STATE ----------
-    const State = (()=>{
-      const key = "tt_state_v16";
-      const now = ()=>Date.now();
-      const base = {
-        qk:0, flow:50,
-        lastSpinDay:"",
-        premiumUntil:0,
-        usedPredIds:[],
-        predBag:[]
-      };
-      function load(){
-        try{
-          const s = JSON.parse(localStorage.getItem(key) || "null");
-          return Object.assign({}, base, s||{});
-        }catch(e){ return Object.assign({}, base); }
-      }
-      let s = load();
-      function save(){ localStorage.setItem(key, JSON.stringify(s)); }
-      function isPremium(){ return s.premiumUntil > now(); }
-      function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(); }
-      function addQK(v){ s.qk = Math.max(0, Math.round((s.qk+v)*100)/100); save(); }
-      function setFlow(v){ s.flow = Math.max(0, Math.min(100, Math.round(v))); save(); }
-      function markSpinToday(){
-        const d = new Date();
-        s.lastSpinDay = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        save();
-      }
-      function spunToday(){
-        const d = new Date();
-        const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        return s.lastSpinDay === k;
-      }
-      function get(){ return s; }
-      return { get, save, isPremium, addPremium, addQK, setFlow, markSpinToday, spunToday };
-    })();
-
-    function renderHUD(){
-      const s = State.get();
-      $("qkPill").textContent = "QK " + s.qk.toFixed(2);
-      $("flowPill").textContent = "FLOW " + String(s.flow).padStart(2,"0") + "/100";
-    }
-    renderHUD();
-
-    // ---------- 100 PREDICTIONS EN + ZH (>=5 sentences each) ----------
-    const Predictions = (()=>{
-      const enBase = [
-        "Today is about returning to what is steady. Spend more time with family or the people who calm your mind. Reduce noise and do fewer things, but do them well. If tension appears, breathe and soften your shoulders, then continue slowly. You end the day stronger when you protect peace instead of forcing outcomes.",
-        "Treat today like a gentle reset. Walk more, drink water, and let your nervous system slow down. Avoid arguments and do not try to prove a point. Give one act of care to someone close to you, then let it go without expectations. Harmony is your advantage today.",
-        "Your power is real, but pacing is everything today. Keep commitments light and do not add new pressure. If an opportunity appears, choose the option that reduces stress long-term. Rest is not weakness; it is strategy. When you slow down, clarity arrives.",
-        "Today favors connection over confrontation. Speak less, listen more, and keep your tone warm. Clean your space or finish one simple task to create inner order. Try something new in a safe way, just to refresh your mind. Your flow rises when you stay calm and curious.",
-        "This day brings quiet luck that appears in small details. Be open, but do not gamble your peace. If you feel nervous, return to the body: walk, breathe, relax your jaw. Spend time with people you trust. Stability is your best win.",
-        "Today may test your patience, so move slower than usual. Avoid impulsive promises and postpone risky decisions. If you sense pressure from others, create distance and think quietly. Choose sleep, food, and basic routines. Calm discipline protects you.",
-        "Be careful with overstimulation today. Too many messages can create unnecessary anxiety. Stop and return to one simple task, then finish it. Avoid sharp words because they echo longer than you expect. The day softens when you keep boundaries clean.",
-        "You might feel pushed to change everything quickly. Do not force it; move step by step. If you are uncertain, wait one day before big decisions. Spend time with family or close friends, and let their calm ground you. Quiet attention gives you the right direction.",
-        "Today asks for emotional maturity. Do not enter drama even if it invites you. Keep focus on health, family, and stable progress. Do one responsible action that supports your future, then rest. You win by refusing chaos.",
-        "This day is better for reflection than confrontation. Pause before reacting and keep expectations realistic. Choose warmth: tea, quiet music, a short walk. Speak gently and protect your energy. Peace is worth more than a temporary victory."
-      ];
-      const zhBase = [
-        "今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把情绪放慢。减少噪音，少一些争辩，少一些急迫的决定。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。",
-        "把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。避免争吵，也不必证明任何事。给亲近的人一点关心，然后放下期待。保持和气，福流自然来。",
-        "今天你的力量足够，但关键在于节奏。不要增加新的压力，把任务做少做精。若出现机会，先冷静观察再行动。休息不是软弱，而是策略。你越慢，越清楚。",
-        "今天适合连接，不适合对抗。讲话少一点，语气柔一点，你会更有掌控感。整理环境，外在秩序会带来内在秩序。尝试一个小小的新体验，让心刷新。保持好奇与平静，福流会上升。",
-        "今天有一种安静的好运，会出现在细节里。保持开放，但别拿你的平静去冒险。紧张时回到身体：走一走、深呼吸、放松下颌。与可信的人相处，会让你更稳。稳定就是胜利。",
-        "今天可能考验耐心，所以建议你比平时更慢。避免冲动承诺，也不要做冒险决定。若外界压力大，就拉开距离，给自己空白。把重点放在睡眠、饮食与规律。平静的自律会保护你。",
-        "今天容易被信息刺激而焦虑。把消息变少，把行动变简单。先完成一件小事，然后停下来休息。避免尖锐语言，因为它会留下回声。边界清晰，心就安定。",
-        "今天不适合急着改变一切。一步一步走，不要强推结果。若你不确定，就把大决定延后一天。多陪伴家人或朋友，让心落地。安静的专注会带来方向。",
-        "今天需要情绪成熟。别进入戏剧化的争执，即使它在邀请你。把注意力放回健康、家人和稳定进展。做一件对未来有益的小事，然后休息。拒绝混乱，你就赢了。",
-        "今天更适合反思，不适合对抗。反应前先停一下，保持期待合理。选择温暖：茶、安静的音乐、短暂散步。说话温和，保护能量。平静比短暂胜利更重要。"
-      ];
-      const en = [];
-      const zh = [];
-      for(let i=0;i<100;i++){
-        en.push(enBase[i % enBase.length]);
-        zh.push(zhBase[i % zhBase.length]);
-      }
-      return { list:(lang)=> (lang==="en") ? en : zh };
-    })();
-
-    // ---------- NON-REPEAT PICKER ----------
-    function nextPrediction(){
-      const s = State.get();
-      const total = 100;
-      if(!Array.isArray(s.predBag) || s.predBag.length===0){
-        const ids = Array.from({length:total}, (_,i)=>i);
-        for(let i=ids.length-1;i>0;i--){
-          const j = Math.floor(Math.random()*(i+1));
-          const tmp = ids[i]; ids[i]=ids[j]; ids[j]=tmp;
-        }
-        s.predBag = ids;
-      }
-      const id = s.predBag.pop();
-      s.usedPredIds.push(id);
-      State.save();
-      return { id, text: Predictions.list(I18N.getLang())[id] };
-    }
-
-    // ---------- OVERLAY (Parchment + brush writing + stamp) ----------
-    const Overlay = (()=>{
-      const overlay = $("overlay");
-      const closeBtn = $("closeOverlay");
-      const c = $("parchment");
-      const ctx = c.getContext("2d");
-
-      function show(){ overlay.classList.add("show"); resize(); }
-      function hide(){ overlay.classList.remove("show"); }
-      closeBtn.addEventListener("click", hide);
-
-      function resize(){
-        const dpr = Perf.dprCap();
-        const rect = c.getBoundingClientRect();
-        c.width = Math.floor(rect.width*dpr);
-        c.height = Math.floor(rect.height*dpr);
-        ctx.setTransform(dpr,0,0,dpr,0,0);
-      }
-      window.addEventListener("resize", resize);
-
-      function paperBg(){
-        const w = c.getBoundingClientRect().width;
-        const h = c.getBoundingClientRect().height;
-        ctx.clearRect(0,0,w,h);
-
-        const g = ctx.createLinearGradient(0,0,w,h);
-        g.addColorStop(0, "rgba(200,170,120,0.22)");
-        g.addColorStop(0.35, "rgba(120,95,60,0.22)");
-        g.addColorStop(1, "rgba(60,45,28,0.33)");
-        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-
-        ctx.save();
-        ctx.globalCompositeOperation="multiply";
-        const v = ctx.createRadialGradient(w*0.5,h*0.45,30,w*0.5,h*0.45,Math.max(w,h)*0.7);
-        v.addColorStop(0,"rgba(0,0,0,0)");
-        v.addColorStop(1,"rgba(0,0,0,0.75)");
-        ctx.fillStyle=v; ctx.fillRect(0,0,w,h);
-        ctx.restore();
-
-        ctx.save();
-        ctx.globalAlpha=0.14;
-        for(let i=0;i<150;i++){
-          const y = Math.random()*h;
-          ctx.strokeStyle="rgba(255,243,209,0.12)";
-          ctx.lineWidth=1;
-          ctx.beginPath();
-          ctx.moveTo(0,y);
-          ctx.lineTo(w,y+(Math.random()*8-4));
-          ctx.stroke();
-        }
-        ctx.restore();
-      }
-
-      function drawSeal(x,y,scale=1){
-        ctx.save();
-        ctx.translate(x,y);
-        ctx.rotate(-0.05);
-        ctx.scale(scale,scale);
-        ctx.fillStyle="rgba(184,0,29,0.92)";
-        ctx.strokeStyle="rgba(255,211,106,0.22)";
-        ctx.lineWidth=2;
-        ctx.shadowColor="rgba(0,0,0,0.35)";
-        ctx.shadowBlur=12;
-        const s = 96;
-        ctx.fillRect(-s/2,-s/2,s,s);
-        ctx.strokeRect(-s/2,-s/2,s,s);
-        ctx.shadowBlur=0;
-        ctx.fillStyle="rgba(255,243,209,0.92)";
-        ctx.font="700 44px serif";
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
-        ctx.fillText("财",0,3);
-        ctx.restore();
-      }
-
-      function wrapText(text, maxW, isZh){
-        const tokens = isZh ? text.split("") : text.split(" ");
-        const lines = [];
-        let line = "";
-        for(let i=0;i<tokens.length;i++){
-          const t = isZh ? tokens[i] : (tokens[i] + " ");
-          const test = line + t;
-          if(ctx.measureText(test).width > maxW && line.length>0){
-            lines.push(line);
-            line = t;
-          }else line = test;
-        }
-        if(line.trim().length) lines.push(line);
-        return lines;
-      }
-
-      async function play(text){
-        show(); resize();
-
-        const w = c.getBoundingClientRect().width;
-        const h = c.getBoundingClientRect().height;
-        paperBg();
-
-        const isZh = (I18N.getLang()==="zh");
-        $("overlayLabel").textContent = I18N.t("overlay");
-
-        const padX = 32;
-        const topY = 70;
-        const maxW = w - padX*2;
-        const font = isZh
-          ? "600 18px 'Noto Sans SC','PingFang SC','Microsoft YaHei',serif"
-          : "600 17px 'Georgia','Times New Roman',serif";
-
-        // header
-        ctx.save();
-        ctx.fillStyle="rgba(255,243,209,0.88)";
-        ctx.font="700 14px Orbitron, Inter, system-ui";
-        ctx.fillText(isZh ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
-        ctx.restore();
-
-        ctx.font = font;
-        ctx.textBaseline="top";
-
-        const lines = wrapText(text, maxW, isZh);
-
-        // write like brush (per char)
-        let y = topY;
-        let cc = 0;
-        for(let li=0; li<lines.length; li++){
-          const L = lines[li];
-          let x = padX;
-          for(let ci=0; ci<L.length; ci++){
-            const ch = L[ci];
-
-            const jx = (Math.random()*0.6 - 0.3);
-            const jy = (Math.random()*0.6 - 0.3);
-
-            const ink = ctx.createLinearGradient(x,y,x,y+22);
-            ink.addColorStop(0,"rgba(255,243,209,0.92)");
-            ink.addColorStop(1,"rgba(255,211,106,0.70)");
-            ctx.fillStyle = ink;
-            ctx.fillText(ch, x+jx, y+jy);
-
-            x += ctx.measureText(ch).width;
-            cc++;
-            if(cc % 18 === 0) await new Promise(r=>setTimeout(r, 8));
-          }
-          y += 26;
-          if(y > h-130) break;
-          await new Promise(r=>setTimeout(r, 10));
-        }
-
-        // footer
-        ctx.save();
-        ctx.fillStyle="rgba(255,211,106,0.70)";
-        ctx.font="600 12px Inter, system-ui";
-        const ts = new Date().toLocaleString(isZh ? "zh-CN" : "en-US");
-        ctx.fillText(ts, padX, h-40);
-        ctx.restore();
-
-        // stamp
-        await new Promise(r=>setTimeout(r, 260));
-        haptic("heavy");
-        const sx = w - 110;
-        const sy = h - 120;
-        for(let k=0;k<=16;k++){
-          const t = k/16;
-          const ease = 1 - Math.pow(1-t,3);
-          paperBg();
-
-          // redraw header + body quickly
-          ctx.save();
-          ctx.fillStyle="rgba(255,243,209,0.88)";
-          ctx.font="700 14px Orbitron, Inter, system-ui";
-          ctx.fillText(isZh ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
-          ctx.restore();
-
-          ctx.save();
-          ctx.font=font;
-          ctx.fillStyle="rgba(255,243,209,0.92)";
-          ctx.textBaseline="top";
-          let yy = topY;
-          for(let li=0; li<lines.length; li++){
-            ctx.fillText(lines[li], padX, yy);
-            yy += 26;
-            if(yy > h-130) break;
-          }
-          ctx.restore();
-
-          ctx.save();
-          ctx.fillStyle="rgba(255,211,106,0.70)";
-          ctx.font="600 12px Inter, system-ui";
-          ctx.fillText(ts, padX, h-40);
-          ctx.restore();
-
-          drawSeal(sx, sy, 0.55 + 0.45*ease);
-          await new Promise(r=>requestAnimationFrame(r));
-        }
-      }
-      return { play, hide };
-    })();
-
-    // ---------- FX CANVAS: GOLD DUST ----------
-    const fxCanvas = $("fxCanvas");
-    const fxCtx = fxCanvas.getContext("2d");
-    function resizeFX(){
-      const dpr = Perf.dprCap();
-      fxCanvas.width = Math.floor(innerWidth*dpr);
-      fxCanvas.height = Math.floor(innerHeight*dpr);
-      fxCanvas.style.width = innerWidth+"px";
-      fxCanvas.style.height = innerHeight+"px";
-      fxCtx.setTransform(dpr,0,0,dpr,0,0);
-    }
-    resizeFX();
-
-    const Dust = (()=>{
-      const parts = [];
-      function spawn(initial=false, boost=1){
-        parts.push({
-          x: Math.random()*innerWidth,
-          y: initial ? Math.random()*innerHeight : (innerHeight + 10),
-          vx: (-0.05 + Math.random()*0.10)*boost,
-          vy: (-0.18 + Math.random()*0.14)*boost,
-          r: 0.6 + Math.random()*2.0,
-          a: 0.08 + Math.random()*0.34,
-          tw: 0.65 + Math.random()*0.35
-        });
-      }
-      function init(){
-        const base = (Perf.q==="low") ? 80 : (Perf.q==="medium") ? 120 : 150;
-        for(let i=0;i<base;i++) spawn(true);
-      }
-      function burst(){
-        const n = (Perf.q==="low") ? 18 : 30;
-        for(let i=0;i<n;i++) spawn(false, 1.8);
-      }
-      function step(dt){
-        fxCtx.fillStyle="rgba(0,0,0,0.18)";
-        fxCtx.fillRect(0,0,innerWidth,innerHeight);
-        fxCtx.save();
-        fxCtx.globalCompositeOperation="lighter";
-        for(let i=parts.length-1;i>=0;i--){
-          const p = parts[i];
-          p.x += p.vx*(dt*60);
-          p.y += p.vy*(dt*60);
-          const tw = 0.65 + 0.35*Math.sin(Date.now()*0.002*p.tw);
-          const a = p.a * tw;
-          fxCtx.beginPath();
-          fxCtx.fillStyle = "rgba(255,211,106,"+a+")";
-          fxCtx.shadowColor="rgba(255,211,106,0.35)";
-          fxCtx.shadowBlur=12;
-          fxCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          fxCtx.fill();
-          if(p.y < -20 || p.x < -30 || p.x > innerWidth+30){
-            parts.splice(i,1);
-            spawn(true);
-          }
-        }
-        fxCtx.restore();
-      }
-      init();
-      return { step, burst };
-    })();
-
-    function sealBurst(x,y){
-      fxCtx.save();
-      fxCtx.globalCompositeOperation="lighter";
-      for(let i=0;i<20;i++){
-        const a = Math.random()*Math.PI*2;
-        const r = 20 + Math.random()*160;
-        const px = x + Math.cos(a)*r;
-        const py = y + Math.sin(a)*r;
-        fxCtx.strokeStyle="rgba(255,211,106,0.20)";
-        fxCtx.lineWidth=1;
-        fxCtx.beginPath();
-        fxCtx.moveTo(x,y);
-        fxCtx.lineTo(px,py);
-        fxCtx.stroke();
-      }
-      fxCtx.restore();
-    }
-
-    // ---------- THREE (NO MODULES) ----------
-    let renderer, scene, camera, composer, bloom, clock;
-    let portalGroup, portalRing, portalCore, stars, dragonMesh;
-    let targetX=0, targetY=0, curX=0, curY=0;
-    let dollyT = 0;
-
-    function bindParallax(){
-      function onMove(x,y){
-        targetX = (x/innerWidth)*2 - 1;
-        targetY = (y/innerHeight)*2 - 1;
-      }
-      addEventListener("mousemove", e=>onMove(e.clientX,e.clientY), {passive:true});
-      addEventListener("touchmove", e=>{
-        const t = e.touches && e.touches[0];
-        if(!t) return;
-        onMove(t.clientX,t.clientY);
-      }, {passive:true});
-    }
-
-    function makeStars(count){
-      const geo = new THREE.BufferGeometry();
-      const pos = new Float32Array(count*3);
-      const col = new Float32Array(count*3);
-      for(let i=0;i<count;i++){
-        const rr = 450 + Math.random()*900;
-        const theta = Math.random()*Math.PI*2;
-        const phi = Math.acos(2*Math.random()-1);
-        const x = rr*Math.sin(phi)*Math.cos(theta);
-        const y = rr*Math.sin(phi)*Math.sin(theta);
-        const z = rr*Math.cos(phi);
-        pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
-
-        const warm = Math.random() < 0.28;
-        const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
-        const k = warm ? (0.6+Math.random()*0.4) : (0.55+Math.random()*0.45);
-        col[i*3]=c.r*k; col[i*3+1]=c.g*k; col[i*3+2]=c.b*k;
-      }
-      geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
-      geo.setAttribute("color", new THREE.BufferAttribute(col,3));
-      const mat = new THREE.PointsMaterial({
-        size: (Perf.q==="low") ? 1.0 : 1.35,
-        vertexColors:true,
-        transparent:true,
-        opacity:0.9,
-        depthWrite:false
-      });
-      return new THREE.Points(geo, mat);
-    }
-
-    function initThree(){
-      const canvas = $("stage3d");
-      renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:"high-performance" });
-      renderer.setPixelRatio(Perf.dprCap());
-      renderer.setSize(innerWidth, innerHeight, false);
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x000000, 0.0012);
-
-      camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 3000);
-      camera.position.set(0,0,26);
-
-      clock = new THREE.Clock();
-
-      const key = new THREE.DirectionalLight(0xFFD36A, 1.35);
-      key.position.set(12,10,18);
-      scene.add(key);
-
-      const rim = new THREE.DirectionalLight(0xB8001D, 0.55);
-      rim.position.set(-14,6,-6);
-      scene.add(rim);
-
-      scene.add(new THREE.AmbientLight(0x0b0e18, 1.2));
-
-      // portal
-      portalGroup = new THREE.Group();
-      scene.add(portalGroup);
-
-      const ringGeo = new THREE.TorusGeometry(8.5, 0.22, 30, 220);
-      const ringMat = new THREE.MeshStandardMaterial({
-        color:0xFFD36A, metalness:0.82, roughness:0.26,
-        emissive:new THREE.Color(0xFFD36A),
-        emissiveIntensity:0.55
-      });
-      portalRing = new THREE.Mesh(ringGeo, ringMat);
-      portalRing.rotation.x = Math.PI/2;
-      portalGroup.add(portalRing);
-
-      const coreGeo = new THREE.CircleGeometry(8.2, 128);
-      const coreMat = new THREE.MeshBasicMaterial({ color:0x050507, transparent:true, opacity:0.22 });
-      portalCore = new THREE.Mesh(coreGeo, coreMat);
-      portalCore.rotation.x = Math.PI/2;
-      portalGroup.add(portalCore);
-
-      portalGroup.position.set(0,-1.2,-10);
-
-      // stars
-      const starCount = (Perf.q==="low") ? 4500 : (Perf.q==="medium") ? 9000 : 14000;
-      stars = makeStars(starCount);
-      scene.add(stars);
-
-      // dragon (texture plane) — cache busting
-      const loader = new THREE.TextureLoader();
-      const dragonUrl = "dragon.jpg?cb=" + encodeURIComponent(VERSION);
-      loader.load(dragonUrl, (tex)=>{
-        tex.colorSpace = THREE.SRGBColorSpace;
-
-        const geo = new THREE.PlaneGeometry(18,18,64,64);
-        const mat = new THREE.ShaderMaterial({
-          transparent:true,
-          uniforms:{ uTex:{value:tex}, uTime:{value:0}, uAura:{value:0.55} },
-          vertexShader:
-            "varying vec2 vUv; uniform float uTime;" +
-            "void main(){ vUv=uv; vec3 p=position;" +
-            "float w = sin(uTime*1.2 + p.y*0.6) * 0.06;" +
-            "p.z += w * (0.5 + (1.0-uv.y));" +
-            "gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);" +
-            "}",
-          fragmentShader:
-            "varying vec2 vUv; uniform sampler2D uTex; uniform float uTime; uniform float uAura;" +
-            "void main(){ vec4 tex = texture2D(uTex, vUv);" +
-            "float edge = smoothstep(0.0,0.10,vUv.x)*smoothstep(0.0,0.10,vUv.y)*smoothstep(0.0,0.10,1.0-vUv.x)*smoothstep(0.0,0.10,1.0-vUv.y);" +
-            "float pulse = 0.5 + 0.5*sin(uTime*1.4);" +
-            "vec3 gold = vec3(1.0,0.83,0.42);" +
-            "vec3 glow = gold*(uAura*(0.35+0.65*pulse))*(1.0-edge);" +
-            "float v = smoothstep(0.9,0.2,distance(vUv, vec2(0.5)));" +
-            "vec3 col = tex.rgb + glow*0.65; col *= (0.85 + 0.15*v);" +
-            "gl_FragColor = vec4(col, 1.0);" +
-            "}"
-        });
-
-        dragonMesh = new THREE.Mesh(geo, mat);
-        dragonMesh.position.set(0,1.2,-16);
-        scene.add(dragonMesh);
-      }, undefined, (e)=>{
-        console.warn("Dragon texture failed:", e);
-      });
-
-      // postprocessing bloom
-      composer = new THREE.EffectComposer(renderer);
-      composer.addPass(new THREE.RenderPass(scene, camera));
-      bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.10, 0.55, 0.20);
-      if(Perf.q==="low"){ bloom.strength=0.85; bloom.radius=0.40; }
-      if(Perf.q==="medium"){ bloom.strength=1.00; bloom.radius=0.50; }
-      composer.addPass(bloom);
-
-      bindParallax();
-      animate();
-    }
-
-    function cameraDollyWin(){ dollyT = 1.0; }
-
-    function animate(){
-      requestAnimationFrame(animate);
-      const dt = clock.getDelta();
-      const t = clock.elapsedTime;
-
-      curX += (targetX - curX)*0.06;
-      curY += (targetY - curY)*0.06;
-
-      camera.rotation.y = curX * 0.10;
-      camera.rotation.x = -curY * 0.07;
-
-      if(dollyT > 0){
-        dollyT -= dt*1.35;
-        const k = Math.max(0, dollyT);
-        const ease = 1 - Math.pow(k, 2.2);
-        camera.position.z = 26 - ease*2.6;
-        camera.position.y = ease*0.35;
-        bloom.strength = ((Perf.q==="low") ? 0.85 : 1.10) + ease*0.22;
-      }else{
-        camera.position.z += (26 - camera.position.z)*0.06;
-        camera.position.y += (0 - camera.position.y)*0.06;
-      }
-
-      if(portalRing) portalRing.rotation.z += dt*0.08;
-      if(portalCore) portalCore.material.opacity = 0.18 + 0.04*Math.sin(t*0.9);
-      if(stars){
-        stars.rotation.y += dt*0.012;
-        stars.rotation.x += dt*0.006;
-      }
-      if(dragonMesh && dragonMesh.material && dragonMesh.material.uniforms){
-        dragonMesh.material.uniforms.uTime.value = t;
-      }
-
-      Dust.step(dt);
-      composer.render();
-    }
-
-    function onResize(){
-      renderer.setPixelRatio(Perf.dprCap());
-      renderer.setSize(innerWidth, innerHeight, false);
-      camera.aspect = innerWidth/innerHeight;
-      camera.updateProjectionMatrix();
-      composer.setSize(innerWidth, innerHeight);
-      resizeFX();
-    }
-    addEventListener("resize", onResize);
-
-    // ---------- UI EVENTS ----------
-    $("langBtn").addEventListener("click", ()=> I18N.toggle());
-    $("helpBtn").addEventListener("click", ()=> Overlay.play(I18N.t("helpMsg")));
-    $("wishBtn").addEventListener("click", ()=>{
-      const prev = $("microText").textContent;
-      $("microText").textContent = I18N.t("wishMsg");
-      sealBurst(innerWidth*0.52, innerHeight*0.36);
-      Dust.burst();
-      setTimeout(()=> $("microText").textContent = prev, 1400);
-    });
-
-    $("premiumBtn").addEventListener("click", ()=>{
-      // STUB: here TonConnect payment 1 TON -> premiumUntil
-      State.addPremium(24);
-      const msg = (I18N.getLang()==="zh")
-        ? "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
-        : "Offering recorded. You are Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond.";
-      Overlay.play(msg);
-    });
-
-    $("spinBtn").addEventListener("click", async ()=>{
-      if(State.spunToday() && !State.isPremium()){
-        const warn = (I18N.getLang()==="zh")
-          ? "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。"
-          : "You already spun today. Keep discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate.";
-        Overlay.play(warn);
-        return;
-      }
-
-      haptic("heavy");
-      Dust.burst();
-      cameraDollyWin();
-
-      const qkGain = 3 + Math.floor(Math.random()*10);
-      State.addQK(qkGain);
-      State.setFlow(State.get().flow + (Math.random()*8-3));
-      State.markSpinToday();
-      renderHUD();
-
-      sealBurst(innerWidth*0.52, innerHeight*0.64);
-      const { text } = nextPrediction();
-      setTimeout(()=> Overlay.play(text), 220);
-    });
-
-    // ---------- BOOT ----------
-    try{
-      initThree();
-    }catch(err){
-      fatal(err);
-    }
-  })();
-  </script>
 </body>
 </html>
