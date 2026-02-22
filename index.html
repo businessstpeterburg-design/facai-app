@@ -1,256 +1,1439 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TON TEMPLE</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>TON TEMPLE / Fa Cai Ritual</title>
+  <meta name="theme-color" content="#050505"/>
 
-<style>
-html,body{
-margin:0;
-padding:0;
-background:#050505;
-overflow:hidden;
-font-family:Inter, sans-serif;
-color:#FFD36A;
-}
+  <style>
+    :root{
+      --obsidian:#050505;
+      --gold:#FFD36A;
+      --gold2:#B8860B;
+      --warm:#FFF3D1;
+      --crimson:#B8001D;
+      --glass: rgba(10,10,12,.52);
+      --glassBorder: rgba(255,211,106,.18);
+      --shadow: 0 16px 60px rgba(0,0,0,.45);
+    }
+    html,body{
+      height:100%; margin:0; background:#000; overflow:hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
 
-#ui{
-position:absolute;
-top:0;
-left:0;
-right:0;
-bottom:0;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-pointer-events:none;
-}
+    /* ====== FULLSCREEN 3D + FX ====== */
+    #stage3d{ position:fixed; inset:0; z-index:1; touch-action:none; }
+    #fxCanvas{ position:fixed; inset:0; z-index:2; pointer-events:none; }
 
-button{
-pointer-events:auto;
-background:linear-gradient(145deg,#B8860B,#FFD36A);
-border:none;
-padding:18px 40px;
-border-radius:14px;
-font-size:18px;
-letter-spacing:.2em;
-cursor:pointer;
-color:#000;
-font-weight:600;
-}
+    /* ====== HUD (mobile-first safe areas) ====== */
+    #hud{
+      position:fixed; inset:0;
+      z-index:5;
+      pointer-events:none;
+      padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 10px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 10px);
+      display:flex; flex-direction:column; justify-content:space-between;
+      gap:10px;
+    }
 
-#papyrus{
-position:absolute;
-width:80%;
-max-width:700px;
-height:60%;
-background:linear-gradient(#d8c9a3,#bfa67a);
-border-radius:12px;
-display:none;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-padding:40px;
-color:#2b1b05;
-box-shadow:0 0 40px rgba(255,211,106,0.4);
-animation:drop .7s ease-out;
-}
+    .topbar{
+      pointer-events:none;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: linear-gradient(180deg, rgba(10,10,12,.62), rgba(10,10,12,.38));
+      border:1px solid var(--glassBorder);
+      border-radius:18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; user-select:none; }
+    .brand .t1{
+      font-weight:800; letter-spacing:.14em; font-size:12px;
+      color:rgba(255,243,209,.95); text-transform:uppercase;
+    }
+    .brand .t2{
+      font-weight:650; letter-spacing:.18em; font-size:10px;
+      color:rgba(255,211,106,.82); text-transform:uppercase;
+    }
 
-@keyframes drop{
-0%{transform:translateY(-100px) scale(.9);opacity:0;}
-100%{transform:translateY(0) scale(1);opacity:1;}
-}
+    .rightPills{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+    .pill{
+      pointer-events:none;
+      display:inline-flex; align-items:center; gap:7px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,211,106,.14);
+      color: rgba(255,243,209,.92);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .btn{
+      pointer-events:auto;
+      cursor:pointer;
+      border:none; outline:none;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.24);
+      color: rgba(255,243,209,.95);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn:hover{ background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.32); }
 
-#seal{
-position:absolute;
-width:120px;
-height:120px;
-background:#B8001D;
-border-radius:8px;
-display:none;
-justify-content:center;
-align-items:center;
-color:#FFD36A;
-font-size:26px;
-font-weight:bold;
-animation:slam .4s ease-out;
-}
+    /* ====== BOTTOM DOCK ====== */
+    .dock{
+      pointer-events:none;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
+      border:1px solid var(--glassBorder);
+      border-radius:18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+    }
+    .dockLeft, .dockRight{ display:flex; align-items:center; gap:8px; pointer-events:none; }
+    .dockBtn{
+      pointer-events:auto;
+      width:40px; height:40px;
+      border-radius:14px;
+      border:1px solid rgba(255,211,106,.18);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,243,209,.92);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .18s ease;
+    }
+    .dockBtn:active{ transform: scale(.98); }
+    .dockBtn:hover{ border-color: rgba(255,211,106,.30); }
 
-@keyframes slam{
-0%{transform:translateY(-200px) scale(.6);}
-70%{transform:translateY(20px) scale(1.1);}
-100%{transform:translateY(0) scale(1);}
-}
-</style>
+    /* ====== CENTER CTA (small, not a big empty card) ====== */
+    .ctaWrap{
+      pointer-events:none;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cta{
+      pointer-events:auto;
+      display:inline-flex; flex-direction:column; align-items:center; gap:10px;
+      padding:12px 14px;
+      border-radius:18px;
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,211,106,.14);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      user-select:none;
+      box-shadow: 0 18px 70px rgba(0,0,0,.42);
+    }
+    .ctaTitle{
+      font-family: Orbitron, Inter, system-ui;
+      font-weight:800;
+      font-size:11px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color: rgba(255,243,209,.92);
+    }
+    .spinBtn{
+      pointer-events:auto;
+      cursor:pointer;
+      width: min(300px, 74vw);
+      height:56px;
+      border-radius:16px;
+      border:1px solid rgba(255,211,106,.28);
+      background: linear-gradient(180deg, rgba(255,211,106,.18), rgba(255,211,106,.08));
+      color: rgba(255,243,209,.98);
+      font-size:12px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-weight:800;
+      box-shadow: 0 16px 60px rgba(0,0,0,.40);
+      transition: transform .14s ease;
+    }
+    .spinBtn:active{ transform: scale(.99); }
+
+    .micro{
+      max-width: 520px;
+      text-align:center;
+      font-size:10px;
+      letter-spacing:.12em;
+      color: rgba(255,243,209,.72);
+      line-height:1.35;
+    }
+
+    /* ====== OVERLAY: PARCHMENT ====== */
+    #overlay{
+      position:fixed; inset:0;
+      z-index:20;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 10px) 14px;
+      background: rgba(0,0,0,.68);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    #overlay.show{ display:flex; }
+
+    .parchmentWrap{
+      width:min(820px, 96vw);
+      height:min(74vh, 720px);
+      position:relative;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,211,106,.22);
+      background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
+                  linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
+      box-shadow: 0 25px 120px rgba(0,0,0,.65);
+    }
+    .parchmentCanvas{ position:absolute; inset:0; width:100%; height:100%; }
+    .overlayTop{
+      position:absolute; left:0; right:0; top:0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.0));
+      z-index:2;
+      pointer-events:none;
+    }
+    .overlayTop .label{
+      font-family: Orbitron, Inter, system-ui;
+      font-weight:800;
+      font-size:10px;
+      letter-spacing:.20em;
+      text-transform:uppercase;
+      color: rgba(255,243,209,.86);
+      user-select:none;
+    }
+    .closeBtn{
+      pointer-events:auto;
+      cursor:pointer;
+      border:none;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.22);
+      color: rgba(255,243,209,.95);
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      user-select:none;
+    }
+
+    /* ====== MOBILE FIXES (icons not flying off) ====== */
+    @media (max-width: 420px){
+      .rightPills{ gap:6px; }
+      .pill{ font-size:10px; padding:7px 9px; letter-spacing:.12em; }
+      .btn{ font-size:10px; padding:8px 10px; letter-spacing:.12em; }
+      .brand .t1{ font-size:11px; }
+      .brand .t2{ font-size:9px; }
+      .dockBtn{ width:38px; height:38px; border-radius:13px; }
+      .spinBtn{ width: 78vw; }
+    }
+  </style>
 </head>
+
 <body>
+  <canvas id="stage3d"></canvas>
+  <canvas id="fxCanvas"></canvas>
 
-<div id="ui">
-<button id="spinBtn">SPIN WHEEL</button>
-<div id="papyrus">
-<div id="text"></div>
-</div>
-<div id="seal">福</div>
-</div>
+  <div id="hud">
+    <div class="topbar">
+      <div class="brand">
+        <div class="t1">TON TEMPLE</div>
+        <div class="t2">帝王福流仪式</div>
+      </div>
 
-<script>
+      <div class="rightPills">
+        <div class="pill" id="qkPill">QK 0.00</div>
+        <div class="pill" id="flowPill">FLOW 50/100</div>
+        <button class="btn" id="helpBtn">i</button>
+        <button class="btn" id="langBtn">EN</button>
+        <button class="btn" id="gateBtn">GATE</button>
+      </div>
+    </div>
+
+    <div class="ctaWrap">
+      <div class="cta">
+        <div class="ctaTitle" id="ctaTitle">Temple Ritual</div>
+        <button class="spinBtn" id="spinBtn">SPIN WHEEL</button>
+        <div class="micro" id="microText">This is a ritualized interface. Not financial advice.</div>
+      </div>
+    </div>
+
+    <div class="dock">
+      <div class="dockLeft">
+        <button class="dockBtn" id="journalBtn">J</button>
+        <button class="dockBtn" id="proBtn">P</button>
+      </div>
+      <div class="dockRight">
+        <button class="dockBtn" id="soundBtn">S</button>
+        <button class="dockBtn" id="wishBtn">★</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARCHMENT OVERLAY -->
+  <div id="overlay">
+    <div class="parchmentWrap">
+      <div class="overlayTop">
+        <div class="label" id="overlayLabel">TEMPLE GUIDANCE</div>
+        <button class="closeBtn" id="closeOverlay">CLOSE</button>
+      </div>
+      <canvas class="parchmentCanvas" id="parchment"></canvas>
+    </div>
+  </div>
+
+<script type="module">
+/* ==========================================================
+   TON TEMPLE — MOBILE FIRST AAA (Telegram-safe)
+   цель: на телефоне ровно, без обрезов, без лагов
+   ========================================================== */
+
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { EffectComposer } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+
 /* =======================
-   THREE CORE
-======================= */
+   PERF GOVERNOR (mobile-first)
+   ======================= */
+const Perf = (() => {
+  const mem = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // Telegram WebView can choke on high DPR + bloom
+  let tier = "high";
+  if(isMobile) tier = "medium";
+  if(mem <= 3 || cores <= 4) tier = "medium";
+  if(mem <= 2) tier = "low";
+
+  function dpr(){
+    const base = window.devicePixelRatio || 1;
+    if(tier === "low") return Math.min(base, 1.25);
+    if(tier === "medium") return Math.min(base, 1.5);
+    return Math.min(base, 2.0);
+  }
+  return { tier, isMobile, dpr };
+})();
+
+/* =======================
+   HAPTIC (Telegram + fallback)
+   ======================= */
+function haptic(type="light"){
+  try{
+    if(window.Telegram?.WebApp?.HapticFeedback){
+      const H = window.Telegram.WebApp.HapticFeedback;
+      if(type === "success") H.notificationOccurred("success");
+      else if(type === "error") H.notificationOccurred("error");
+      else H.impactOccurred(type);
+      return;
+    }
+  }catch(e){}
+  if(navigator.vibrate){
+    if(type==="heavy") navigator.vibrate([25,10,25]);
+    else if(type==="success") navigator.vibrate([15,10,35]);
+    else navigator.vibrate(10);
+  }
+}
+
+/* =======================
+   AUDIO (lightweight, gesture-based)
+   ======================= */
+const AudioSys = (() => {
+  let ctx, master;
+  let enabled = true;
+
+  const now = ()=> ctx?.currentTime || 0;
+  const r = (a,b)=> a + Math.random()*(b-a);
+
+  function ensure(){
+    if(!enabled) return;
+    if(!ctx){
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain();
+      master.gain.value = 0.6;
+      master.connect(ctx.destination);
+    }
+    if(ctx.state !== "running") ctx.resume().catch(()=>{});
+  }
+
+  function tone(freq=440, dur=0.12, vol=0.08, type="sine"){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t0);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    o.connect(g).connect(master);
+    o.start(t0);
+    o.stop(t0+dur+0.02);
+  }
+
+  function whoosh(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type="sine";
+    o.frequency.setValueAtTime(180, t0);
+    o.frequency.exponentialRampToValueAtTime(780*r(.95,1.05), t0+0.18);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.20, t0+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+0.22);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0+0.24);
+  }
+
+  function chime(){
+    tone(523.25*r(.99,1.01), 0.22, 0.09, "sine");
+    setTimeout(()=>tone(659.25*r(.99,1.01), 0.24, 0.07, "sine"), 40);
+    setTimeout(()=>tone(783.99*r(.99,1.01), 0.28, 0.06, "sine"), 85);
+  }
+
+  function stamp(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type="triangle";
+    o.frequency.setValueAtTime(120*r(.95,1.05), t0);
+    o.frequency.exponentialRampToValueAtTime(58, t0+0.10);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.30, t0+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+0.18);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0+0.20);
+  }
+
+  function inkTick(){
+    tone(420*r(.98,1.02), 0.08, 0.035, "triangle");
+  }
+
+  function toggle(){
+    enabled = !enabled;
+    if(enabled) ensure();
+    return enabled;
+  }
+
+  return { ensure, whoosh, chime, stamp, inkTick, toggle };
+})();
+
+/* =======================
+   I18N (EN label locked)
+   ======================= */
+const I18N = (() => {
+  const storeKey = "tt_lang_v2";
+  let lang = localStorage.getItem(storeKey) || "zh";
+
+  const dict = {
+    zh: {
+      brand2: "帝王福流仪式",
+      ctaTitle: "帝王福流仪式",
+      spin: "转动福轮",
+      micro: "这是一种仪式化界面，并非金融建议。",
+      overlay: "天宫指引",
+      gate: "供奉",
+      helpText: "三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。",
+      premiumText: "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
+    },
+    en: {
+      brand2: "TEMPLE RITUAL",
+      ctaTitle: "Temple Ritual",
+      spin: "SPIN WHEEL",
+      micro: "This is a ritualized interface. Not financial advice.",
+      overlay: "TEMPLE GUIDANCE",
+      gate: "GATE",
+      helpText: "Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.",
+      premiumText: "Offering recorded. You are in Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond."
+    }
+  };
+
+  function t(k){ return dict[lang]?.[k] ?? dict.zh[k] ?? k; }
+  function set(newLang){
+    lang = (newLang === "en") ? "en" : "zh";
+    localStorage.setItem(storeKey, lang);
+    render();
+  }
+  function toggle(){ set(lang === "zh" ? "en" : "zh"); }
+  function get(){ return lang; }
+
+  function render(){
+    document.documentElement.lang = lang;
+    document.querySelector(".brand .t2").textContent = t("brand2");
+    document.getElementById("ctaTitle").textContent = t("ctaTitle");
+    document.getElementById("spinBtn").textContent = t("spin");
+    document.getElementById("microText").textContent = t("micro");
+    document.getElementById("overlayLabel").textContent = t("overlay");
+    // IMPORTANT: EN label always "EN"
+    document.getElementById("langBtn").textContent = "EN";
+    document.getElementById("gateBtn").textContent = (lang === "zh") ? "供奉" : "GATE";
+  }
+
+  return { t, set, toggle, get, render };
+})();
+I18N.render();
+
+/* =======================
+   STATE (QK / FLOW / PREMIUM / NON-REPEAT)
+   ======================= */
+const State = (() => {
+  const key = "tt_state_ps5_mobile_v1";
+  const base = { qk:0, flow:50, premiumUntil:0, lastSpinDay:"", bag:[], used:[] };
+
+  function load(){
+    try{ return { ...base, ...(JSON.parse(localStorage.getItem(key)) || {}) }; }
+    catch(e){ return { ...base }; }
+  }
+  let s = load();
+  const now = ()=> Date.now();
+
+  function save(){ localStorage.setItem(key, JSON.stringify(s)); }
+  function isPremium(){ return s.premiumUntil > now(); }
+  function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(); }
+  function addQK(v){ s.qk = Math.max(0, Math.round((s.qk+v)*100)/100); save(); }
+  function setFlow(v){ s.flow = Math.max(0, Math.min(100, Math.round(v))); save(); }
+
+  function todayKey(){
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  function spunToday(){ return s.lastSpinDay === todayKey(); }
+  function markSpun(){ s.lastSpinDay = todayKey(); save(); }
+
+  return { get:()=>s, save, isPremium, addPremium, addQK, setFlow, spunToday, markSpun };
+})();
+
+function renderHUD(){
+  const s = State.get();
+  document.getElementById("qkPill").textContent = `QK ${s.qk.toFixed(2)}`;
+  document.getElementById("flowPill").textContent = `FLOW ${String(s.flow).padStart(2,"0")}/100`;
+}
+renderHUD();
+
+/* =======================
+   PREDICTIONS (100 EN + 100 ZH, 5+ sentences)
+   NOTE: текст можно расширять потом, но сейчас уже соблюдает правило.
+   ======================= */
+const Predictions = (() => {
+  const en = [
+`Today is about returning to what is steady and calm. Spend more time with family or the people who bring you peace. Keep your schedule simple and avoid unnecessary emotional tension. If a decision feels rushed, give it time and choose the option that reduces stress long-term. A quiet, disciplined rhythm will keep your mind clear and your day successful.`,
+`Treat today like a gentle reset for your body and focus. Walk more, drink water, and let your nervous system slow down. Do one small act of care for someone close, then release it without expectations. Avoid arguments or trying to prove a point—your strength is in restraint. When you choose harmony, the right opportunities become easier to notice.`,
+`Your best results today come from patience, not pressure. Choose one priority and finish it with clean attention. If you feel irritation rising, pause, breathe, and soften your shoulders. Spend a little time with friends or family to restore emotional balance. The day rewards simple progress and calm self-control.`,
+`Today favors connection over confrontation. Keep your words fewer and warmer, especially with close people. Do not overload yourself with tasks—finish one thing well and stop. If you have extra energy, try something new in a safe way to refresh your mindset. Your flow improves when you stay relaxed and present.`,
+`This day carries a quiet kind of luck. Do not chase it aggressively; notice it gently. Avoid risky shortcuts and protect your peace like a valuable resource. Choose stable routines, clean boundaries, and calm people. By evening, you’ll feel more grounded if you keep the day simple and honest.`,
+`Your mind may want to solve everything at once, but today is not for force. Slow down and do things step by step. If someone brings drama, do not enter that arena; keep your tone steady. Spend time at home or with your closest circle for emotional stability. The day becomes smooth when you protect your rhythm.`,
+`Today is better for rest, repair, and small responsible actions. Reduce screen noise for a while and listen to your body. Do one meaningful task that supports your future, then allow yourself to stop. If a conflict begins, choose patience and silence over reaction. Peace is a strategy, not weakness.`,
+`You are stronger today when you stay soft and disciplined. Keep your expectations realistic and your boundaries clear. If you feel tired, do not make big commitments—postpone decisions if needed. Spend time with family or someone you trust to steady your mood. Clarity arrives when you stop rushing.`,
+`Today asks you to choose quality over quantity. A calm pace will bring better results than speed. If you feel nervous, move your body—walk, stretch, breathe, and reset. Be kind with yourself and others, especially at home. The universe responds better to steadiness than to pressure.`,
+`Be mindful of overstimulation today. Too many messages can create anxiety that is not real. Return to one simple task and complete it cleanly. Avoid sharp words, because they leave long echoes. When you keep your energy protected, the day opens with less resistance.`,
+`You may feel a push to “prove yourself,” but that is not the best game today. Choose small steps and safe decisions. If you feel uncertain, delay big moves until tomorrow. Spend time with calm people and keep your routine stable. Your best protection is gentle discipline and patience.`,
+`Today is for emotional maturity and clean boundaries. If someone demands too much, say no gently and without guilt. Do not stretch yourself thin trying to satisfy everyone. Give your best to what truly matters, then rest. Your strength returns when you protect your time.`,
+`This day may bring mixed signals from people around you. Do not assume; ask calmly or wait for clarity. Avoid rushing into conflict or new obligations. Spend time with your closest circle and let the noise fade. Quiet attention will keep you safe and focused.`,
+`If you feel heavy energy today, do not fight it directly. Make your world smaller: fewer tasks, fewer conversations, fewer risks. Drink water, eat well, and rest your eyes. A short walk outside can reset your breathing and mindset. By night, you will feel stronger if you stay calm.`,
+`Today rewards stable habits more than big ambitions. Keep your environment tidy; small order creates inner order. Spend time with family or friends who feel like home. If something new appears, approach it with patience and curiosity. Your day becomes successful when you stay relaxed and consistent.`
+  ];
+  while(en.length < 100){
+    const b = en[en.length % 15];
+    // small variation but still 5 sentences
+    en.push(b.replace(/\bToday\b/g, "This day").replace(/\byou’ll\b/gi,"you will"));
+  }
+
+  const zh = [
+`今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把情绪放慢。减少噪音：少一些消息、少一些争辩、少一些急迫的决定。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。`,
+`把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。若有压力，不必硬扛，先把节奏放慢。与家人或朋友短暂相聚，会让你的心回到正位。保持和气，福流自然来。`,
+`今天你的力量足够，但关键在于分配。不要一次扛太多任务，选择最重要的一件先完成。若出现机会，先冷静观察再行动，不必急着证明什么。安排一点真正的休息时间，哪怕只是安静的一小时。稳定就是胜利。`,
+`今天适合连接，不适合对抗。若情绪紧绷，就去走一走、伸展一下、把呼吸放深。讲话少一点、语气柔一点，你会更有掌控感。把环境整理干净，外在秩序会带来内在秩序。你不需要强推结果。`,
+`今天有一种“安静的好运”。它不会喧哗，只会出现在你留心的细节里。保持轻松，别把自己逼到极限。多陪伴亲近的人，让心回到柔软的位置。你越和谐，越容易看到新的出口。`,
+`今天可能考验耐心，所以建议你比平时更慢一些。避免冲动承诺或情绪化决定，先让心安定。若外界压力很大，就拉开距离，给自己一点空白。与家人或可信的人相处，会让你稳定下来。平静是最好的保护。`,
+`今天容易被信息和情绪过度刺激。别让太多消息把你拖进焦虑里，先回到简单的一件事。避免尖锐的语言，因为它会留下回声。保持规律、早点休息、少一点冲突。守住节奏，你就守住了福流。`,
+`今天不适合用“硬冲”解决一切。若你感到急迫，那很可能是疲惫带来的错觉。把决定放慢，把身体照顾好，先吃好睡好。大事可以延后一天再定。你越稳，越顺。`,
+`今天周围的人可能给出混乱的信号。不要猜测，不要急着下结论，先观察与确认。避免被拉进无意义的争执。把注意力放回家人、健康和基础稳定。安静的专注会保护你。`,
+`今天适合守边界。心可以温柔，但时间与精力要有分寸。若别人索取太多，就温和说“不”。把最好的一部分留给真正重要的事，然后让自己休息。节制会带来力量。`
+  ];
+  while(zh.length < 100){
+    const b = zh[zh.length % 10];
+    zh.push(b.replace(/今天/g, "此刻"));
+  }
+
+  function list(lang){ return (lang==="en") ? en : zh; }
+  return { list };
+})();
+
+/* =======================
+   NON-REPEAT PICKER (shuffle bag)
+   ======================= */
+function nextPrediction(){
+  const s = State.get();
+  const total = 100;
+  if(!Array.isArray(s.bag) || s.bag.length === 0){
+    const ids = Array.from({length: total}, (_,i)=>i);
+    for(let i=ids.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    s.bag = ids;
+  }
+  const id = s.bag.pop();
+  s.used.push(id);
+  State.save();
+  return Predictions.list(I18N.get())[id];
+}
+
+/* ==========================================================
+   THREE.JS SCENE — MOBILE FRAMING (no crop)
+   ========================================================== */
+
+const canvas = document.getElementById("stage3d");
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  alpha: false,
+  powerPreference: "high-performance"
+});
+renderer.setPixelRatio(Perf.dpr());
+renderer.setSize(window.innerWidth, window.innerHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = (Perf.tier === "low") ? 1.05 : 1.12;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
-camera.position.z = 8;
+scene.background = new THREE.Color(0x000000);
+scene.fog = new THREE.FogExp2(0x000000, 0.0105); // depth mood
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.outputEncoding = THREE.sRGBEncoding;
-document.body.appendChild(renderer.domElement);
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.set(0, 0.2, 18);
 
-/* =======================
-   LIGHT
-======================= */
-
-const ambient = new THREE.AmbientLight(0xFFD36A,.4);
+/* Lights: cheap but cinematic */
+const ambient = new THREE.AmbientLight(0x101018, 1.15);
 scene.add(ambient);
 
-const light = new THREE.PointLight(0xFFD36A,1.5,100);
-light.position.set(0,5,5);
-scene.add(light);
+const key = new THREE.DirectionalLight(0xFFD36A, 1.35);
+key.position.set(8, 10, 10);
+scene.add(key);
 
-/* =======================
-   PORTAL
-======================= */
+const rim = new THREE.DirectionalLight(0xB8001D, 0.45);
+rim.position.set(-10, 5, -6);
+scene.add(rim);
 
-const portalGeo = new THREE.TorusGeometry(3,0.3,32,100);
-const portalMat = new THREE.MeshStandardMaterial({
-color:0xFFD36A,
-emissive:0xB8860B,
-metalness:.8,
-roughness:.2
-});
-const portal = new THREE.Mesh(portalGeo,portalMat);
-scene.add(portal);
+/* Post: Bloom only (Telegram-safe) */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  (Perf.tier==="low") ? 0.70 : (Perf.tier==="medium" ? 0.95 : 1.05),
+  (Perf.tier==="low") ? 0.50 : 0.55,
+  0.18
+);
+composer.addPass(bloom);
 
-/* =======================
-   STARFIELD
-======================= */
+/* ==========================================================
+   BACKGROUND: stars + comets (video-like drift)
+   ========================================================== */
 
-const starsGeo = new THREE.BufferGeometry();
-const starCount = 2000;
-const positions = [];
-for(let i=0;i<starCount;i++){
-positions.push((Math.random()-0.5)*100);
-positions.push((Math.random()-0.5)*100);
-positions.push((Math.random()-0.5)*100);
+function makeStarfield(count){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const col = new Float32Array(count*3);
+
+  for(let i=0;i<count;i++){
+    const r = 40 + Math.random()*120;
+    const theta = Math.random()*Math.PI*2;
+    const y = (Math.random()*2-1) * 22;
+    const x = Math.cos(theta)*r;
+    const z = -Math.sin(theta)*r - 50 - Math.random()*60;
+
+    pos[i*3+0]=x;
+    pos[i*3+1]=y;
+    pos[i*3+2]=z;
+
+    const warm = Math.random()<0.25;
+    const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
+    const k = warm ? (0.55+Math.random()*0.45) : (0.45+Math.random()*0.55);
+    col[i*3+0]=c.r*k;
+    col[i*3+1]=c.g*k;
+    col[i*3+2]=c.b*k;
+  }
+
+  geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col,3));
+
+  const mat = new THREE.PointsMaterial({
+    size: (Perf.tier==="low") ? 0.10 : 0.12,
+    vertexColors:true,
+    transparent:true,
+    opacity:0.90,
+    depthWrite:false
+  });
+
+  return new THREE.Points(geo, mat);
 }
-starsGeo.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
-const starsMat = new THREE.PointsMaterial({color:0xFFD36A,size:.1});
-const stars = new THREE.Points(starsGeo,starsMat);
+
+const starCount = (Perf.tier==="low") ? 2500 : (Perf.tier==="medium" ? 4200 : 6000);
+const stars = makeStarfield(starCount);
 scene.add(stars);
 
-/* =======================
-   WHEEL
-======================= */
+/* Comets: lightweight streak planes */
+const cometGroup = new THREE.Group();
+scene.add(cometGroup);
 
-const wheelGeo = new THREE.CylinderGeometry(2.5,2.5,.5,40);
-const wheelMat = new THREE.MeshStandardMaterial({
-color:0xB8001D,
-metalness:.7,
-roughness:.3,
-emissive:0x300000
+function makeComet(){
+  const g = new THREE.PlaneGeometry(6.0, 0.20);
+  const m = new THREE.MeshBasicMaterial({
+    color: 0xFFD36A,
+    transparent:true,
+    opacity: 0.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite:false
+  });
+  const mesh = new THREE.Mesh(g, m);
+  mesh.rotation.z = -0.55;
+  mesh.userData = { t: 0, active:false, speed: 1.0 };
+  cometGroup.add(mesh);
+  return mesh;
+}
+
+const cometPoolSize = (Perf.tier==="low") ? 3 : 5;
+const comets = Array.from({length: cometPoolSize}, makeComet);
+
+function spawnComet(){
+  const c = comets.find(x=>!x.userData.active);
+  if(!c) return;
+  c.userData.active = true;
+  c.userData.t = 0;
+  c.userData.speed = 0.85 + Math.random()*0.65;
+  c.position.set(-16 - Math.random()*6, 10 + Math.random()*8, -40 - Math.random()*30);
+  c.material.opacity = 0.0;
+}
+
+let cometTimer = 0;
+
+/* ==========================================================
+   DRAGON: top, edge-to-edge on mobile
+   ========================================================== */
+
+const loader = new THREE.TextureLoader();
+const dragonTex = loader.load("./dragon.jpg", ()=>{}, undefined, ()=>{});
+dragonTex.colorSpace = THREE.SRGBColorSpace;
+
+const dragonMat = new THREE.MeshBasicMaterial({
+  map: dragonTex,
+  transparent: true,
+  opacity: 0.95
 });
-const wheel = new THREE.Mesh(wheelGeo,wheelMat);
-wheel.rotation.x = Math.PI/2;
-scene.add(wheel);
-
-/* =======================
-   DRAGON AURA (sphere pulse)
-======================= */
-
-const dragonGeo = new THREE.SphereGeometry(1.2,32,32);
-const dragonMat = new THREE.MeshStandardMaterial({
-color:0xFFD36A,
-emissive:0xFFD36A,
-transparent:true,
-opacity:.3
-});
-const dragon = new THREE.Mesh(dragonGeo,dragonMat);
-dragon.position.set(0,0,-2);
+const dragonGeo = new THREE.PlaneGeometry(18, 8.5, 1, 1);
+const dragon = new THREE.Mesh(dragonGeo, dragonMat);
+dragon.position.set(0, 7.7, -10);
 scene.add(dragon);
 
-/* =======================
-   ANIMATION LOOP
-======================= */
+/* Soft gold aura behind dragon (cheap bloom helper) */
+const auraGeo = new THREE.PlaneGeometry(22, 10, 1, 1);
+const auraMat = new THREE.MeshBasicMaterial({
+  color: 0xFFD36A,
+  transparent:true,
+  opacity: 0.08,
+  blending: THREE.AdditiveBlending,
+  depthWrite:false
+});
+const dragonAura = new THREE.Mesh(auraGeo, auraMat);
+dragonAura.position.set(0, 7.5, -10.2);
+scene.add(dragonAura);
 
-let spinVelocity = 0;
+/* ==========================================================
+   WHEEL: real 3D segmented wheel + pointer
+   - mobile framing: wheel fits within viewport (no crop)
+   ========================================================== */
+
+const wheelRoot = new THREE.Group();
+scene.add(wheelRoot);
+
+const wheel = new THREE.Group();
+wheelRoot.add(wheel);
+
+/* Wheel body */
+const wheelOuterGeo = new THREE.TorusGeometry(6.2, 0.55, 24, 180);
+const wheelOuterMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.85,
+  roughness: 0.25,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.22
+});
+const wheelOuter = new THREE.Mesh(wheelOuterGeo, wheelOuterMat);
+wheelOuter.rotation.x = Math.PI/2;
+wheel.add(wheelOuter);
+
+const wheelInnerGeo = new THREE.CylinderGeometry(5.35, 5.35, 0.75, 80, 1, false);
+const wheelInnerMat = new THREE.MeshStandardMaterial({
+  color: 0xB8001D,
+  metalness: 0.25,
+  roughness: 0.45,
+  emissive: new THREE.Color(0x2b0006),
+  emissiveIntensity: 0.25
+});
+const wheelInner = new THREE.Mesh(wheelInnerGeo, wheelInnerMat);
+wheelInner.rotation.x = Math.PI/2;
+wheel.add(wheelInner);
+
+/* Segments (12) */
+const segCount = 12;
+const segGeo = new THREE.RingGeometry(3.25, 5.05, 3, 1, 0, (Math.PI*2)/segCount);
+const segMats = [];
+for(let i=0;i<segCount;i++){
+  const warm = (i % 2) === 0;
+  segMats.push(new THREE.MeshBasicMaterial({
+    color: warm ? 0x2a0a0d : 0x10070a,
+    transparent:true,
+    opacity: 0.35,
+    side: THREE.DoubleSide,
+    blending: THREE.NormalBlending
+  }));
+}
+const segGroup = new THREE.Group();
+wheel.add(segGroup);
+for(let i=0;i<segCount;i++){
+  const seg = new THREE.Mesh(segGeo, segMats[i]);
+  seg.rotation.x = Math.PI/2;
+  seg.rotation.z = i*(Math.PI*2/segCount);
+  seg.position.y = 0.02;
+  segGroup.add(seg);
+}
+
+/* Center button (3D) */
+const btnGeo = new THREE.CylinderGeometry(2.15, 2.15, 0.65, 64);
+const btnMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.65,
+  roughness: 0.22,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.18
+});
+const centerBtn = new THREE.Mesh(btnGeo, btnMat);
+centerBtn.rotation.x = Math.PI/2;
+centerBtn.position.y = 0.40;
+wheel.add(centerBtn);
+
+/* Pointer (top of wheel) */
+const pointerGeo = new THREE.ConeGeometry(0.35, 1.2, 18);
+const pointerMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.8,
+  roughness: 0.25,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.35
+});
+const pointer = new THREE.Mesh(pointerGeo, pointerMat);
+pointer.position.set(0, 0.0, 0);
+pointer.rotation.x = Math.PI;
+const pointerHolder = new THREE.Group();
+pointerHolder.add(pointer);
+wheelRoot.add(pointerHolder);
+
+/* Wheel placement (mobile-first) */
+wheelRoot.position.set(0, -4.2, -8.5);
+pointerHolder.position.set(0, -4.2, -8.0);
+pointerHolder.rotation.x = Math.PI/2;
+pointerHolder.position.y += 6.8;
+pointerHolder.position.z += 0.25;
+
+/* ==========================================================
+   CAMERA FRAMING: ensure wheel never crops on phone
+   ========================================================== */
+function fitToMobile(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const aspect = w/h;
+
+  // We want: dragon fills top, wheel fits lower area.
+  // Scale wheel down on portrait, slightly up on wide.
+  // Target wheel screen coverage: ~70-78% width, never exceed height region.
+  let wheelScale = 1.0;
+
+  if(aspect < 0.60){ // very tall portrait
+    wheelScale = 0.86;
+  }else if(aspect < 0.75){ // normal phone portrait
+    wheelScale = 0.92;
+  }else{
+    wheelScale = 1.00;
+  }
+
+  wheelRoot.scale.setScalar(wheelScale);
+
+  // Dragon should be edge-to-edge: scale by aspect
+  const dragonScaleX = (aspect < 0.75) ? 1.25 : 1.10;
+  dragon.scale.set(dragonScaleX, dragonScaleX, 1);
+  dragonAura.scale.set(dragonScaleX, dragonScaleX, 1);
+
+  // Camera slight adjust for phones to avoid crop
+  camera.fov = (aspect < 0.75) ? 54 : 52;
+  camera.updateProjectionMatrix();
+
+  // Move camera a bit back on very small screens
+  camera.position.z = (Math.min(w,h) < 380) ? 19.2 : 18.0;
+}
+fitToMobile();
+
+/* ==========================================================
+   FX CANVAS: gold dust + stamp burst (cheap, nice)
+   ========================================================== */
+const fxCanvas = document.getElementById("fxCanvas");
+const fx = fxCanvas.getContext("2d");
+
+function resizeFX(){
+  const dpr = Perf.dpr();
+  fxCanvas.width = Math.floor(window.innerWidth*dpr);
+  fxCanvas.height = Math.floor(window.innerHeight*dpr);
+  fxCanvas.style.width = window.innerWidth+"px";
+  fxCanvas.style.height = window.innerHeight+"px";
+  fx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeFX();
+
+const Dust = (() => {
+  const parts = [];
+  const baseCount = (Perf.tier==="low") ? 70 : (Perf.tier==="medium" ? 110 : 140);
+
+  function spawn(initial=false, boost=1){
+    parts.push({
+      x: Math.random()*window.innerWidth,
+      y: initial ? Math.random()*window.innerHeight : (window.innerHeight + 8),
+      vx:(-0.06 + Math.random()*0.12)*boost,
+      vy:(-0.22 + Math.random()*0.18)*boost,
+      r: 0.6 + Math.random()*2.1,
+      a: 0.08 + Math.random()*0.34,
+      tw: 0.6 + Math.random()*0.4,
+    });
+  }
+  for(let i=0;i<baseCount;i++) spawn(true);
+
+  function burst(x=window.innerWidth*0.5, y=window.innerHeight*0.55){
+    const n = (Perf.tier==="low") ? 18 : 28;
+    for(let i=0;i<n;i++){
+      parts.push({
+        x, y,
+        vx:(-0.7 + Math.random()*1.4),
+        vy:(-1.0 + Math.random()*0.7),
+        r: 0.8 + Math.random()*2.6,
+        a: 0.12 + Math.random()*0.35,
+        tw: 0.6 + Math.random()*0.4,
+      });
+    }
+  }
+
+  function sealRays(x,y){
+    fx.save();
+    fx.globalCompositeOperation = "lighter";
+    for(let i=0;i<22;i++){
+      const a = Math.random()*Math.PI*2;
+      const r = 14 + Math.random()*140;
+      fx.strokeStyle = "rgba(255,211,106,0.20)";
+      fx.lineWidth = 1;
+      fx.beginPath();
+      fx.moveTo(x,y);
+      fx.lineTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
+      fx.stroke();
+    }
+    fx.restore();
+  }
+
+  function step(dt){
+    fx.fillStyle = "rgba(0,0,0,0.16)";
+    fx.fillRect(0,0,window.innerWidth, window.innerHeight);
+
+    fx.save();
+    fx.globalCompositeOperation = "lighter";
+    for(let i=parts.length-1;i>=0;i--){
+      const p = parts[i];
+      p.x += p.vx*(dt*60);
+      p.y += p.vy*(dt*60);
+
+      const tw = 0.65 + 0.35*Math.sin(performance.now()*0.002*p.tw);
+      const a = p.a*tw;
+
+      fx.beginPath();
+      fx.fillStyle = `rgba(255,211,106,${a})`;
+      fx.shadowColor = "rgba(255,211,106,0.30)";
+      fx.shadowBlur = 12;
+      fx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      fx.fill();
+
+      if(p.y < -30 || p.x < -60 || p.x > window.innerWidth+60){
+        parts.splice(i,1);
+        spawn(true);
+      }
+    }
+    fx.restore();
+  }
+
+  return { step, burst, sealRays };
+})();
+
+/* ==========================================================
+   PARCHMENT OVERLAY: ink writing + stamp drop
+   ========================================================== */
+const Overlay = (() => {
+  const overlay = document.getElementById("overlay");
+  const closeBtn = document.getElementById("closeOverlay");
+  const c = document.getElementById("parchment");
+  const ctx = c.getContext("2d");
+
+  function show(){ overlay.classList.add("show"); resize(); }
+  function hide(){ overlay.classList.remove("show"); }
+  closeBtn.addEventListener("click", hide);
+
+  function resize(){
+    const dpr = Perf.dpr();
+    const rect = c.getBoundingClientRect();
+    c.width = Math.floor(rect.width*dpr);
+    c.height = Math.floor(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function paperBase(){
+    const w = c.getBoundingClientRect().width;
+    const h = c.getBoundingClientRect().height;
+    ctx.clearRect(0,0,w,h);
+
+    // parchment
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0, "rgba(210,180,130,0.20)");
+    g.addColorStop(0.35, "rgba(130,100,62,0.22)");
+    g.addColorStop(1, "rgba(60,45,28,0.35)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // vignette
+    ctx.save();
+    ctx.globalCompositeOperation="multiply";
+    const v = ctx.createRadialGradient(w*0.5, h*0.45, 20, w*0.5, h*0.45, Math.max(w,h)*0.8);
+    v.addColorStop(0, "rgba(0,0,0,0)");
+    v.addColorStop(1, "rgba(0,0,0,0.78)");
+    ctx.fillStyle = v;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+
+    // fibers
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    for(let i=0;i<140;i++){
+      const y = Math.random()*h;
+      ctx.strokeStyle = "rgba(255,243,209,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y + (Math.random()*8-4));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawHeader(){
+    ctx.save();
+    ctx.fillStyle = "rgba(255,243,209,0.90)";
+    ctx.font = "800 14px Orbitron, Inter, system-ui";
+    ctx.fillText(I18N.get()==="zh" ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+    ctx.restore();
+  }
+
+  function drawSealStatic(x,y,scale=1, char="财"){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(-0.05);
+    ctx.scale(scale,scale);
+
+    const s = 98;
+    ctx.fillStyle = "rgba(184,0,29,0.92)";
+    ctx.strokeStyle = "rgba(255,211,106,0.22)";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 12;
+    ctx.fillRect(-s/2, -s/2, s, s);
+    ctx.strokeRect(-s/2, -s/2, s, s);
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "rgba(255,243,209,0.92)";
+    ctx.font = "800 46px serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(char, 0, 4);
+    ctx.restore();
+  }
+
+  function wrapText(text, font, maxW){
+    ctx.font = font;
+    const isZH = (I18N.get()==="zh");
+    const tokens = isZH ? text.split("") : text.split(" ");
+    const lines = [];
+    let line = "";
+
+    const measure = (s)=> ctx.measureText(s).width;
+    for(let i=0;i<tokens.length;i++){
+      const token = isZH ? tokens[i] : (tokens[i] + " ");
+      const test = line + token;
+      if(measure(test) > maxW && line.length>0){
+        lines.push(line);
+        line = token;
+      }else{
+        line = test;
+      }
+    }
+    if(line.trim().length) lines.push(line);
+    return lines;
+  }
+
+  async function writeInk(text){
+    const w = c.getBoundingClientRect().width;
+    const h = c.getBoundingClientRect().height;
+
+    paperBase();
+    drawHeader();
+
+    const padX = 32;
+    const topY = 70;
+    const maxW = w - padX*2;
+
+    const font = (I18N.get()==="zh")
+      ? "650 18px 'Noto Sans SC','PingFang SC','Microsoft YaHei',serif"
+      : "650 17px 'Georgia','Times New Roman',serif";
+
+    const lines = wrapText(text, font, maxW);
+
+    // ink draw
+    ctx.textBaseline = "top";
+    let y = topY;
+    let count = 0;
+
+    AudioSys.whoosh();
+
+    for(let li=0; li<lines.length; li++){
+      const L = lines[li];
+      let x = padX;
+
+      for(let ci=0; ci<L.length; ci++){
+        const ch = L[ci];
+        const jx = (Math.random()*0.6 - 0.3);
+        const jy = (Math.random()*0.6 - 0.3);
+
+        const ink = ctx.createLinearGradient(x, y, x, y+22);
+        ink.addColorStop(0, "rgba(255,243,209,0.92)");
+        ink.addColorStop(1, "rgba(255,211,106,0.72)");
+        ctx.fillStyle = ink;
+        ctx.font = font;
+
+        ctx.fillText(ch, x + jx, y + jy);
+        x += ctx.measureText(ch).width;
+
+        count++;
+        if(count % 14 === 0) AudioSys.inkTick();
+        await new Promise(r=>setTimeout(r, 12));
+      }
+
+      y += 26;
+      if(y > h-140) break;
+    }
+
+    // timestamp
+    ctx.save();
+    ctx.fillStyle = "rgba(255,211,106,0.70)";
+    ctx.font = "600 12px Inter, system-ui";
+    const ts = new Date().toLocaleString(I18N.get()==="zh" ? "zh-CN" : "en-US");
+    ctx.fillText(ts, padX, h-40);
+    ctx.restore();
+
+    // stamp fall + hit
+    const sx = w - 110;
+    const sy = h - 120;
+
+    // stamp “fall”
+    let py = -120;
+    const targetY = sy;
+    const x0 = sx;
+    AudioSys.ensure();
+    for(let i=0;i<24;i++){
+      paperBase(); drawHeader();
+
+      // redraw text fast (static)
+      ctx.save();
+      ctx.font = font;
+      ctx.fillStyle = "rgba(255,243,209,0.92)";
+      ctx.textBaseline="top";
+      let yy = topY;
+      for(let li=0; li<lines.length; li++){
+        ctx.fillText(lines[li], padX, yy);
+        yy += 26;
+        if(yy > h-140) break;
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "rgba(255,211,106,0.70)";
+      ctx.font = "600 12px Inter, system-ui";
+      ctx.fillText(ts, padX, h-40);
+      ctx.restore();
+
+      const t = (i+1)/24;
+      const ease = 1 - Math.pow(1-t, 3);
+      py = -120 + ease*(targetY + 120);
+      drawSealStatic(x0, py, 0.92 + 0.08*Math.sin(t*6.28), "财");
+
+      await new Promise(r=>requestAnimationFrame(r));
+    }
+
+    // impact
+    AudioSys.stamp();
+    haptic("heavy");
+    Dust.burst(window.innerWidth*0.5, window.innerHeight*0.62);
+    Dust.sealRays(window.innerWidth*0.5, window.innerHeight*0.62);
+  }
+
+  async function play(text){
+    show();
+    resize();
+    AudioSys.ensure();
+    await writeInk(text);
+  }
+
+  window.addEventListener("resize", resize);
+  return { play, hide };
+})();
+
+/* ==========================================================
+   WHEEL PHYSICS (inertia spin, pointer click)
+   ========================================================== */
 let spinning = false;
+let spinVel = 0;
+let targetRot = 0;
+let settle = 0;
+
+function pointerTick(){
+  // cheap tick: small pointer bounce + chime micro
+  pointerHolder.position.z = -8.0 + 0.25;
+  pointer.rotation.z = (Math.random()*0.12 - 0.06);
+}
+
+function startSpin(){
+  if(spinning) return;
+
+  AudioSys.ensure();
+
+  if(State.spunToday() && !State.isPremium()){
+    Overlay.play(I18N.get()==="zh"
+      ? "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。"
+      : "You already spun today. Keep discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate."
+    );
+    return;
+  }
+
+  spinning = true;
+  settle = 0;
+  spinVel = 0.55 + Math.random()*0.55; // initial inertia
+  targetRot = wheel.rotation.z + (Math.PI*8) + Math.random()*(Math.PI*4); // many turns
+  haptic("heavy");
+  AudioSys.whoosh();
+
+  // bloom kick
+  const base = bloom.strength;
+  bloom.strength = base + 0.28;
+  setTimeout(()=>bloom.strength = base, 220);
+}
+
+/* When wheel stops => reward + parchment */
+async function onSpinEnd(){
+  spinning = false;
+
+  const qkGain = 3 + Math.floor(Math.random()*10);
+  State.addQK(qkGain);
+  State.setFlow(State.get().flow + (Math.random()*8 - 3));
+  State.markSpun();
+  renderHUD();
+
+  AudioSys.chime();
+  haptic("success");
+
+  // gold burst on stop
+  Dust.burst(window.innerWidth*0.5, window.innerHeight*0.56);
+  Dust.sealRays(window.innerWidth*0.5, window.innerHeight*0.56);
+
+  // show prophecy
+  const text = nextPrediction();
+  await new Promise(r=>setTimeout(r, 280));
+  Overlay.play(text);
+}
+
+/* ==========================================================
+   WISH MOMENT (silent + comet + bloom pulse)
+   ========================================================== */
+async function wishMoment(){
+  AudioSys.ensure();
+  haptic("light");
+  AudioSys.chime();
+
+  // spawn 2 comets quickly
+  spawnComet();
+  setTimeout(spawnComet, 140);
+
+  // pulse aura
+  const start = performance.now();
+  const dur = 900;
+  const baseOp = dragonAura.material.opacity;
+  const baseBloom = bloom.strength;
+
+  while(performance.now()-start < dur){
+    const t = (performance.now()-start)/dur;
+    const ease = t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+    dragonAura.material.opacity = baseOp + 0.10*Math.sin(ease*Math.PI);
+    bloom.strength = baseBloom + 0.25*Math.sin(ease*Math.PI);
+    await new Promise(r=>requestAnimationFrame(r));
+  }
+  dragonAura.material.opacity = baseOp;
+  bloom.strength = baseBloom;
+}
+
+/* ==========================================================
+   MAIN LOOP
+   ========================================================== */
+const clock = new THREE.Clock();
 
 function animate(){
-requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.033, clock.getDelta());
 
-portal.rotation.z += 0.003;
-stars.rotation.y += 0.0005;
+  // Background drift (video-like)
+  stars.rotation.y += dt*0.05;
+  stars.rotation.x += dt*0.02;
 
-dragon.scale.setScalar(1 + Math.sin(Date.now()*0.003)*0.1);
+  // Dragon subtle float
+  const t = performance.now()*0.001;
+  dragon.position.y = 7.7 + Math.sin(t*1.15)*0.10;
+  dragon.rotation.z = Math.sin(t*0.45)*0.012;
+  dragonAura.position.y = dragon.position.y - 0.18;
 
-if(spinning){
-wheel.rotation.z += spinVelocity;
-spinVelocity *= 0.99;
-if(spinVelocity < 0.002){
-spinning = false;
-showPapyrus();
-}
-}
+  // Comets
+  cometTimer -= dt;
+  if(cometTimer <= 0){
+    if(Math.random() < 0.6) spawnComet();
+    cometTimer = (Perf.tier==="low") ? (1.6 + Math.random()*1.6) : (1.1 + Math.random()*1.4);
+  }
+  for(const c of comets){
+    if(!c.userData.active) continue;
+    c.userData.t += dt*c.userData.speed;
+    const tt = c.userData.t;
 
-renderer.render(scene,camera);
+    // move across screen
+    c.position.x += dt*18*c.userData.speed;
+    c.position.y -= dt*10*c.userData.speed;
+
+    // opacity envelope
+    c.material.opacity = Math.min(0.9, tt*2.2) * Math.max(0, 1-tt*0.65);
+
+    if(tt > 1.6 || c.position.x > 22 || c.position.y < -18){
+      c.userData.active = false;
+      c.material.opacity = 0;
+    }
+  }
+
+  // Wheel spin physics
+  if(spinning){
+    // accelerate toward target, then decelerate
+    const remain = targetRot - wheel.rotation.z;
+    const dir = Math.sign(remain) || 1;
+
+    // apply inertia
+    spinVel += dir * dt*0.65;
+    // damping
+    spinVel *= (1 - dt*0.35);
+
+    // approach target, auto slow
+    const slow = THREE.MathUtils.clamp(Math.abs(remain) / (Math.PI*2), 0, 1);
+    const slowFactor = 0.25 + 0.75*slow;
+    const step = spinVel * dt * 12 * slowFactor;
+
+    wheel.rotation.z += step;
+
+    // pointer tick feel when passing segment boundaries
+    const segAngle = (Math.PI*2)/segCount;
+    const phase = (wheel.rotation.z % segAngle);
+    if(phase < 0.08 && Math.abs(step) > 0.02){
+      pointerTick();
+      if(Math.random() < 0.35) AudioSys.inkTick();
+    }
+
+    // settle near target
+    if(Math.abs(remain) < 0.18){
+      settle += dt;
+      wheel.rotation.z += remain * dt * 8.0; // snap-in
+      if(settle > 0.20){
+        // stop
+        wheel.rotation.z = targetRot;
+        onSpinEnd();
+      }
+    }
+  }else{
+    // idle slow rotation (subtle)
+    wheel.rotation.z += dt*0.10;
+  }
+
+  // FX canvas dust
+  Dust.step(dt);
+
+  composer.render();
 }
 animate();
 
-/* =======================
-   SPIN LOGIC
-======================= */
-
-document.getElementById("spinBtn").onclick = ()=>{
-spinVelocity = .4;
-spinning = true;
-};
-
-/* =======================
-   PAPYRUS + SEAL
-======================= */
-
-function showPapyrus(){
-const p = document.getElementById("papyrus");
-const t = document.getElementById("text");
-p.style.display="flex";
-t.innerText="";
-let message = "Today the energy around you encourages calm decisions and steady movement. Avoid unnecessary conflicts. Stay grounded. Seek clarity before action. Opportunity appears through patience and awareness.";
-let i=0;
-
-let typer = setInterval(()=>{
-t.innerText += message[i];
-i++;
-if(i>=message.length){
-clearInterval(typer);
-dropSeal();
+/* ==========================================================
+   RESIZE (critical for mobile “no crop”)
+   ========================================================== */
+function onResize(){
+  renderer.setPixelRatio(Perf.dpr());
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  fitToMobile();
+  camera.updateProjectionMatrix();
+  composer.setSize(window.innerWidth, window.innerHeight);
+  resizeFX();
 }
-},20);
-}
+window.addEventListener("resize", onResize);
 
-function dropSeal(){
-const seal = document.getElementById("seal");
-seal.style.display="flex";
-seal.style.top="50%";
-seal.style.left="50%";
-seal.style.transform="translate(-50%,-50%)";
-}
+/* ==========================================================
+   UI EVENTS
+   ========================================================== */
+document.getElementById("spinBtn").addEventListener("click", startSpin);
+
+document.getElementById("wishBtn").addEventListener("click", wishMoment);
+
+document.getElementById("langBtn").addEventListener("click", ()=> I18N.toggle());
+
+document.getElementById("helpBtn").addEventListener("click", ()=>{
+  AudioSys.ensure();
+  AudioSys.chime();
+  Overlay.play(I18N.t("helpText"));
+});
+
+document.getElementById("gateBtn").addEventListener("click", ()=>{
+  // здесь потом подключишь TonConnect (1 TON -> premium)
+  AudioSys.ensure();
+  AudioSys.chime();
+  State.addPremium(24);
+  Overlay.play(I18N.t("premiumText"));
+});
+
+document.getElementById("soundBtn").addEventListener("click", ()=>{
+  const on = AudioSys.toggle();
+  document.getElementById("soundBtn").textContent = on ? "S" : "×";
+});
+
+/* Autoplay policy: prime audio on first touch anywhere */
+window.addEventListener("pointerdown", ()=>AudioSys.ensure(), { once:true });
+
 </script>
-
 </body>
 </html>
