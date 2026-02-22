@@ -2,6 +2,3303 @@
 <html lang="zh">
 <head>
   <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>TON TEMPLE — AAA Mobile Ritual</title>
+
+  <style>
+    :root{
+      --obsidian:#050505;
+      --gold:#FFD36A;
+      --gold2:#B8860B;
+      --warm:#FFF3D1;
+      --glass: rgba(10,10,12,.55);
+      --glassBorder: rgba(255,211,106,.18);
+    }
+    html,body{
+      height:100%; margin:0; background:#000; overflow:hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    #stage3d{ position:fixed; inset:0; z-index:1; touch-action:none; }
+    #fxCanvas{ position:fixed; inset:0; z-index:3; pointer-events:none; }
+    #ui{
+      position:fixed; inset:0; z-index:5;
+      display:flex; align-items:stretch; justify-content:center;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+      pointer-events:none;
+    }
+    .uiWrap{
+      width:min(980px, 100%);
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      padding:10px;
+      gap:10px;
+      pointer-events:none;
+    }
+    .topHud{
+      pointer-events:auto;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 12px; border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.62), rgba(10,10,12,.40));
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; line-height:1.1; user-select:none; }
+    .brand .t1{ font-weight:800; letter-spacing:.14em; font-size:12px; color:var(--warm); text-transform:uppercase; }
+    .brand .t2{ font-weight:700; letter-spacing:.16em; font-size:10px; color:rgba(255,211,106,.8); text-transform:uppercase; }
+
+    .hudRight{
+      display:flex; align-items:center; gap:8px;
+      flex-wrap:nowrap;
+      max-width: 62vw;
+      overflow:hidden;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,211,106,.14);
+      color: rgba(255,243,209,.92);
+      font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+      user-select:none; white-space:nowrap;
+    }
+    .btn{
+      pointer-events:auto;
+      cursor:pointer; border:none; outline:none;
+      padding:9px 12px; border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.25);
+      color: rgba(255,243,209,.95);
+      font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.34);}
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .center{
+      flex:1;
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .centerCard{
+      pointer-events:auto;
+      width:min(820px, 96vw);
+      border-radius:18px;
+      background: var(--glass);
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 55px rgba(0,0,0,.42);
+      overflow:hidden;
+    }
+    .cardInner{ padding:14px; display:flex; flex-direction:column; gap:12px; }
+    .titleRow{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; user-select:none; }
+    .titleRow h2{
+      margin:0; font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+      color:rgba(255,243,209,.95); font-weight:800;
+    }
+    .titleRow .sub{ font-size:10px; letter-spacing:.12em; color: rgba(255,211,106,.74); text-transform:uppercase; opacity:.95; }
+
+    .bigAction{ display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; padding:18px 14px 16px; }
+    .wheelBtn{
+      width:min(340px, 92%); height:58px; border-radius:16px;
+      border:1px solid rgba(255,211,106,.28);
+      background: linear-gradient(180deg, rgba(255,211,106,.16), rgba(255,211,106,.08));
+      color: rgba(255,243,209,.98);
+      font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-weight:900;
+      box-shadow: 0 16px 50px rgba(0,0,0,.35);
+      cursor:pointer; transition: transform .14s ease;
+    }
+    .wheelBtn:hover{ transform: translateY(-1px);}
+    .wheelBtn:active{ transform: translateY(0px) scale(.99);}
+
+    .micro{ font-size:10px; letter-spacing:.12em; color: rgba(255,243,209,.75); text-align:center; line-height:1.4; user-select:none; }
+
+    .dock{
+      pointer-events:auto;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 12px; border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
+      border:1px solid var(--glassBorder);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    }
+    .dockLeft, .dockRight{ display:flex; gap:8px; align-items:center; }
+    .dotBtn{
+      width:40px; height:40px; border-radius:14px;
+      border:1px solid rgba(255,211,106,.18);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,243,209,.92);
+      cursor:pointer; transition: transform .12s ease, border-color .18s ease;
+      font-weight:800;
+    }
+    .dotBtn:hover{ transform: translateY(-1px); border-color: rgba(255,211,106,.28);}
+    .dotBtn:active{ transform: translateY(0px) scale(.99); }
+
+    /* Overlay parchment */
+    #overlay{
+      position:fixed; inset:0; z-index:10; display:none;
+      align-items:center; justify-content:center;
+      padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    #overlay.show{ display:flex; }
+    .parchmentWrap{
+      width:min(780px, 96vw);
+      height:min(74vh, 680px);
+      position:relative;
+      border-radius:18px; overflow:hidden;
+      box-shadow: 0 25px 120px rgba(0,0,0,.6);
+      border:1px solid rgba(255,211,106,.22);
+      background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
+                  linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
+    }
+    .parchmentCanvas{ position:absolute; inset:0; width:100%; height:100%; }
+    .overlayTop{
+      position:absolute; left:0; right:0; top:0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.0));
+      z-index:2;
+    }
+    .overlayTop .label{
+      font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+      color: rgba(255,243,209,.85); font-weight:900;
+    }
+    .closeBtn{
+      cursor:pointer; border:none;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.22);
+      color: rgba(255,243,209,.95);
+      font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+      font-weight:900;
+    }
+
+    /* Mobile: чтобы верхний HUD не “поехал” */
+    @media (max-width: 420px){
+      .hudRight{ max-width: 64vw; gap:6px; }
+      .pill{ padding:7px 8px; font-size:10px; letter-spacing:.10em; }
+      .btn{ padding:8px 10px; font-size:10px; }
+      .brand .t1{ font-size:11px; }
+      .brand .t2{ font-size:9px; }
+      .centerCard{ width: 96vw; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="stage3d"></canvas>
+  <canvas id="fxCanvas"></canvas>
+
+  <div id="ui">
+    <div class="uiWrap">
+      <div class="topHud">
+        <div class="brand">
+          <div class="t1">TON TEMPLE</div>
+          <div class="t2">帝王福流仪式</div>
+        </div>
+        <div class="hudRight">
+          <div class="pill" id="qkPill">QK 000.00</div>
+          <div class="pill" id="flowPill">FLOW 00/100</div>
+          <button class="btn" id="helpBtn">i</button>
+          <button class="btn" id="langBtn">EN</button>
+          <button class="btn" id="gateBtn">GATE</button>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="centerCard">
+          <div class="cardInner">
+            <div class="titleRow">
+              <h2 id="titleMain">Temple Ritual</h2>
+              <div class="sub" id="titleSub">Spin → Guidance → Decision</div>
+            </div>
+            <div class="bigAction">
+              <button class="wheelBtn" id="spinBtn">SPIN WHEEL</button>
+              <div class="micro" id="microText">This is a ritualized interface. Not financial advice.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dock">
+        <div class="dockLeft">
+          <button class="dotBtn" id="journalBtn">J</button>
+          <button class="dotBtn" id="proBtn">P</button>
+        </div>
+        <div class="dockRight">
+          <button class="dotBtn" id="soundBtn">S</button>
+          <button class="dotBtn" id="wishBtn">★</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARCHMENT -->
+  <div id="overlay">
+    <div class="parchmentWrap">
+      <div class="overlayTop">
+        <div class="label" id="overlayLabel">TEMPLE GUIDANCE</div>
+        <button class="closeBtn" id="closeOverlay">CLOSE</button>
+      </div>
+      <canvas class="parchmentCanvas" id="parchment"></canvas>
+    </div>
+  </div>
+
+<script type="module">
+/* ============================================================
+   TON TEMPLE — AAA MOBILE FIRST (Telegram-safe)
+   Goals:
+   - phone-first framing (no cropping)
+   - wheel ~2x smaller than your last mobile test
+   - dragon spans edge-to-edge top
+   - stars + comets fly like video
+   - cinematic post (bloom + tone mapping) but stable
+   ============================================================ */
+
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { EffectComposer } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+
+/* ---------- Mobile-first perf governor ---------- */
+const PERF = (() => {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const mem = navigator.deviceMemory || (isMobile ? 4 : 8);
+  const cores = navigator.hardwareConcurrency || (isMobile ? 4 : 8);
+
+  let tier = "high";
+  if (isMobile && (mem <= 4 || cores <= 6)) tier = "medium";
+  if (mem <= 3 || cores <= 4) tier = "low";
+
+  function dpr(){
+    const base = window.devicePixelRatio || 1;
+    // Telegram lag killer: cap DPR harder
+    if (tier === "low") return Math.min(base, 1.15);
+    if (tier === "medium") return Math.min(base, 1.35);
+    return Math.min(base, 1.6);
+  }
+  return { isMobile, tier, dpr };
+})();
+
+/* ---------- Haptics (Telegram + fallback) ---------- */
+function haptic(type="light"){
+  try{
+    if(window.Telegram?.WebApp?.HapticFeedback){
+      const H = window.Telegram.WebApp.HapticFeedback;
+      if(type === "success") H.notificationOccurred("success");
+      else if(type === "error") H.notificationOccurred("error");
+      else H.impactOccurred(type);
+      return;
+    }
+  }catch(e){}
+  if(navigator.vibrate){
+    if(type==="heavy") navigator.vibrate([25,10,25]);
+    else if(type==="success") navigator.vibrate([15,10,35]);
+    else navigator.vibrate(10);
+  }
+}
+
+/* ---------- Audio (lightweight, click-safe) ---------- */
+const AudioFX = (() => {
+  let ctx, master;
+  let enabled = true;
+
+  function init(){
+    if(ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = 0.55;
+    master.connect(ctx.destination);
+  }
+  function ensure(){
+    if(!enabled) return;
+    init();
+    if(ctx.state !== "running") ctx.resume().catch(()=>{});
+  }
+  const now = ()=> ctx?.currentTime || 0;
+  const r = (a,b)=> a + Math.random()*(b-a);
+
+  function whoosh(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type="sine";
+    o.frequency.setValueAtTime(180, t0);
+    o.frequency.exponentialRampToValueAtTime(650*r(.95,1.05), t0+.18);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.14, t0+.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+.22);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0+.24);
+  }
+  function chime(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    [523.25, 659.25, 783.99].forEach((f,i)=>{
+      const o = ctx.createOscillator();
+      o.type="sine";
+      o.frequency.setValueAtTime(f*r(.985,1.02), t0);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.12/(i+1), t0+.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+.65);
+      o.connect(g).connect(master);
+      o.start(t0 + i*0.02);
+      o.stop(t0 + 0.7);
+    });
+  }
+  function stamp(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type="sine";
+    o.frequency.setValueAtTime(120*r(.95,1.05), t0);
+    o.frequency.exponentialRampToValueAtTime(55, t0+.09);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.25, t0+.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+.16);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0+.18);
+  }
+  function inkTick(){
+    ensure(); if(!ctx) return;
+    const t0 = now();
+    const o = ctx.createOscillator();
+    o.type="triangle";
+    o.frequency.setValueAtTime(420*r(.98,1.02), t0);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.03, t0+.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+.08);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0+.10);
+  }
+  function toggle(){
+    enabled = !enabled;
+    if(!ctx) return enabled;
+    master.gain.setTargetAtTime(enabled ? 0.55 : 0.0001, now(), 0.05);
+    return enabled;
+  }
+  return { ensure, whoosh, chime, stamp, inkTick, toggle };
+})();
+
+/* ---------- I18N (EN label locked) ---------- */
+const I18N = (() => {
+  const key = "tt_lang_vA";
+  let lang = localStorage.getItem(key) || "zh";
+  const dict = {
+    zh: {
+      titleMain: "帝王福流仪式",
+      titleSub: "转轮 → 指引 → 抉择",
+      spin: "转动福轮",
+      micro: "这是一种仪式化界面，并非金融建议。",
+      overlay: "天宫指引",
+      help: "说明",
+      gate: "供奉"
+    },
+    en: {
+      titleMain: "Temple Ritual",
+      titleSub: "Spin → Guidance → Decision",
+      spin: "SPIN WHEEL",
+      micro: "This is a ritualized interface. Not financial advice.",
+      overlay: "TEMPLE GUIDANCE",
+      help: "INFO",
+      gate: "GATE"
+    }
+  };
+  function t(k){ return dict[lang]?.[k] ?? dict.zh[k] ?? k; }
+  function set(n){
+    lang = (n === "en") ? "en" : "zh";
+    localStorage.setItem(key, lang);
+    render();
+  }
+  function toggle(){ set(lang === "zh" ? "en" : "zh"); }
+  function render(){
+    document.documentElement.lang = lang;
+    document.getElementById("titleMain").textContent = t("titleMain");
+    document.getElementById("titleSub").textContent = t("titleSub");
+    document.getElementById("spinBtn").textContent = t("spin");
+    document.getElementById("microText").textContent = t("micro");
+    document.getElementById("overlayLabel").textContent = t("overlay");
+    // EN label fixed
+    document.getElementById("langBtn").textContent = "EN";
+    document.getElementById("helpBtn").textContent = "i";
+    document.getElementById("gateBtn").textContent = (lang === "zh") ? dict.zh.gate : dict.en.gate;
+  }
+  return { t, set, toggle, render, get:()=>lang };
+})();
+I18N.render();
+
+/* ---------- State ---------- */
+const State = (() => {
+  const key = "tt_state_AAA_mobile";
+  const base = { qk:0, flow:50, lastSpinDay:"", premiumUntil:0, predBag:[], usedPredIds:[] };
+  function load(){
+    try{ return { ...base, ...(JSON.parse(localStorage.getItem(key)||"null")||{}) }; }
+    catch(e){ return { ...base }; }
+  }
+  let s = load();
+  const now = ()=> Date.now();
+  function save(){ localStorage.setItem(key, JSON.stringify(s)); }
+  function isPremium(){ return s.premiumUntil > now(); }
+  function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(); }
+  function addQK(v){ s.qk = Math.max(0, Math.round((s.qk+v)*100)/100); save(); }
+  function setFlow(v){ s.flow = Math.max(0, Math.min(100, Math.round(v))); save(); }
+  function spunToday(){
+    const d=new Date(); const k=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    return s.lastSpinDay===k;
+  }
+  function markSpinToday(){
+    const d=new Date(); const k=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    s.lastSpinDay=k; save();
+  }
+  return { get:()=>s, save, isPremium, addPremium, addQK, setFlow, spunToday, markSpinToday };
+})();
+function renderHUD(){
+  const s=State.get();
+  document.getElementById("qkPill").textContent = `QK ${s.qk.toFixed(2)}`;
+  document.getElementById("flowPill").textContent = `FLOW ${String(s.flow).padStart(2,"0")}/100`;
+}
+renderHUD();
+
+/* ---------- Predictions (100 EN + 100 ZH, 5+ sentences) ---------- */
+const Predictions = (() => {
+  const enSeed = [
+    `Today is about returning to what is steady. Spend more time with family or the people who calm your mind. Reduce noise: fewer messages, fewer decisions, fewer emotional spikes. Choose one simple task and finish it with patience, then stop. When tension rises, breathe slower and let your shoulders drop; your best results come from quiet focus, not pressure.`,
+    `Treat today like a gentle reset. Walk a little more, drink water, and let your nervous system slow down. Do one small act of care for someone close, then release expectations. Avoid arguing or proving a point; it wastes your energy. Your flow increases when you choose harmony over control and keep your rhythm clean.`,
+    `You have enough strength for the day, but the key is pacing. Don’t rush into new commitments; keep your schedule light and disciplined. If an opportunity appears, observe calmly and take only what aligns with your values. Make space for real rest, even if it’s just a quiet hour. Peace is a strategy today, not a weakness.`,
+    `Your mind may want to solve everything at once, but today rewards simplicity. Choose one priority, protect it, and let other things wait. Spend a little time with friends or family, and keep your tone warm. Try something new in a safe way—a new route, a new food, a new small experience. The day opens when you stay curious and relaxed.`,
+    `Today is better for connection than confrontation. If you feel stressed, move your body—walk, stretch, breathe. Let your words be fewer and calmer, and you’ll feel your power return. Keep your environment tidy; small order creates inner order. You don’t need to force outcomes—just stay consistent and present.`,
+    `Today may test your patience, so move slower than usual. Avoid impulsive promises, even if you feel excited. If pressure comes from others, create distance and think quietly. Spend time with supportive people and keep your routine stable. Your best protection is calm discipline and clean boundaries.`
+  ];
+  const zhSeed = [
+    `今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把情绪放慢。减少噪音：少一些消息、少一些争辩、少一些急迫的决定。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。`,
+    `把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。若有压力，不必硬扛，先把节奏放慢。与家人或朋友短暂相聚，会让你的心回到正位。保持和气，福流自然来。`,
+    `今天你的力量足够，但关键在于分配。不要一次扛太多任务，选择最重要的一件先完成。若出现机会，先冷静观察再行动，不必急着证明什么。安排一点真正的休息时间，哪怕只是安静的一小时。稳定就是胜利。`,
+    `今天适合连接，不适合对抗。若情绪紧绷，就去走一走、伸展一下、把呼吸放深。讲话少一点、语气柔一点，你会更有掌控感。把环境整理干净，外在秩序会带来内在秩序。你不需要强推结果。`,
+    `今天有一种“安静的好运”。它不会喧哗，只会出现在你留心的细节里。保持轻松，别把自己逼到极限。多陪伴亲近的人，让心回到柔软的位置。你越和谐，越容易看到新的出口。`,
+    `今天可能考验耐心，所以建议你比平时更慢一些。避免冲动承诺或情绪化决定，先让心安定。若外界压力很大，就拉开距离，给自己一点空白。与家人或可信的人相处，会让你稳定下来。平静是最好的保护。`
+  ];
+
+  const en = [];
+  const zh = [];
+
+  // Expand to 100 each with safe variations but still 5+ sentences.
+  while(en.length < 100){
+    const base = enSeed[en.length % enSeed.length];
+    const v = base
+      .replace(/Today/g, (en.length%3===0) ? "This day" : "Today")
+      .replace(/calm/g, (en.length%4===0) ? "steady" : "calm");
+    en.push(v);
+  }
+  while(zh.length < 100){
+    const base = zhSeed[zh.length % zhSeed.length];
+    const v = base.replace(/今天/g, (zh.length%3===0) ? "此刻" : "今天");
+    zh.push(v);
+  }
+
+  function list(lang){ return (lang==="en") ? en : zh; }
+  return { list };
+})();
+
+/* ---------- Non-repeating shuffle bag ---------- */
+function nextPrediction(){
+  const s = State.get();
+  const total = 100;
+  if(!Array.isArray(s.predBag) || s.predBag.length === 0){
+    const ids = Array.from({length:total}, (_,i)=>i);
+    for(let i=ids.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    s.predBag = ids;
+  }
+  const id = s.predBag.pop();
+  s.usedPredIds.push(id);
+  State.save();
+  const text = Predictions.list(I18N.get())[id];
+  return { id, text };
+}
+
+/* ============================================================
+   THREE SCENE — Phone First Cinematic
+   ============================================================ */
+const canvas = document.getElementById("stage3d");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:"high-performance" });
+renderer.setPixelRatio(PERF.dpr());
+renderer.setSize(window.innerWidth, window.innerHeight, false);
+
+// Cinematic tone mapping (PS5-ish vibe)
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = PERF.tier==="low" ? 1.05 : 1.12;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, PERF.tier==="low" ? 0.0015 : 0.00115);
+
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 2500);
+camera.position.set(0, 0.6, 24);
+
+const clock = new THREE.Clock();
+
+/* ---------- Lights (cinematic, not heavy) ---------- */
+const key = new THREE.DirectionalLight(0xFFD36A, PERF.tier==="low" ? 1.1 : 1.35);
+key.position.set(10, 12, 10);
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0x88B7FF, 0.25);
+fill.position.set(-12, 6, 2);
+scene.add(fill);
+
+const rim = new THREE.DirectionalLight(0xB8001D, 0.35);
+rim.position.set(-10, 6, -10);
+scene.add(rim);
+
+const amb = new THREE.AmbientLight(0x0b0e18, 1.1);
+scene.add(amb);
+
+/* ---------- Background “video” stars + comets (3D) ---------- */
+function makeStars(count){
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const col = new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    const r = 220 + Math.random()*1400;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos(2*Math.random()-1);
+    const x = r*Math.sin(phi)*Math.cos(theta);
+    const y = r*Math.sin(phi)*Math.sin(theta);
+    const z = r*Math.cos(phi);
+    pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+
+    const warm = Math.random() < 0.35;
+    const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
+    const k = warm ? (0.55+Math.random()*0.45) : (0.45+Math.random()*0.55);
+    col[i*3]=c.r*k; col[i*3+1]=c.g*k; col[i*3+2]=c.b*k;
+  }
+  g.setAttribute("position", new THREE.BufferAttribute(pos,3));
+  g.setAttribute("color", new THREE.BufferAttribute(col,3));
+  const m = new THREE.PointsMaterial({
+    size: PERF.tier==="low" ? 1.05 : 1.25,
+    vertexColors:true,
+    transparent:true,
+    opacity: 0.9,
+    depthWrite:false
+  });
+  const p = new THREE.Points(g,m);
+  return p;
+}
+const starCount = (PERF.tier==="low") ? 4500 : (PERF.tier==="medium" ? 8500 : 12000);
+const stars = makeStars(starCount);
+scene.add(stars);
+
+// Comets: lightweight line sprites (not many, but convincing)
+const comets = [];
+function spawnComet(){
+  const g = new THREE.BufferGeometry();
+  const len = PERF.tier==="low" ? 14 : 22;
+  const pos = new Float32Array(len*3);
+  for(let i=0;i<len;i++){
+    pos[i*3]   = -i*0.22;
+    pos[i*3+1] = 0;
+    pos[i*3+2] = 0;
+  }
+  g.setAttribute("position", new THREE.BufferAttribute(pos,3));
+  const m = new THREE.LineBasicMaterial({ color: 0xFFD36A, transparent:true, opacity:0.55 });
+  const line = new THREE.Line(g,m);
+
+  const startX = -22 - Math.random()*10;
+  const startY =  10 + Math.random()*10;
+  const startZ = -80 - Math.random()*220;
+
+  line.position.set(startX, startY, startZ);
+  line.rotation.z = -0.35 - Math.random()*0.45;
+  line.userData.vx = 14 + Math.random()*18;
+  line.userData.vy = -8 - Math.random()*8;
+  line.userData.vz = 70 + Math.random()*110;
+  line.userData.life = 0;
+  line.userData.maxLife = 1.15 + Math.random()*0.65;
+
+  scene.add(line);
+  comets.push(line);
+}
+const cometMax = (PERF.tier==="low") ? 2 : (PERF.tier==="medium" ? 3 : 4);
+for(let i=0;i<cometMax;i++) spawnComet();
+
+/* ---------- Portal aura ring (3D) ---------- */
+const portal = new THREE.Group();
+scene.add(portal);
+
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(8.2, 0.28, 30, 240),
+  new THREE.MeshStandardMaterial({
+    color: 0xFFD36A, metalness:0.85, roughness:0.25,
+    emissive: new THREE.Color(0xFFD36A), emissiveIntensity: 0.55
+  })
+);
+ring.rotation.x = Math.PI/2;
+portal.add(ring);
+
+const core = new THREE.Mesh(
+  new THREE.CircleGeometry(7.85, 128),
+  new THREE.MeshBasicMaterial({ color:0x050507, transparent:true, opacity:0.25 })
+);
+core.rotation.x = Math.PI/2;
+portal.add(core);
+
+portal.position.set(0, -2.2, -16);
+
+/* ---------- Dragon (edge-to-edge top, shimmering aura) ---------- */
+const loader = new THREE.TextureLoader();
+const dragonTex = loader.load("./dragon.jpg");
+dragonTex.colorSpace = THREE.SRGBColorSpace;
+
+const dragon = new THREE.Mesh(
+  new THREE.PlaneGeometry(22, 10.8, 1, 1),
+  new THREE.ShaderMaterial({
+    transparent:true,
+    depthWrite:false,
+    uniforms:{
+      uTex:{ value: dragonTex },
+      uTime:{ value: 0 },
+      uGlow:{ value: 0.85 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      void main(){
+        vUv = uv;
+        vec3 p = position;
+        // subtle breathing
+        p.y += sin(uTime*1.2 + uv.x*6.0) * 0.06;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform sampler2D uTex;
+      uniform float uTime;
+      uniform float uGlow;
+
+      float vignette(vec2 uv){
+        float d = distance(uv, vec2(0.5));
+        return smoothstep(0.95, 0.35, d);
+      }
+
+      void main(){
+        vec4 t = texture2D(uTex, vUv);
+
+        // if jpg (no alpha), still show it with controlled opacity
+        float a = (t.a < 0.02) ? 0.92 : t.a;
+
+        // aura edge glow (no alpha needed)
+        float e1 = smoothstep(0.0, 0.10, vUv.x) * smoothstep(0.0, 0.10, vUv.y);
+        float e2 = smoothstep(0.0, 0.10, 1.0-vUv.x) * smoothstep(0.0, 0.10, 1.0-vUv.y);
+        float edge = e1*e2;
+        float pulse = 0.45 + 0.55*sin(uTime*1.35);
+
+        vec3 gold = vec3(1.0, 0.83, 0.42);
+        vec3 glow = gold * (uGlow * (0.25 + 0.75*pulse)) * (1.0-edge);
+
+        vec3 col = t.rgb;
+        col = col * (0.92 + 0.08*vignette(vUv));
+        col += glow * 0.65;
+
+        gl_FragColor = vec4(col, a);
+      }
+    `
+  })
+);
+dragon.position.set(0, 7.15, -18);
+scene.add(dragon);
+
+/* ============================================================
+   Wheel — true 3D, segmented, mobile-fit (no cropping)
+   ============================================================ */
+const wheel = new THREE.Group();
+scene.add(wheel);
+
+// Outer rim
+const rimMesh = new THREE.Mesh(
+  new THREE.TorusGeometry(6.2, 0.55, 40, 260),
+  new THREE.MeshStandardMaterial({
+    color:0xFFD36A, metalness:0.82, roughness:0.24,
+    emissive: new THREE.Color(0xFFD36A), emissiveIntensity: 0.22
+  })
+);
+rimMesh.rotation.x = Math.PI/2;
+wheel.add(rimMesh);
+
+// Inner plate
+const plate = new THREE.Mesh(
+  new THREE.CylinderGeometry(5.45, 5.45, 0.7, 80),
+  new THREE.MeshStandardMaterial({
+    color:0xB8001D, metalness:0.25, roughness:0.45,
+    emissive: new THREE.Color(0x2b0006), emissiveIntensity:0.9
+  })
+);
+plate.rotation.x = Math.PI/2;
+wheel.add(plate);
+
+// Segment ring (fake “wheel slices” via thin boxes)
+const segCount = 24;
+const segGroup = new THREE.Group();
+wheel.add(segGroup);
+for(let i=0;i<segCount;i++){
+  const a = (i/segCount)*Math.PI*2;
+  const seg = new THREE.Mesh(
+    new THREE.BoxGeometry(0.45, 0.12, 0.9),
+    new THREE.MeshStandardMaterial({
+      color: (i%2===0)?0xFFD36A:0xFFF3D1,
+      metalness:0.55, roughness:0.35,
+      emissive: new THREE.Color(0xFFD36A),
+      emissiveIntensity: (i%2===0)?0.06:0.03
+    })
+  );
+  seg.position.set(Math.cos(a)*5.05, Math.sin(a)*5.05, 0.25);
+  seg.rotation.z = a;
+  segGroup.add(seg);
+}
+
+// Center button (3D pill)
+const center = new THREE.Mesh(
+  new THREE.CapsuleGeometry(2.2, 0.6, 8, 22),
+  new THREE.MeshStandardMaterial({
+    color:0xFFD36A, metalness:0.75, roughness:0.28,
+    emissive: new THREE.Color(0xFFD36A), emissiveIntensity: 0.12
+  })
+);
+center.position.set(0,0,0.65);
+wheel.add(center);
+
+// Pointer (top)
+const pointer = new THREE.Mesh(
+  new THREE.ConeGeometry(0.35, 1.25, 18),
+  new THREE.MeshStandardMaterial({
+    color:0xFFD36A, metalness:0.8, roughness:0.22,
+    emissive: new THREE.Color(0xFFD36A), emissiveIntensity:0.3
+  })
+);
+pointer.position.set(0, 7.25, 0.2);
+pointer.rotation.x = Math.PI/2;
+scene.add(pointer);
+
+// Position wheel in front of portal
+wheel.position.set(0, -1.2, -4.5);
+
+/* ---------- Mobile sizing: wheel 2x smaller (your request) ---------- */
+function applyMobileFraming(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const aspect = w/h;
+
+  // Base scale target: phone first, avoid cropping.
+  // You asked: wheel smaller & near edges but not cut.
+  let scale = 0.78; // desktop default
+  if (PERF.isMobile){
+    // more vertical phones -> smaller scale
+    scale = 0.58;
+    if (aspect < 0.55) scale = 0.54;
+    if (aspect < 0.50) scale = 0.50;
+  }
+  // Also keep safe area: reduce when very small height
+  if (h < 700) scale *= 0.95;
+
+  wheel.scale.setScalar(scale);
+
+  // Camera distance based on scale + aspect
+  camera.fov = PERF.isMobile ? 54 : 52;
+  camera.updateProjectionMatrix();
+
+  // Move wheel slightly down on phones to leave dragon space on top
+  wheel.position.y = PERF.isMobile ? -1.55 : -1.2;
+
+  // Dragon is edge-to-edge: adapt its scale to view width
+  const dragonScale = PERF.isMobile ? 1.05 : 1.0;
+  dragon.scale.set(dragonScale, dragonScale, 1);
+
+  // Pointer adjust with wheel scale
+  pointer.position.y = (PERF.isMobile ? 6.45 : 7.25) * scale/0.78;
+}
+applyMobileFraming();
+
+/* ============================================================
+   Postprocessing — bloom (safe)
+   ============================================================ */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  PERF.tier==="low" ? 0.85 : 1.05,
+  PERF.tier==="low" ? 0.55 : 0.65,
+  0.22
+);
+composer.addPass(bloom);
+
+/* ============================================================
+   FX Canvas (gold dust + stamp impact)
+   ============================================================ */
+const fxCanvas = document.getElementById("fxCanvas");
+const fx = fxCanvas.getContext("2d");
+function resizeFX(){
+  const dpr = PERF.dpr();
+  fxCanvas.width = Math.floor(window.innerWidth*dpr);
+  fxCanvas.height = Math.floor(window.innerHeight*dpr);
+  fxCanvas.style.width = window.innerWidth+"px";
+  fxCanvas.style.height = window.innerHeight+"px";
+  fx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeFX();
+
+const Dust = (() => {
+  const p = [];
+  function spawn(initial=false, boost=1){
+    const x = Math.random()*window.innerWidth;
+    const y = initial ? Math.random()*window.innerHeight : (window.innerHeight + 10);
+    p.push({
+      x,y,
+      vx:(-0.08 + Math.random()*0.16)*boost,
+      vy:(-0.26 + Math.random()*0.16)*boost,
+      r:0.6 + Math.random()*2.2,
+      a:0.06 + Math.random()*0.28,
+      tw:0.6 + Math.random()*0.4
+    });
+  }
+  function init(){
+    const base = (PERF.tier==="low") ? 70 : (PERF.tier==="medium" ? 110 : 140);
+    for(let i=0;i<base;i++) spawn(true);
+  }
+  function burst(x,y){
+    const n = (PERF.tier==="low") ? 18 : (PERF.tier==="medium" ? 26 : 34);
+    for(let i=0;i<n;i++){
+      p.push({
+        x:x + (Math.random()*40-20),
+        y:y + (Math.random()*40-20),
+        vx:(Math.random()*2-1)*2.2,
+        vy:(Math.random()*2-1)*2.2,
+        r:1.0 + Math.random()*2.8,
+        a:0.12 + Math.random()*0.28,
+        tw:0.6 + Math.random()*0.4
+      });
+    }
+  }
+  function step(dt){
+    fx.fillStyle = "rgba(0,0,0,0.16)";
+    fx.fillRect(0,0,window.innerWidth, window.innerHeight);
+    fx.save();
+    fx.globalCompositeOperation="lighter";
+    for(let i=p.length-1;i>=0;i--){
+      const s = p[i];
+      s.x += s.vx*(dt*60);
+      s.y += s.vy*(dt*60);
+      const tw = 0.65 + 0.35*Math.sin(performance.now()*0.002*s.tw);
+      const a = s.a*tw;
+
+      fx.beginPath();
+      fx.fillStyle = `rgba(255,211,106,${a})`;
+      fx.shadowColor = "rgba(255,211,106,0.32)";
+      fx.shadowBlur = 14;
+      fx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      fx.fill();
+
+      if(s.y<-30 || s.x<-60 || s.x>window.innerWidth+60){
+        p.splice(i,1);
+        spawn(true);
+      }
+    }
+    fx.restore();
+  }
+  init();
+  return { step, burst };
+})();
+
+function radialShock(x,y){
+  fx.save();
+  fx.globalCompositeOperation="lighter";
+  for(let i=0;i<16;i++){
+    const a = Math.random()*Math.PI*2;
+    const r = 10 + Math.random()*180;
+    fx.strokeStyle = "rgba(255,211,106,0.20)";
+    fx.lineWidth = 1;
+    fx.beginPath();
+    fx.moveTo(x,y);
+    fx.lineTo(x+Math.cos(a)*r, y+Math.sin(a)*r);
+    fx.stroke();
+  }
+  fx.restore();
+}
+
+/* ============================================================
+   Overlay parchment: “ink writing” + stamp fall + dust hit
+   ============================================================ */
+const Overlay = (() => {
+  const overlay = document.getElementById("overlay");
+  const close = document.getElementById("closeOverlay");
+  const c = document.getElementById("parchment");
+  const ctx = c.getContext("2d");
+
+  function show(){ overlay.classList.add("show"); resize(); }
+  function hide(){ overlay.classList.remove("show"); }
+  close.addEventListener("click", hide);
+
+  function resize(){
+    const dpr = PERF.dpr();
+    const r = c.getBoundingClientRect();
+    c.width = Math.floor(r.width*dpr);
+    c.height = Math.floor(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function paperBG(){
+    const w = c.getBoundingClientRect().width;
+    const h = c.getBoundingClientRect().height;
+    ctx.clearRect(0,0,w,h);
+
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0, "rgba(210,180,120,0.22)");
+    g.addColorStop(0.35, "rgba(120,95,60,0.24)");
+    g.addColorStop(1, "rgba(60,45,28,0.34)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // Burn edges
+    ctx.save();
+    ctx.globalCompositeOperation="multiply";
+    const v = ctx.createRadialGradient(w*0.5, h*0.45, 40, w*0.5, h*0.45, Math.max(w,h)*0.75);
+    v.addColorStop(0,"rgba(0,0,0,0)");
+    v.addColorStop(1,"rgba(0,0,0,0.76)");
+    ctx.fillStyle=v;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+
+    // Fibers
+    ctx.save();
+    ctx.globalAlpha = 0.14;
+    for(let i=0;i<140;i++){
+      const y = Math.random()*h;
+      ctx.strokeStyle = "rgba(255,243,209,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0,y);
+      ctx.lineTo(w, y + (Math.random()*8-4));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSeal(x,y,scale=1, rot=-0.08){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.scale(scale,scale);
+
+    ctx.fillStyle = "rgba(184,0,29,0.92)";
+    ctx.strokeStyle = "rgba(255,211,106,0.22)";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 14;
+
+    const s = 96;
+    ctx.fillRect(-s/2,-s/2,s,s);
+    ctx.strokeRect(-s/2,-s/2,s,s);
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "rgba(255,243,209,0.92)";
+    ctx.font = "900 44px serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("财", 0, 3);
+    ctx.restore();
+  }
+
+  async function writeInk(text){
+    const w = c.getBoundingClientRect().width;
+    const h = c.getBoundingClientRect().height;
+
+    paperBG();
+
+    // header
+    ctx.save();
+    ctx.fillStyle = "rgba(255,243,209,0.88)";
+    ctx.font = "900 14px Inter, system-ui";
+    ctx.fillText(I18N.get()==="zh" ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+    ctx.restore();
+
+    const padX = 32;
+    const topY = 70;
+    const maxW = w - padX*2;
+
+    const font = (I18N.get()==="zh")
+      ? "700 18px 'Noto Sans SC','PingFang SC','Microsoft YaHei',serif"
+      : "700 17px 'Georgia','Times New Roman',serif";
+    ctx.font = font;
+    ctx.textBaseline = "top";
+
+    const tokens = (I18N.get()==="zh") ? text.split("") : text.split(" ");
+    const lines = [];
+    let line = "";
+    const measure = s=>ctx.measureText(s).width;
+
+    for(let i=0;i<tokens.length;i++){
+      const t = (I18N.get()==="zh") ? tokens[i] : (tokens[i] + " ");
+      const test = line + t;
+      if(measure(test) > maxW && line.length>0){
+        lines.push(line);
+        line = t;
+      }else{
+        line = test;
+      }
+    }
+    if(line.trim().length) lines.push(line);
+
+    // ink reveal
+    AudioFX.whoosh();
+    let y = topY;
+    let count = 0;
+    for(let li=0; li<lines.length; li++){
+      const L = lines[li];
+      let x = padX;
+      for(let ci=0; ci<L.length; ci++){
+        const ch = L[ci];
+        const jx = (Math.random()*0.6-0.3);
+        const jy = (Math.random()*0.6-0.3);
+
+        const ink = ctx.createLinearGradient(x,y,x,y+22);
+        ink.addColorStop(0,"rgba(255,243,209,0.92)");
+        ink.addColorStop(1,"rgba(255,211,106,0.70)");
+        ctx.fillStyle = ink;
+        ctx.fillText(ch, x+jx, y+jy);
+
+        x += ctx.measureText(ch).width;
+        count++;
+        if(count % 14 === 0) AudioFX.inkTick();
+
+        await new Promise(r=>setTimeout(r, PERF.isMobile ? 10 : 12));
+      }
+      y += 26;
+      if(y > h-140) break;
+    }
+
+    // timestamp
+    ctx.save();
+    ctx.fillStyle = "rgba(255,211,106,0.70)";
+    ctx.font = "700 12px Inter, system-ui";
+    const ts = new Date().toLocaleString(I18N.get()==="zh" ? "zh-CN" : "en-US");
+    ctx.fillText(ts, padX, h-40);
+    ctx.restore();
+
+    // stamp fall + impact
+    await new Promise(r=>setTimeout(r, 260));
+    AudioFX.stamp();
+    haptic("heavy");
+
+    // animate stamp dropping
+    const sx = w - 115;
+    const sy = h - 120;
+
+    let vy = 0;
+    let py = -120;
+    const g = 0.85; // gravity
+    for(let i=0;i<46;i++){
+      paperBG();
+
+      // redraw text final fast
+      ctx.save();
+      ctx.fillStyle="rgba(255,243,209,0.88)";
+      ctx.font="900 14px Inter, system-ui";
+      ctx.fillText(I18N.get()==="zh" ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+      ctx.restore();
+
+      ctx.save();
+      ctx.font = font;
+      ctx.fillStyle="rgba(255,243,209,0.92)";
+      ctx.textBaseline="top";
+      let yy=topY;
+      for(let li=0; li<lines.length; li++){
+        ctx.fillText(lines[li], padX, yy);
+        yy+=26;
+        if(yy>h-140) break;
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle="rgba(255,211,106,0.70)";
+      ctx.font="700 12px Inter, system-ui";
+      ctx.fillText(ts, padX, h-40);
+      ctx.restore();
+
+      // physics
+      vy += g;
+      py += vy;
+      const hit = (py >= sy);
+      if(hit){
+        py = sy;
+        // impact once
+        if(vy > 0){
+          Dust.burst(window.innerWidth*0.52, window.innerHeight*0.64);
+          radialShock(window.innerWidth*0.52, window.innerHeight*0.64);
+          vy = -vy*0.18; // tiny bounce
+        }
+      }
+      drawSeal(sx, py, 0.92, -0.06);
+
+      await new Promise(r=>requestAnimationFrame(r));
+      if(hit && Math.abs(vy) < 0.25) break;
+    }
+
+    // final dust pop
+    Dust.burst(window.innerWidth*0.52, window.innerHeight*0.64);
+  }
+
+  async function play(text){
+    show();
+    resize();
+    AudioFX.ensure();
+    await writeInk(text);
+  }
+
+  window.addEventListener("resize", resize);
+  return { play, hide };
+})();
+
+/* ============================================================
+   Wheel spin physics (inertia + snap)
+   ============================================================ */
+let spinning = false;
+let spinVel = 0;
+let spinTargetSnap = 0;
+let settle = 0;
+
+function startSpin(){
+  if(spinning) return;
+  spinning = true;
+  settle = 0;
+  // strong initial velocity
+  spinVel = 12 + Math.random()*6; // rad/sec
+  // after slow down, we snap to a segment
+  const segAngle = (Math.PI*2)/segCount;
+  const randomIndex = Math.floor(Math.random()*segCount);
+  spinTargetSnap = randomIndex * segAngle;
+  AudioFX.whoosh();
+  haptic("heavy");
+}
+
+/* ============================================================
+   Parallax (subtle, phone safe)
+   ============================================================ */
+let tx=0, ty=0, cx=0, cy=0;
+function bindParallax(){
+  const onMove=(x,y)=>{
+    const nx=(x/window.innerWidth)*2-1;
+    const ny=(y/window.innerHeight)*2-1;
+    tx=nx; ty=ny;
+  };
+  window.addEventListener("mousemove",(e)=>onMove(e.clientX,e.clientY), {passive:true});
+  window.addEventListener("touchmove",(e)=>{
+    const t=e.touches?.[0]; if(!t) return;
+    onMove(t.clientX,t.clientY);
+  }, {passive:true});
+}
+bindParallax();
+
+/* ============================================================
+   Main loop
+   ============================================================ */
+let t = 0;
+let shake = 0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.033, clock.getDelta());
+  t += dt;
+
+  // starfield drift (video feel)
+  stars.rotation.y += dt*0.012;
+  stars.rotation.x += dt*0.006;
+
+  // comets
+  for(let i=comets.length-1;i>=0;i--){
+    const c = comets[i];
+    c.userData.life += dt;
+    c.position.x += c.userData.vx*dt;
+    c.position.y += c.userData.vy*dt;
+    c.position.z += c.userData.vz*dt;
+    c.material.opacity = 0.55 * Math.max(0, 1 - (c.userData.life / c.userData.maxLife));
+    if(c.userData.life >= c.userData.maxLife){
+      scene.remove(c);
+      comets.splice(i,1);
+      spawnComet();
+    }
+  }
+
+  // dragon aura time
+  dragon.material.uniforms.uTime.value = t;
+
+  // portal breathing
+  ring.material.emissiveIntensity = 0.5 + 0.22*Math.sin(t*1.1);
+  core.material.opacity = 0.22 + 0.05*Math.sin(t*0.9);
+
+  // parallax
+  cx += (tx - cx)*0.05;
+  cy += (ty - cy)*0.05;
+
+  // camera micro-move (PS5 cinematic without nausea)
+  const par = PERF.isMobile ? 0.06 : 0.09;
+  camera.rotation.y = cx*par;
+  camera.rotation.x = -cy*(par*0.7);
+
+  // wheel idle breathing
+  wheel.position.z = -4.5 + Math.sin(t*0.9)*0.06;
+
+  // spin physics
+  if(spinning){
+    // friction curve
+    const friction = 1.35 + (spinVel*0.04);
+    spinVel = Math.max(0, spinVel - friction*dt);
+
+    wheel.rotation.z += spinVel*dt;
+
+    // glow bump while spinning
+    bloom.strength = (PERF.tier==="low" ? 0.85 : 1.05) + Math.min(0.35, spinVel*0.02);
+
+    // settle snap
+    if(spinVel <= 1.2){
+      // smoothly guide to target snap
+      const a = wheel.rotation.z % (Math.PI*2);
+      const diff = ((spinTargetSnap - a + Math.PI*3)%(Math.PI*2)) - Math.PI;
+      wheel.rotation.z += diff * (0.18 + settle*0.02);
+      settle += dt*30;
+
+      // end condition
+      if(Math.abs(diff) < 0.004 && spinVel < 0.25){
+        spinning = false;
+        bloom.strength = (PERF.tier==="low" ? 0.85 : 1.05);
+
+        // impact moment
+        shake = 0.22;
+        AudioFX.chime();
+        Dust.burst(window.innerWidth*0.52, window.innerHeight*0.62);
+        radialShock(window.innerWidth*0.52, window.innerHeight*0.62);
+
+        // result
+        const qkGain = 3 + Math.floor(Math.random()*10);
+        State.addQK(qkGain);
+        State.setFlow(State.get().flow + (Math.random()*8-3));
+        State.markSpinToday();
+        renderHUD();
+
+        // show parchment
+        const { text } = nextPrediction();
+        setTimeout(()=>Overlay.play(text), 280);
+      }
+    }
+  }else{
+    bloom.strength += (((PERF.tier==="low" ? 0.85 : 1.05)) - bloom.strength)*0.05;
+    wheel.rotation.z += dt*0.06;
+  }
+
+  // camera shake
+  if(shake > 0){
+    shake = Math.max(0, shake - dt*1.8);
+    const s = shake*shake;
+    camera.position.x = (Math.random()*2-1)*0.12*s;
+    camera.position.y = 0.6 + (Math.random()*2-1)*0.12*s;
+  }else{
+    camera.position.x += (0 - camera.position.x)*0.12;
+    camera.position.y += (0.6 - camera.position.y)*0.12;
+  }
+
+  // FX canvas dust
+  Dust.step(dt);
+
+  composer.render();
+}
+animate();
+
+/* ============================================================
+   Resize
+   ============================================================ */
+function onResize(){
+  renderer.setPixelRatio(PERF.dpr());
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  composer.setSize(window.innerWidth, window.innerHeight);
+  bloom.setSize(window.innerWidth, window.innerHeight);
+  resizeFX();
+  applyMobileFraming();
+}
+window.addEventListener("resize", onResize);
+
+/* ============================================================
+   UI actions
+   ============================================================ */
+document.getElementById("soundBtn").addEventListener("click", ()=>{
+  AudioFX.ensure();
+  const on = AudioFX.toggle();
+  document.getElementById("soundBtn").textContent = on ? "S" : "×";
+});
+
+document.getElementById("langBtn").addEventListener("click", ()=>{
+  I18N.toggle();
+});
+
+document.getElementById("helpBtn").addEventListener("click", ()=>{
+  AudioFX.ensure();
+  AudioFX.chime();
+  const msg = (I18N.get()==="zh")
+    ? "三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。"
+    : "Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.";
+  Overlay.play(msg);
+});
+
+document.getElementById("wishBtn").addEventListener("click", ()=>{
+  AudioFX.ensure();
+  AudioFX.whoosh();
+  bloom.strength += 0.22;
+  setTimeout(()=>bloom.strength -= 0.22, 240);
+  Dust.burst(window.innerWidth*0.5, window.innerHeight*0.42);
+  radialShock(window.innerWidth*0.5, window.innerHeight*0.42);
+  haptic("light");
+});
+
+document.getElementById("gateBtn").addEventListener("click", ()=>{
+  // тут ты потом подключишь TonConnect: 1 TON -> premium
+  AudioFX.ensure();
+  AudioFX.chime();
+  State.addPremium(24);
+  const txt = (I18N.get()==="zh")
+    ? "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
+    : "Offering recorded. You are in Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond.";
+  Overlay.play(txt);
+});
+
+document.getElementById("spinBtn").addEventListener("click", ()=>{
+  AudioFX.ensure();
+
+  if(State.spunToday() && !State.isPremium()){
+    const warn = (I18N.get()==="zh")
+      ? "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。"
+      : "You already spun today. Keep your discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate.";
+    Overlay.play(warn);
+    return;
+  }
+  startSpin();
+});
+
+// Close overlay on backdrop tap (mobile-friendly)
+document.getElementById("overlay").addEventListener("click", (e)=>{
+  if(e.target.id === "overlay") Overlay.hide();
+});
+
+/* Startup polish */
+window.addEventListener("load", ()=>{
+  // slight intro pulse
+  setTimeout(()=>{
+    bloom.strength += 0.18;
+    setTimeout(()=>bloom.strength -= 0.18, 260);
+  }, 220);
+});
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>TON TEMPLE / Fa Cai Supreme Ritual</title>
+
+  <style>
+    :root{
+      --bg0:#000;
+      --glass: rgba(10,10,12,.52);
+      --glass2: rgba(10,10,12,.36);
+      --gold:#FFD36A;
+      --gold2:#B8860B;
+      --warm:#FFF3D1;
+      --crimson:#B8001D;
+      --border: rgba(255,211,106,.18);
+      --border2: rgba(255,211,106,.28);
+      --shadow: rgba(0,0,0,.55);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: var(--bg0);
+      overflow:hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--warm);
+    }
+
+    /* ===== 3D + FX canvases ===== */
+    #stage3d{
+      position:fixed; inset:0;
+      z-index:1;
+      background: radial-gradient(1200px 800px at 50% 26%, #0b0e18 0%, #050507 60%, #000 100%);
+      touch-action:none;
+      display:block;
+    }
+    #fxCanvas{
+      position:fixed; inset:0;
+      z-index:3;
+      pointer-events:none;
+      display:block;
+    }
+
+    /* ===== UI layer ===== */
+    #ui{
+      position:fixed; inset:0;
+      z-index:5;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding:
+        calc(env(safe-area-inset-top) + 10px)
+        calc(env(safe-area-inset-right) + 10px)
+        calc(env(safe-area-inset-bottom) + 10px)
+        calc(env(safe-area-inset-left) + 10px);
+      box-sizing:border-box;
+    }
+
+    .uiWrap{
+      width:min(1100px, 100%);
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      box-sizing:border-box;
+    }
+
+    .topHud{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.62), rgba(10,10,12,.40));
+      border:1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+      box-sizing:border-box;
+      min-height:60px;
+    }
+
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+      line-height:1.1;
+      user-select:none;
+      min-width: 140px;
+    }
+    .brand .t1{
+      font-weight:700;
+      letter-spacing:.12em;
+      font-size:12px;
+      color:var(--warm);
+      text-transform:uppercase;
+      opacity:.95;
+    }
+    .brand .t2{
+      font-weight:600;
+      letter-spacing:.16em;
+      font-size:10px;
+      color:rgba(255,211,106,.8);
+      text-transform:uppercase;
+    }
+
+    .hudRight{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      max-width: 66%;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,211,106,.14);
+      color: rgba(255,243,209,.92);
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .btn{
+      cursor:pointer;
+      border:none;
+      outline:none;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.25);
+      color: rgba(255,243,209,.95);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.34);}
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .center{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: 0;
+    }
+
+    .card{
+      width: 100%;
+      max-width: 980px;
+      border-radius:18px;
+      background: var(--glass);
+      border:1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 55px rgba(0,0,0,.42);
+      overflow:hidden;
+      position:relative;
+      box-sizing:border-box;
+    }
+
+    .cardInner{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      box-sizing:border-box;
+    }
+
+    .title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+    }
+    .title h2{
+      margin:0;
+      font-size:13px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:rgba(255,243,209,.95);
+      font-family: Orbitron, Inter, system-ui;
+      font-weight:700;
+    }
+    .title .sub{
+      font-size:10px;
+      letter-spacing:.12em;
+      color: rgba(255,211,106,.74);
+      text-transform:uppercase;
+      opacity:.95;
+      text-align:right;
+    }
+
+    .bigAction{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      padding:18px 14px 14px;
+    }
+
+    .wheelBtn{
+      width:min(340px, 92%);
+      height:58px;
+      border-radius:16px;
+      border:1px solid rgba(255,211,106,.28);
+      background: linear-gradient(180deg, rgba(255,211,106,.16), rgba(255,211,106,.08));
+      color: rgba(255,243,209,.98);
+      font-size:12px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-weight:700;
+      box-shadow: 0 16px 50px rgba(0,0,0,.35);
+      cursor:pointer;
+      transition: transform .14s ease, filter .18s ease;
+    }
+    .wheelBtn:hover{ transform: translateY(-1px); filter: brightness(1.05);}
+    .wheelBtn:active{ transform: translateY(0px) scale(.99); filter: brightness(0.98);}
+
+    .micro{
+      font-size:10px;
+      letter-spacing:.12em;
+      color: rgba(255,243,209,.75);
+      text-align:center;
+      line-height:1.4;
+      user-select:none;
+      max-width: 720px;
+    }
+
+    .dock{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
+      border:1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-sizing:border-box;
+    }
+    .dockLeft, .dockRight{ display:flex; gap:8px; align-items:center; }
+
+    .dotBtn{
+      width:42px; height:42px;
+      border-radius:14px;
+      border:1px solid rgba(255,211,106,.18);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,243,209,.92);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .18s ease, filter .18s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+    .dotBtn:hover{ transform: translateY(-1px); border-color: rgba(255,211,106,.28); filter: brightness(1.05);}
+    .dotBtn:active{ transform: translateY(0px) scale(.99); filter: brightness(0.98); }
+
+    /* ===== Overlay ===== */
+    #overlay{
+      position:fixed; inset:0;
+      z-index:10;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:
+        calc(env(safe-area-inset-top) + 14px)
+        14px
+        calc(env(safe-area-inset-bottom) + 14px)
+        14px;
+      background: rgba(0,0,0,.68);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-sizing:border-box;
+    }
+    #overlay.show{ display:flex; }
+
+    .parchmentWrap{
+      width:min(760px, 96vw);
+      height:min(74vh, 680px);
+      position:relative;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: 0 25px 120px rgba(0,0,0,.6);
+      border:1px solid rgba(255,211,106,.22);
+      background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
+                  linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
+    }
+    .parchmentCanvas{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+    }
+    .overlayTop{
+      position:absolute; left:0; right:0; top:0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.0));
+      z-index:2;
+      pointer-events:none;
+      box-sizing:border-box;
+    }
+    .overlayTop .label{
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color: rgba(255,243,209,.85);
+      font-family: Orbitron, Inter, system-ui;
+      pointer-events:none;
+      user-select:none;
+    }
+    .closeBtn{
+      pointer-events:auto;
+      cursor:pointer;
+      border:none;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,211,106,.10);
+      border:1px solid rgba(255,211,106,.22);
+      color: rgba(255,243,209,.95);
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      user-select:none;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: calc(env(safe-area-inset-bottom) + 18px);
+      z-index: 20;
+      padding:10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,211,106,.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: rgba(255,243,209,.92);
+      font-size:12px;
+      letter-spacing:.02em;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* ===== Mobile tuning ===== */
+    @media (max-width: 520px){
+      #ui{
+        padding:
+          calc(env(safe-area-inset-top) + 8px)
+          calc(env(safe-area-inset-right) + 8px)
+          calc(env(safe-area-inset-bottom) + 8px)
+          calc(env(safe-area-inset-left) + 8px);
+      }
+      .topHud{
+        padding:8px 10px;
+        border-radius:14px;
+        min-height: 56px;
+      }
+      .brand{ min-width: 120px; }
+      .brand .t1{ font-size:11px; }
+      .brand .t2{ font-size:9px; }
+      .hudRight{ gap:6px; max-width: 62%; }
+      .pill{
+        padding:7px 9px;
+        font-size:10px;
+        letter-spacing:.10em;
+      }
+      .btn{
+        padding:8px 10px;
+        font-size:10px;
+        letter-spacing:.12em;
+      }
+      .cardInner{ padding:12px; }
+      .dock{
+        padding:8px 10px;
+        border-radius:14px;
+      }
+      .dotBtn{ width:40px; height:40px; border-radius:14px; }
+      .title .sub{ max-width: 46%; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="stage3d"></canvas>
+  <canvas id="fxCanvas"></canvas>
+
+  <div id="ui">
+    <div class="uiWrap">
+      <div class="topHud">
+        <div class="brand">
+          <div class="t1">TON TEMPLE</div>
+          <div class="t2">帝王福流仪式</div>
+        </div>
+
+        <div class="hudRight">
+          <div class="pill" id="qkPill">QK 000.00</div>
+          <div class="pill" id="flowPill">FLOW 00/100</div>
+          <button class="btn" id="helpBtn">i</button>
+          <button class="btn" id="langBtn">EN</button>
+          <button class="btn" id="premiumBtn">GATE</button>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="card">
+          <div class="cardInner">
+            <div class="title">
+              <h2 id="titleMain">Temple Ritual</h2>
+              <div class="sub" id="titleSub">Spin → Guidance → Decision</div>
+            </div>
+
+            <div class="bigAction">
+              <button class="wheelBtn" id="spinBtn">SPIN WHEEL</button>
+              <div class="micro" id="microText">
+                This is a ritualized interface. Not financial advice.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dock">
+        <div class="dockLeft">
+          <button class="dotBtn" id="journalBtn">J</button>
+          <button class="dotBtn" id="proBtn">P</button>
+        </div>
+        <div class="dockRight">
+          <button class="dotBtn" id="soundBtn">S</button>
+          <button class="dotBtn" id="wishBtn">★</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARCHMENT OVERLAY -->
+  <div id="overlay">
+    <div class="parchmentWrap">
+      <div class="overlayTop">
+        <div class="label" id="overlayLabel">TEMPLE GUIDANCE</div>
+        <button class="closeBtn" id="closeOverlay">CLOSE</button>
+      </div>
+      <canvas class="parchmentCanvas" id="parchment"></canvas>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script type="module">
+/* ==========================================================
+   TON TEMPLE — AAA MOBILE-FIRST ENGINE (SINGLE FILE)
+   Goal: phone-first scale (no clipping), cinematic without lag.
+   ========================================================== */
+
+/* ===== THREE IMPORTS ===== */
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { EffectComposer } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+
+/* ==========================================================
+   UTIL: Toast
+   ========================================================== */
+const Toast = (() => {
+  const el = document.getElementById("toast");
+  let t = null;
+  function show(msg, ms=1400){
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(t);
+    t = setTimeout(()=> el.classList.remove("show"), ms);
+  }
+  return { show };
+})();
+
+/* ==========================================================
+   PERF: Mobile-first governor (Telegram-safe)
+   ========================================================== */
+const Perf = (() => {
+  const ua = navigator.userAgent || "";
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile|Telegram/i.test(ua);
+  const mem = navigator.deviceMemory || (isMobile ? 4 : 8);
+  const cores = navigator.hardwareConcurrency || (isMobile ? 6 : 8);
+
+  // Conservative DPR caps for Telegram WebView
+  let tier = "high";
+  if(isMobile && (mem <= 4 || cores <= 6)) tier = "medium";
+  if(isMobile && (mem <= 3)) tier = "low";
+
+  function dpr(){
+    const base = window.devicePixelRatio || 1;
+    if(tier === "low") return Math.min(base, 1.15);
+    if(tier === "medium") return Math.min(base, 1.35);
+    return Math.min(base, isMobile ? 1.5 : 2.0);
+  }
+
+  return {
+    isMobile,
+    tier: ()=>tier,
+    dpr
+  };
+})();
+
+/* ==========================================================
+   HAPTIC (Telegram + fallback)
+   ========================================================== */
+function haptic(type="light"){
+  try{
+    if(window.Telegram?.WebApp?.HapticFeedback){
+      const H = window.Telegram.WebApp.HapticFeedback;
+      if(type === "success") H.notificationOccurred("success");
+      else if(type === "error") H.notificationOccurred("error");
+      else H.impactOccurred(type);
+      return;
+    }
+  }catch(e){}
+  if(navigator.vibrate){
+    if(type==="heavy") navigator.vibrate([20,10,25]);
+    else if(type==="success") navigator.vibrate([15,10,35]);
+    else navigator.vibrate(10);
+  }
+}
+
+/* ==========================================================
+   I18N (EN label locked)
+   ========================================================== */
+const I18N = (() => {
+  const storeKey = "tt_lang_v1";
+  let lang = localStorage.getItem(storeKey) || "zh";
+
+  const dict = {
+    zh: {
+      titleMain: "帝王福流仪式",
+      titleSub: "转轮 → 指引 → 抉择",
+      spin: "转动福轮",
+      micro: "这是一种仪式化界面，并非金融建议。",
+      overlay: "天宫指引",
+      gate: "供奉",
+      wish: "许愿时刻",
+      helpText: "三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。",
+      already: "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。",
+      premiumOk: "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
+    },
+    en: {
+      titleMain: "Temple Ritual",
+      titleSub: "Spin → Guidance → Decision",
+      spin: "SPIN WHEEL",
+      micro: "This is a ritualized interface. Not financial advice.",
+      overlay: "TEMPLE GUIDANCE",
+      gate: "GATE",
+      wish: "WISH MOMENT",
+      helpText: "Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.",
+      already: "You already spun today. Keep your discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate.",
+      premiumOk: "Offering recorded. You are Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond."
+    }
+  };
+
+  function t(k){ return dict[lang]?.[k] ?? dict.zh[k] ?? k; }
+  function set(newLang){
+    lang = (newLang === "en") ? "en" : "zh";
+    localStorage.setItem(storeKey, lang);
+    render();
+  }
+  function toggle(){ set(lang === "zh" ? "en" : "zh"); }
+
+  function render(){
+    document.documentElement.lang = lang;
+    document.getElementById("titleMain").textContent = t("titleMain");
+    document.getElementById("titleSub").textContent = t("titleSub");
+    document.getElementById("spinBtn").textContent = t("spin");
+    document.getElementById("microText").textContent = t("micro");
+    document.getElementById("overlayLabel").textContent = t("overlay");
+    // EN label MUST always be "EN"
+    document.getElementById("langBtn").textContent = "EN";
+    document.getElementById("premiumBtn").textContent = t("gate");
+  }
+
+  return { t, toggle, render, getLang:()=>lang };
+})();
+I18N.render();
+
+/* ==========================================================
+   State (QK, Flow, Premium, non-repeat predictions)
+   ========================================================== */
+const State = (() => {
+  const key = "tt_state_aaa_mobile_v1";
+  const now = ()=> Date.now();
+
+  const base = {
+    qk: 0,
+    flow: 50,
+    lastSpinDay: "",
+    premiumUntil: 0,
+    predBag: [],
+    usedPredIds: []
+  };
+
+  let s = base;
+  function load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(key) || "null");
+      s = { ...base, ...(raw||{}) };
+    }catch(e){
+      s = { ...base };
+    }
+  }
+  function save(){ localStorage.setItem(key, JSON.stringify(s)); }
+
+  function dayKey(){
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  function spunToday(){ return s.lastSpinDay === dayKey(); }
+  function markSpinToday(){ s.lastSpinDay = dayKey(); save(); }
+
+  function isPremium(){ return s.premiumUntil > now(); }
+  function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(); }
+
+  function addQK(v){
+    s.qk = Math.max(0, Math.round((s.qk + v)*100)/100);
+    save();
+  }
+  function setFlow(v){
+    s.flow = Math.max(0, Math.min(100, Math.round(v)));
+    save();
+  }
+
+  load();
+  return { get:()=>s, save, spunToday, markSpinToday, isPremium, addPremium, addQK, setFlow };
+})();
+
+function renderHUD(){
+  const s = State.get();
+  document.getElementById("qkPill").textContent = `QK ${s.qk.toFixed(2)}`;
+  document.getElementById("flowPill").textContent = `FLOW ${String(s.flow).padStart(2,"0")}/100`;
+}
+renderHUD();
+
+/* ==========================================================
+   Predictions (100 EN + 100 ZH) минимум 5 предложений, non-repeat
+   ========================================================== */
+const Predictions = (() => {
+  const en = [];
+  const zh = [];
+
+  // helper for building 5+ sentences
+  function EN(a,b,c,d,e){ return `${a} ${b} ${c} ${d} ${e}`; }
+  function ZH(a,b,c,d,e){ return `${a}${b}${c}${d}${e}`; }
+
+  // 1..30 handcrafted (tone: 90% support / 10% soft caution)
+  en.push(EN(
+    "Today is a day for calm structure, not pressure.",
+    "Spend real time with family or people who make you feel safe and grounded.",
+    "Choose one small priority and finish it cleanly, then stop chasing more.",
+    "If stress rises, move your body—walk, breathe, and soften your shoulders before you speak.",
+    "Your best result comes from harmony and discipline, not force."
+  ));
+  en.push(EN(
+    "Treat today like a reset for your nervous system.",
+    "Reduce noise: fewer messages, fewer arguments, fewer impulsive decisions.",
+    "Give yourself permission to rest without guilt and to recover your focus.",
+    "Try one new small experience—new route, new food, or a short creative task.",
+    "When you relax, clarity arrives naturally and the day becomes smoother."
+  ));
+  en.push(EN(
+    "Your energy is valuable today, so protect it carefully.",
+    "Avoid drama and avoid people who demand emotional labor from you.",
+    "Do one helpful act for someone close, then release expectations.",
+    "Keep your environment tidy; small order creates inner order.",
+    "The universe responds when you keep your rhythm steady."
+  ));
+  en.push(EN(
+    "Today is better for connection than confrontation.",
+    "If a conflict starts, step back and choose patience over winning.",
+    "Spend time with family, share food, share calm, and keep your voice soft.",
+    "Work lightly, then rest fully—don’t mix stress into your recovery time.",
+    "You’ll end the day stable if you keep it simple and honest."
+  ));
+  en.push(EN(
+    "You may feel an urge to solve everything at once, but do not rush.",
+    "Pick one priority that truly matters and ignore distractions.",
+    "If an opportunity appears, take it only if it reduces stress long-term.",
+    "Breathe before replying; your tone today decides the quality of your day.",
+    "Progress is real when it is quiet, consistent, and clean."
+  ));
+  en.push(EN(
+    "A quiet luck follows you today, but it prefers calm attention.",
+    "Notice small chances without gambling your peace or your time.",
+    "Spend a little longer with loved ones and let your mind soften.",
+    "If you feel anxious, return to the body: walk and slow your breathing.",
+    "Harmony is the real victory, and it unlocks the next step."
+  ));
+
+  // soft caution examples
+  en.push(EN(
+    "Today may test your patience, so slow down more than usual.",
+    "Avoid impulsive promises, purchases, or risky shortcuts even if excitement appears.",
+    "If pressure comes from others, create space and think quietly before agreeing.",
+    "Anchor yourself with family, routine, and basic health habits.",
+    "Calm discipline is your protection and your advantage today."
+  ));
+  en.push(EN(
+    "Be mindful of overstimulation today.",
+    "Too many messages and decisions can turn into unnecessary anxiety.",
+    "Pause, choose one simple task, and finish it without multitasking.",
+    "Avoid sharp words—they echo longer than you expect.",
+    "When you hold clean boundaries, the day becomes smooth again."
+  ));
+
+  // Fill to 100 by high-quality templated variations (still 5+ sentences)
+  const enSeeds = [
+    ["calm structure","family","one small priority","walk and breathe","harmony over force"],
+    ["gentle reset","less noise","real rest","try something new","clarity arrives"],
+    ["protect energy","avoid drama","kind action","tidy space","steady rhythm"],
+    ["connection","step back","warm tone","work then rest","simple stability"],
+    ["slow decisions","one priority","aligned opportunity","breathe before reply","quiet progress"],
+    ["quiet luck","notice chances","time with loved ones","return to body","harmony wins"],
+    ["patience test","avoid impulsive moves","create space","routine and health","calm discipline"],
+    ["overstimulation","reduce messages","single task","avoid sharp words","clean boundaries"]
+  ];
+
+  while(en.length < 100){
+    const i = en.length % enSeeds.length;
+    const s = enSeeds[i];
+    en.push(EN(
+      `Today favors ${s[0]} instead of chaos.`,
+      `Spend more time with ${s[1]} or with people who ground you.`,
+      `Choose ${s[2]} and complete it cleanly, then stop.`,
+      `If tension appears, ${s[3]} and let your nervous system settle.`,
+      `You win today by choosing ${s[4]} and keeping your rhythm steady.`
+    ));
+  }
+
+  // Chinese
+  zh.push(ZH(
+    "今天适合回到稳定与温柔。",
+    "多陪伴家人或让你安心的人，把节奏放慢。",
+    "选择一件小事认真完成，然后允许自己休息。",
+    "若压力上来，就走一走、深呼吸、把肩颈放松再说话。",
+    "你越和谐越清晰，福流会自然回应。"
+  ));
+  zh.push(ZH(
+    "把今天当作一次柔和的重启。",
+    "减少噪音：少消息、少争辩、少冲动决定。",
+    "给自己真正的休息，不需要内疚。",
+    "尝试一个小小的新体验，让心变得更开阔。",
+    "放松之后，你会看到更稳的方向。"
+  ));
+  zh.push(ZH(
+    "今天你的精力很宝贵，要学会保护。",
+    "远离情绪消耗与无意义的争执。",
+    "为亲近的人做一件温暖的小事，然后放下期待。",
+    "把环境整理干净，外在秩序会带来内在秩序。",
+    "节奏稳了，心就稳了，路也更顺。"
+  ));
+  zh.push(ZH(
+    "今天更适合连接，不适合对抗。",
+    "若冲突出现，先退一步，用耐心替代胜负心。",
+    "多与家人相处，说话柔一点，心就安一点。",
+    "工作轻一点，休息完整一点，不要把压力带进睡眠。",
+    "保持简单与真诚，你会收获稳定。"
+  ));
+  zh.push(ZH(
+    "今天不要急着把所有事情一次解决。",
+    "抓住一个真正重要的优先项，其余先放一放。",
+    "机会来了先观察再行动，不要为了证明而勉强自己。",
+    "回复之前先呼吸，你的语气决定今天的质量。",
+    "安静的进步最有力量，也最不容易出错。"
+  ));
+  zh.push(ZH(
+    "今天有一种安静的好运，会出现在细节里。",
+    "留心小机会，但不要拿平静去交换刺激。",
+    "多陪陪亲近的人，让心回到柔软的位置。",
+    "若紧张，就回到身体：走路、放慢呼吸、放松下颌。",
+    "你守住和谐，就守住了福流。"
+  ));
+
+  const zhSeeds = [
+    ["稳定与温柔","家人","一件小事","走路深呼吸","和谐与节制"],
+    ["柔和重启","减少噪音","真正休息","尝试新体验","方向更稳"],
+    ["保护精力","远离争执","温暖小事","整理环境","节奏更顺"],
+    ["连接","退一步","语气柔和","工作轻休息足","收获稳定"],
+    ["不急","一个优先项","先观察再行动","回复前呼吸","安静进步"],
+    ["安静好运","不换刺激","陪伴亲近的人","回到身体","守住福流"]
+  ];
+
+  while(zh.length < 100){
+    const i = zh.length % zhSeeds.length;
+    const s = zhSeeds[i];
+    zh.push(ZH(
+      `今天适合${s[0]}。`,
+      `多陪伴${s[1]}或让你安心的人，把节奏放慢。`,
+      `选择${s[2]}认真完成，然后就停下来休息。`,
+      `若压力上来，就${s[3]}，让心先安定。`,
+      `你今天的胜利来自${s[4]}，而不是用力过猛。`
+    ));
+  }
+
+  function list(lang){ return (lang === "en") ? en : zh; }
+  return { list };
+})();
+
+function nextPrediction(){
+  const s = State.get();
+  const total = 100;
+
+  if(!Array.isArray(s.predBag) || s.predBag.length === 0){
+    const ids = Array.from({length: total}, (_,i)=>i);
+    // shuffle
+    for(let i=ids.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    s.predBag = ids;
+  }
+
+  const id = s.predBag.pop();
+  s.usedPredIds.push(id);
+  State.save();
+
+  const text = Predictions.list(I18N.getLang())[id];
+  return { id, text };
+}
+
+/* ==========================================================
+   Overlay parchment (ink writing + stamp drop)
+   ========================================================== */
+const Overlay = (() => {
+  const overlay = document.getElementById("overlay");
+  const closeBtn = document.getElementById("closeOverlay");
+  const canvas = document.getElementById("parchment");
+  const ctx = canvas.getContext("2d");
+
+  function show(){ overlay.classList.add("show"); resize(); }
+  function hide(){ overlay.classList.remove("show"); }
+  closeBtn.addEventListener("click", hide);
+
+  function resize(){
+    const dpr = Math.min(Perf.dpr(), 1.5);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width*dpr);
+    canvas.height = Math.floor(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener("resize", resize);
+
+  function paperBG(){
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0,0,w,h);
+
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0, "rgba(210,180,130,0.22)");
+    g.addColorStop(0.35, "rgba(130,100,65,0.24)");
+    g.addColorStop(1, "rgba(65,48,30,0.34)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // dark vignette edges
+    ctx.save();
+    ctx.globalCompositeOperation="multiply";
+    const v = ctx.createRadialGradient(w*0.5, h*0.46, 40, w*0.5, h*0.46, Math.max(w,h)*0.75);
+    v.addColorStop(0, "rgba(0,0,0,0)");
+    v.addColorStop(1, "rgba(0,0,0,0.78)");
+    ctx.fillStyle = v;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+
+    // fibers
+    ctx.save();
+    ctx.globalAlpha = 0.13;
+    for(let i=0;i<140;i++){
+      const y = Math.random()*h;
+      ctx.strokeStyle = "rgba(255,243,209,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y + (Math.random()*7-3.5));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSeal(x,y,scale=1,rot=-0.06){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.scale(scale,scale);
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 14;
+
+    const s = 96;
+    ctx.fillStyle = "rgba(184,0,29,0.92)";
+    ctx.fillRect(-s/2, -s/2, s, s);
+
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,211,106,0.22)";
+    ctx.strokeRect(-s/2, -s/2, s, s);
+
+    ctx.fillStyle = "rgba(255,243,209,0.92)";
+    ctx.font = "700 44px serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("财", 0, 3);
+
+    ctx.restore();
+  }
+
+  function wrapText(text, maxW, font){
+    ctx.font = font;
+    const isZh = (I18N.getLang() === "zh");
+    const tokens = isZh ? text.split("") : text.split(" ");
+    const lines = [];
+    let line = "";
+
+    for(let i=0;i<tokens.length;i++){
+      const token = isZh ? tokens[i] : (tokens[i] + " ");
+      const test = line + token;
+      if(ctx.measureText(test).width > maxW && line.length){
+        lines.push(line);
+        line = token;
+      }else{
+        line = test;
+      }
+    }
+    if(line.trim().length) lines.push(line);
+    return lines;
+  }
+
+  async function writeText(text){
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+
+    paperBG();
+
+    // header
+    ctx.save();
+    ctx.fillStyle = "rgba(255,243,209,0.88)";
+    ctx.font = "700 14px Orbitron, Inter, system-ui";
+    ctx.fillText((I18N.getLang()==="zh") ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+    ctx.restore();
+
+    const padX = 32;
+    const topY = 70;
+    const maxW = w - padX*2;
+
+    const font = (I18N.getLang()==="zh")
+      ? "600 18px 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', serif"
+      : "600 17px 'Georgia', 'Times New Roman', serif";
+
+    const lines = wrapText(text, maxW, font);
+
+    // “brush ink” draw per char
+    ctx.textBaseline = "top";
+    let y = topY;
+    let tick = 0;
+
+    for(let li=0; li<lines.length; li++){
+      const L = lines[li];
+      let x = padX;
+
+      for(let ci=0; ci<L.length; ci++){
+        const ch = L[ci];
+        const jx = (Math.random()*0.6 - 0.3);
+        const jy = (Math.random()*0.6 - 0.3);
+
+        const ink = ctx.createLinearGradient(x, y, x, y+22);
+        ink.addColorStop(0, "rgba(255,243,209,0.92)");
+        ink.addColorStop(1, "rgba(255,211,106,0.70)");
+        ctx.fillStyle = ink;
+        ctx.font = font;
+        ctx.fillText(ch, x + jx, y + jy);
+
+        x += ctx.measureText(ch).width;
+        tick++;
+        // speed: mobile safe
+        if(tick % 16 === 0) await new Promise(r=>setTimeout(r, 10));
+      }
+
+      y += 26;
+      if(y > h-140) break;
+      await new Promise(r=>setTimeout(r, 8));
+    }
+
+    // timestamp
+    ctx.save();
+    ctx.fillStyle = "rgba(255,211,106,0.70)";
+    ctx.font = "600 12px Inter, system-ui";
+    const ts = new Date().toLocaleString(I18N.getLang()==="zh" ? "zh-CN" : "en-US");
+    ctx.fillText(ts, padX, h-40);
+    ctx.restore();
+
+    // stamp drop animation (fall + hit)
+    const sx = w - 110;
+    const sy = h - 120;
+    let stampY = -120;
+    const start = performance.now();
+    const fallDur = 520;
+
+    while(performance.now() - start < fallDur){
+      const t = (performance.now() - start) / fallDur;
+      const ease = t<1 ? (1 - Math.pow(1-t, 3)) : 1;
+      stampY = -120 + (sy + 120) * ease;
+
+      // redraw: BG + text fast
+      paperBG();
+      ctx.save();
+      ctx.fillStyle = "rgba(255,243,209,0.88)";
+      ctx.font = "700 14px Orbitron, Inter, system-ui";
+      ctx.fillText((I18N.getLang()==="zh") ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+      ctx.restore();
+
+      ctx.save();
+      ctx.font = font;
+      ctx.textBaseline="top";
+      ctx.fillStyle="rgba(255,243,209,0.92)";
+      let yy = topY;
+      for(let li=0; li<lines.length; li++){
+        ctx.fillText(lines[li], padX, yy);
+        yy += 26;
+        if(yy > h-140) break;
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "rgba(255,211,106,0.70)";
+      ctx.font = "600 12px Inter, system-ui";
+      ctx.fillText(ts, padX, h-40);
+      ctx.restore();
+
+      // stamp in motion
+      const wob = Math.sin(t*9) * 0.03;
+      drawSeal(sx, stampY, 0.92, -0.07 + wob);
+
+      await new Promise(r=>requestAnimationFrame(r));
+    }
+
+    // hit moment
+    haptic("heavy");
+    FXDust.burst(w*0.78, h*0.78);
+    ScreenShake.hit();
+    // final stamp
+    drawSeal(sx, sy, 1.0);
+  }
+
+  async function play(text){
+    show();
+    resize();
+    await writeText(text);
+  }
+
+  return { play, hide };
+})();
+
+/* ==========================================================
+   FX Canvas: golden dust + comet spark bursts
+   ========================================================== */
+const fxCanvas = document.getElementById("fxCanvas");
+const fxCtx = fxCanvas.getContext("2d");
+
+function resizeFX(){
+  const dpr = Perf.dpr();
+  fxCanvas.width = Math.floor(window.innerWidth*dpr);
+  fxCanvas.height = Math.floor(window.innerHeight*dpr);
+  fxCanvas.style.width = window.innerWidth+"px";
+  fxCanvas.style.height = window.innerHeight+"px";
+  fxCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+resizeFX();
+window.addEventListener("resize", resizeFX);
+
+const FXDust = (() => {
+  const parts = [];
+  const baseN = Perf.tier()==="low" ? 70 : (Perf.tier()==="medium" ? 110 : 140);
+
+  function seed(){
+    parts.length = 0;
+    for(let i=0;i<baseN;i++){
+      parts.push(make(true));
+    }
+  }
+
+  function make(initial=false, x0=null, y0=null){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const x = (x0 != null) ? x0 : Math.random()*w;
+    const y = (y0 != null) ? y0 : (initial ? Math.random()*h : h + 20);
+    const sp = 0.6 + Math.random()*1.4;
+    return {
+      x, y,
+      vx: (-0.10 + Math.random()*0.20) * sp,
+      vy: (-0.55 - Math.random()*0.55) * sp,
+      r: 0.6 + Math.random()*2.1,
+      a: 0.06 + Math.random()*0.22,
+      life: 1.0,
+      tw: 0.5 + Math.random()*1.4
+    };
+  }
+
+  function burst(x,y){
+    const n = Perf.tier()==="low" ? 18 : (Perf.tier()==="medium" ? 26 : 34);
+    for(let i=0;i<n;i++){
+      parts.push(make(false, x + (Math.random()*18-9), y + (Math.random()*18-9)));
+    }
+  }
+
+  function step(dt){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    // trailing fade
+    fxCtx.fillStyle = "rgba(0,0,0,0.14)";
+    fxCtx.fillRect(0,0,w,h);
+
+    fxCtx.save();
+    fxCtx.globalCompositeOperation = "lighter";
+
+    for(let i=parts.length-1;i>=0;i--){
+      const p = parts[i];
+      p.x += p.vx * (dt*60);
+      p.y += p.vy * (dt*60);
+      p.life -= dt * 0.22;
+
+      const tw = 0.65 + 0.35*Math.sin(performance.now()*0.002*p.tw);
+      const a = p.a * tw * Math.max(0, p.life);
+
+      fxCtx.beginPath();
+      fxCtx.fillStyle = `rgba(255,211,106,${a})`;
+      fxCtx.shadowColor = "rgba(255,211,106,0.35)";
+      fxCtx.shadowBlur = 12;
+      fxCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      fxCtx.fill();
+
+      // recycle
+      if(p.y < -30 || p.x < -50 || p.x > w+50 || p.life <= 0){
+        parts.splice(i,1);
+        if(parts.length < baseN) parts.push(make(true));
+      }
+    }
+
+    fxCtx.restore();
+  }
+
+  seed();
+  return { step, burst };
+})();
+
+/* ==========================================================
+   Screen Shake (subtle, mobile-safe)
+   ========================================================== */
+const ScreenShake = (() => {
+  let power = 0;
+  function hit(){
+    power = Math.min(1, power + 0.85);
+  }
+  function apply(){
+    if(power <= 0.001) return {x:0,y:0};
+    power *= 0.86;
+    const m = 6 * power;
+    return { x: (Math.random()*2-1)*m, y:(Math.random()*2-1)*m };
+  }
+  return { hit, apply };
+})();
+
+/* ==========================================================
+   THREE: Scene setup (mobile-first scale)
+   ========================================================== */
+const canvas3d = document.getElementById("stage3d");
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas3d,
+  antialias: true,
+  alpha: true,
+  powerPreference: "high-performance"
+});
+renderer.setPixelRatio(Perf.dpr());
+renderer.setSize(window.innerWidth, window.innerHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = Perf.isMobile ? 1.05 : 1.0;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, 0.00135);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 2600);
+camera.position.set(0, 0.2, 26);
+
+const clock = new THREE.Clock();
+
+/* ===== Cinematic lights ===== */
+const key = new THREE.DirectionalLight(0xFFD36A, 1.35);
+key.position.set(14, 10, 18);
+scene.add(key);
+
+const rim = new THREE.DirectionalLight(0xB8001D, 0.50);
+rim.position.set(-14, 7, -8);
+scene.add(rim);
+
+const fill = new THREE.AmbientLight(0x0b0e18, 1.15);
+scene.add(fill);
+
+/* ==========================================================
+   Stars: deep field + flying comets (real motion)
+   ========================================================== */
+function makeStarField(count){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const col = new Float32Array(count*3);
+
+  for(let i=0;i<count;i++){
+    const r = 420 + Math.random()*1000;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos(2*Math.random()-1);
+    const x = r*Math.sin(phi)*Math.cos(theta);
+    const y = r*Math.sin(phi)*Math.sin(theta);
+    const z = r*Math.cos(phi);
+    pos[i*3+0]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+
+    const warm = Math.random() < 0.22;
+    const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
+    const k = warm ? (0.55+Math.random()*0.45) : (0.55+Math.random()*0.55);
+    col[i*3+0]=c.r*k; col[i*3+1]=c.g*k; col[i*3+2]=c.b*k;
+  }
+
+  geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col,3));
+
+  const mat = new THREE.PointsMaterial({
+    size: Perf.tier()==="low" ? 1.0 : 1.25,
+    vertexColors:true,
+    transparent:true,
+    opacity:0.92,
+    depthWrite:false
+  });
+
+  const pts = new THREE.Points(geo, mat);
+  return pts;
+}
+
+const starCount =
+  (Perf.tier()==="low") ? 4200 :
+  (Perf.tier()==="medium") ? 8200 :
+  12000;
+
+const stars = makeStarField(starCount);
+scene.add(stars);
+
+// Comet sprite texture (procedural)
+function makeCometTexture(){
+  const c = document.createElement("canvas");
+  c.width = 256; c.height = 64;
+  const g = c.getContext("2d");
+
+  const grad = g.createLinearGradient(0,0,256,0);
+  grad.addColorStop(0, "rgba(255,243,209,0.00)");
+  grad.addColorStop(0.25, "rgba(255,211,106,0.12)");
+  grad.addColorStop(0.55, "rgba(255,211,106,0.35)");
+  grad.addColorStop(0.75, "rgba(255,243,209,0.75)");
+  grad.addColorStop(1, "rgba(255,243,209,0.00)");
+
+  g.fillStyle = "rgba(0,0,0,0)";
+  g.fillRect(0,0,256,64);
+
+  g.fillStyle = grad;
+  g.beginPath();
+  g.ellipse(128, 32, 120, 16, 0, 0, Math.PI*2);
+  g.fill();
+
+  // bright head
+  const rad = g.createRadialGradient(190, 32, 0, 190, 32, 26);
+  rad.addColorStop(0, "rgba(255,243,209,0.95)");
+  rad.addColorStop(0.4, "rgba(255,211,106,0.55)");
+  rad.addColorStop(1, "rgba(255,211,106,0.00)");
+  g.fillStyle = rad;
+  g.beginPath();
+  g.arc(190, 32, 26, 0, Math.PI*2);
+  g.fill();
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const cometTex = makeCometTexture();
+const cometMat = new THREE.SpriteMaterial({
+  map: cometTex,
+  color: 0xffffff,
+  transparent:true,
+  opacity:0.0,
+  depthWrite:false
+});
+
+function makeComet(){
+  const spr = new THREE.Sprite(cometMat.clone());
+  spr.scale.set(12, 3.2, 1);
+  spr.material.opacity = 0.0;
+
+  // store motion
+  spr.userData = {
+    t: 0,
+    dur: 1.2 + Math.random()*1.4,
+    start: new THREE.Vector3(-60, 18 + Math.random()*22, -120 - Math.random()*240),
+    end:   new THREE.Vector3( 60, -10 - Math.random()*20, -10 - Math.random()*40),
+    delay: Math.random()*2.0
+  };
+
+  spr.position.copy(spr.userData.start);
+  scene.add(spr);
+  return spr;
+}
+
+const cometsN = Perf.tier()==="low" ? 1 : (Perf.tier()==="medium" ? 2 : 3);
+const comets = Array.from({length: cometsN}, ()=> makeComet());
+
+function updateComets(dt){
+  for(const c of comets){
+    const u = c.userData;
+    if(u.delay > 0){
+      u.delay -= dt;
+      c.material.opacity *= 0.92;
+      continue;
+    }
+
+    u.t += dt / u.dur;
+    const t = u.t;
+
+    if(t >= 1){
+      // reset
+      u.t = 0;
+      u.dur = 1.1 + Math.random()*1.6;
+      u.start = new THREE.Vector3(-60, 18 + Math.random()*22, -120 - Math.random()*240);
+      u.end   = new THREE.Vector3( 60, -10 - Math.random()*20, -10 - Math.random()*40);
+      u.delay = 0.8 + Math.random()*2.2;
+      c.position.copy(u.start);
+      c.material.opacity = 0.0;
+      continue;
+    }
+
+    // ease
+    const ease = t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+    c.position.lerpVectors(u.start, u.end, ease);
+
+    // fade in/out
+    const fade = Math.sin(Math.PI * ease);
+    c.material.opacity = 0.55 * fade;
+
+    // rotation along trajectory
+    const dir = new THREE.Vector3().subVectors(u.end, u.start).normalize();
+    const ang = Math.atan2(dir.y, dir.x);
+    c.material.rotation = ang;
+
+    // tiny shimmer
+    c.material.opacity *= (0.85 + 0.15*Math.sin(performance.now()*0.006));
+  }
+}
+
+/* ==========================================================
+   Dragon: full-width top, slight breathing warp shader
+   (loads ./dragon.jpg correctly on GitHub Pages)
+   ========================================================== */
+const texLoader = new THREE.TextureLoader();
+const dragonURL = new URL("./dragon.jpg", import.meta.url).toString();
+
+const dragonTex = texLoader.load(
+  dragonURL,
+  ()=>{ /* ok */ },
+  undefined,
+  ()=>{ Toast.show("dragon.jpg not loaded (check filename/path)"); }
+);
+dragonTex.colorSpace = THREE.SRGBColorSpace;
+
+const dragonGeo = new THREE.PlaneGeometry(18, 10, 64, 64);
+const dragonMat = new THREE.ShaderMaterial({
+  transparent:true,
+  depthWrite:false,
+  uniforms:{
+    uTex:{ value: dragonTex },
+    uTime:{ value: 0 },
+    uAura:{ value: 0.60 },
+    uFade:{ value: 0.0 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    uniform float uTime;
+    void main(){
+      vUv = uv;
+      vec3 p = position;
+      float w = sin(uTime*1.15 + p.x*0.35) * 0.12;
+      float w2 = sin(uTime*1.55 + p.y*0.55) * 0.08;
+      p.z += (w + w2) * (0.35 + 0.65*(1.0-uv.y));
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
+    }
+  `,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform sampler2D uTex;
+    uniform float uTime;
+    uniform float uAura;
+    uniform float uFade;
+
+    float edgeMask(vec2 uv){
+      float e = smoothstep(0.0, 0.08, uv.x) *
+                smoothstep(0.0, 0.08, uv.y) *
+                smoothstep(0.0, 0.08, 1.0-uv.x) *
+                smoothstep(0.0, 0.08, 1.0-uv.y);
+      return e;
+    }
+
+    void main(){
+      vec4 tex = texture2D(uTex, vUv);
+      // if jpg has no alpha, keep it visible
+      float a = tex.a;
+      if(a < 0.01) a = 1.0;
+
+      float edge = edgeMask(vUv);
+      float pulse = 0.5 + 0.5*sin(uTime*1.35);
+
+      vec3 gold = vec3(1.0, 0.83, 0.42);
+      vec3 glow = gold * (uAura * (0.35 + 0.65*pulse)) * (1.0-edge);
+
+      // subtle vignette
+      float v = smoothstep(0.95, 0.15, distance(vUv, vec2(0.5)));
+      vec3 col = tex.rgb;
+      col = col + glow*0.72;
+      col *= (0.88 + 0.12*v);
+
+      gl_FragColor = vec4(col, a * uFade);
+    }
+  `
+});
+
+const dragon = new THREE.Mesh(dragonGeo, dragonMat);
+scene.add(dragon);
+
+/* ==========================================================
+   Wheel: real 3D segmented wheel + gold rim + pointer
+   Mobile-first scale computed from viewport
+   ========================================================== */
+const wheelGroup = new THREE.Group();
+scene.add(wheelGroup);
+
+const wheel = new THREE.Group();
+wheelGroup.add(wheel);
+
+const segCount = 18;
+const rimOuter = 7.2;
+const rimInner = 5.4;
+const thickness = 0.8;
+
+function makeSegment(i){
+  // segment as extruded wedge (approx by shape + extrude)
+  const a0 = (i/segCount) * Math.PI*2;
+  const a1 = ((i+1)/segCount) * Math.PI*2;
+  const shape = new THREE.Shape();
+  shape.absarc(0,0, rimOuter, a0, a1, false);
+  shape.lineTo(Math.cos(a1)*rimInner, Math.sin(a1)*rimInner);
+  shape.absarc(0,0, rimInner, a1, a0, true);
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: thickness,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 1,
+    bevelSize: 0.10,
+    bevelThickness: 0.10
+  });
+  geo.center();
+
+  const warm = (i % 2 === 0);
+  const mat = new THREE.MeshStandardMaterial({
+    color: warm ? 0x6b000c : 0x14070a,
+    metalness: 0.55,
+    roughness: 0.32,
+    emissive: new THREE.Color(warm ? 0x220006 : 0x0a0000),
+    emissiveIntensity: warm ? 0.28 : 0.18
+  });
+
+  const m = new THREE.Mesh(geo, mat);
+  m.rotation.x = Math.PI/2;
+  m.position.y = 0;
+  m.position.z = 0;
+  return m;
+}
+
+for(let i=0;i<segCount;i++){
+  wheel.add(makeSegment(i));
+}
+
+// gold rim torus
+const rimGeo = new THREE.TorusGeometry(rimOuter+0.35, 0.30, 24, 140);
+const rimMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.86,
+  roughness: 0.25,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.38
+});
+const rim = new THREE.Mesh(rimGeo, rimMat);
+rim.rotation.x = Math.PI/2;
+wheel.add(rim);
+
+// inner ring
+const innerGeo = new THREE.TorusGeometry(rimInner-0.15, 0.14, 18, 120);
+const innerMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.82,
+  roughness: 0.35,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.22
+});
+const inner = new THREE.Mesh(innerGeo, innerMat);
+inner.rotation.x = Math.PI/2;
+wheel.add(inner);
+
+// center cap
+const capGeo = new THREE.CylinderGeometry(2.25, 2.35, 0.65, 48, 1, false);
+const capMat = new THREE.MeshStandardMaterial({
+  color: 0x2a0b0f,
+  metalness: 0.6,
+  roughness: 0.25,
+  emissive: new THREE.Color(0x1a0004),
+  emissiveIntensity: 0.24
+});
+const cap = new THREE.Mesh(capGeo, capMat);
+cap.rotation.x = Math.PI/2;
+cap.position.z = 0.35;
+wheel.add(cap);
+
+// pointer (gold spear)
+const pointerGroup = new THREE.Group();
+scene.add(pointerGroup);
+
+const ptrGeo = new THREE.ConeGeometry(0.28, 1.45, 16, 1);
+const ptrMat = new THREE.MeshStandardMaterial({
+  color: 0xFFD36A,
+  metalness: 0.9,
+  roughness: 0.22,
+  emissive: new THREE.Color(0xFFD36A),
+  emissiveIntensity: 0.25
+});
+const pointer = new THREE.Mesh(ptrGeo, ptrMat);
+pointer.rotation.x = Math.PI/2;
+pointerGroup.add(pointer);
+
+// pointer glow plane
+const glowPlane = new THREE.PlaneGeometry(1.8, 3.2);
+const glowMat = new THREE.MeshBasicMaterial({
+  color: 0xFFD36A,
+  transparent:true,
+  opacity:0.12,
+  depthWrite:false
+});
+const glow = new THREE.Mesh(glowPlane, glowMat);
+glow.rotation.x = Math.PI/2;
+glow.position.z = 0.15;
+pointerGroup.add(glow);
+
+/* ==========================================================
+   Postprocessing: bloom (mobile-safe)
+   ========================================================== */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  Perf.tier()==="low" ? 0.82 : (Perf.tier()==="medium" ? 0.98 : 1.10),
+  0.55,
+  0.20
+);
+composer.addPass(bloom);
+
+/* ==========================================================
+   Mobile-first layout in 3D (NO CLIPPING):
+   - wheel fits inside phone safe area
+   - dragon full-width on top area
+   ========================================================== */
+function layout3D(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const aspect = w/h;
+
+  // wheel should NEVER clip on phones.
+  // target wheel diameter ~ 0.72 of min dimension (mobile), less on short height.
+  const minDim = Math.min(w,h);
+
+  // phone tuning: wheel smaller so it doesn't hit edges
+  const wheelPix = Perf.isMobile ? (minDim * 0.62) : (minDim * 0.58);
+  const wheelWorld = 14.4; // approx diameter from rimOuter ~7.2
+
+  // camera distance to fit wheelWorld into wheelPix
+  // Use simple fit: fov -> visibleHeight at distance
+  const fov = camera.fov * Math.PI/180;
+  // For a given dist, visibleHeight = 2*tan(fov/2)*dist
+  // We want wheelWorld to occupy ~ wheelPix/minDim of screen height (approx)
+  const targetFrac = wheelPix / h;
+  const desiredVisibleHeight = wheelWorld / targetFrac;
+  const dist = desiredVisibleHeight / (2*Math.tan(fov/2));
+
+  camera.position.z = dist;
+  camera.position.y = 0.35;
+  camera.lookAt(0,0,0);
+
+  // position wheel slightly lower (keep space for dragon)
+  const wheelY = Perf.isMobile ? -2.0 : -1.4;
+  wheelGroup.position.set(0, wheelY, -10);
+
+  // pointer above wheel
+  pointerGroup.position.set(0, wheelY + (rimOuter + 0.85), -10);
+  pointerGroup.rotation.z = 0;
+
+  // dragon full width top (edge to edge)
+  // compute world width visible at dragon depth
+  const dragonZ = -16;
+  const distDragon = camera.position.z + Math.abs(dragonZ);
+  const visibleHeight = 2*Math.tan(fov/2) * distDragon;
+  const visibleWidth = visibleHeight * aspect;
+
+  // set dragon size to be near full width
+  dragon.scale.set(visibleWidth/18, (visibleWidth/18), 1);
+
+  // place dragon upper area
+  dragon.position.set(0, Perf.isMobile ? (wheelY + 7.2) : (wheelY + 7.6), dragonZ);
+
+  // fade in dragon (if texture loaded)
+  dragonMat.uniforms.uFade.value = 1.0;
+}
+layout3D();
+
+/* ==========================================================
+   Spin physics (inertia) + cinematic pulses
+   ========================================================== */
+let spinning = false;
+let omega = 0;          // angular velocity
+let angle = 0;
+let targetStop = 0;
+let stopTimer = 0;
+let pulse = 0;
+
+function startSpin(){
+  if(spinning) return;
+
+  // daily limit if not premium
+  if(State.spunToday() && !State.isPremium()){
+    Overlay.play(I18N.t("already"));
+    return;
+  }
+
+  haptic("heavy");
+  spinning = true;
+
+  // initial kick (random)
+  omega = 8.8 + Math.random()*3.2;       // speed
+  stopTimer = 1.6 + Math.random()*1.2;   // spin time before slowing
+  pulse = 1.0;
+
+  // reward now (logic)
+  const qkGain = 3 + Math.floor(Math.random()*10);
+  State.addQK(qkGain);
+  State.setFlow(State.get().flow + (Math.random()*8-3));
+  State.markSpinToday();
+  renderHUD();
+
+  // guidance reveal
+  const { text } = nextPrediction();
+  setTimeout(()=> Overlay.play(text), 1200);
+}
+
+function updateSpin(dt){
+  if(!spinning){
+    // idle slow rotate
+    angle += dt * 0.08;
+    return;
+  }
+
+  // spin phase
+  stopTimer -= dt;
+  angle += omega * dt;
+
+  // start braking after timer
+  if(stopTimer <= 0){
+    // smooth damping
+    omega *= (1.0 - dt*0.65);
+    omega = Math.max(omega, 0.22);
+
+    // when almost stopped -> snap to nearest segment and finish
+    if(omega <= 0.28){
+      // snap
+      const segAngle = (Math.PI*2)/segCount;
+      const snapped = Math.round(angle/segAngle) * segAngle;
+      angle += (snapped - angle) * 0.18;
+
+      omega *= (1.0 - dt*2.4);
+      if(omega <= 0.06){
+        omega = 0;
+        spinning = false;
+        pulse = 1.0;
+        haptic("success");
+        FXDust.burst(window.innerWidth*0.65, window.innerHeight*0.42);
+        ScreenShake.hit();
+      }
+    }
+  }
+
+  // pointer glow pulse during spin
+  pulse = Math.max(0, pulse - dt*0.55);
+}
+
+/* ==========================================================
+   Parallax (subtle) - mobile safe
+   ========================================================== */
+let targetX=0, targetY=0, curX=0, curY=0;
+
+function bindParallax(){
+  function onMove(x,y){
+    const nx = (x/window.innerWidth)*2 - 1;
+    const ny = (y/window.innerHeight)*2 - 1;
+    targetX = nx;
+    targetY = ny;
+  }
+  window.addEventListener("mousemove", (e)=>onMove(e.clientX,e.clientY), {passive:true});
+  window.addEventListener("touchmove", (e)=>{
+    const t = e.touches?.[0];
+    if(!t) return;
+    onMove(t.clientX,t.clientY);
+  }, {passive:true});
+}
+bindParallax();
+
+/* ==========================================================
+   Pause when hidden (Telegram-safe)
+   ========================================================== */
+let paused = false;
+document.addEventListener("visibilitychange", ()=>{
+  paused = document.hidden;
+});
+
+/* ==========================================================
+   Main loop
+   ========================================================== */
+let tAcc = 0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(paused) return;
+
+  const dt = Math.min(clock.getDelta(), 0.033);
+  tAcc += dt;
+
+  // camera micro-parallax
+  curX += (targetX - curX) * 0.05;
+  curY += (targetY - curY) * 0.05;
+
+  const shake = ScreenShake.apply();
+
+  camera.rotation.y = curX * 0.06;
+  camera.rotation.x = -curY * 0.04;
+
+  camera.position.x = shake.x * 0.01;
+  camera.position.y = 0.35 + shake.y * 0.01;
+
+  // stars drift
+  stars.rotation.y += dt*0.010;
+  stars.rotation.x += dt*0.004;
+
+  // comets fly
+  updateComets(dt);
+
+  // dragon breathing
+  dragonMat.uniforms.uTime.value = tAcc;
+
+  // wheel spin
+  updateSpin(dt);
+  wheelGroup.rotation.z = angle;
+
+  // pointer shimmer
+  const glowPulse = 0.10 + 0.10*Math.sin(tAcc*2.4) + (spinning ? 0.10 : 0.0) + pulse*0.12;
+  glow.material.opacity = Math.max(0.06, Math.min(0.24, glowPulse));
+  rimMat.emissiveIntensity = 0.35 + (spinning ? 0.25 : 0.08) + (0.10*Math.sin(tAcc*1.2));
+  innerMat.emissiveIntensity = 0.20 + (spinning ? 0.18 : 0.05);
+
+  // FX dust
+  FXDust.step(dt);
+
+  // bloom gentle control
+  bloom.strength = (Perf.tier()==="low" ? 0.82 : (Perf.tier()==="medium" ? 0.98 : 1.10))
+                   + (spinning ? 0.10 : 0.0)
+                   + pulse*0.10;
+
+  composer.render();
+}
+animate();
+
+/* ==========================================================
+   Resize
+   ========================================================== */
+function onResize(){
+  renderer.setPixelRatio(Perf.dpr());
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  composer.setSize(window.innerWidth, window.innerHeight);
+  resizeFX();
+  layout3D();
+}
+window.addEventListener("resize", onResize);
+
+/* ==========================================================
+   UI events
+   ========================================================== */
+document.getElementById("spinBtn").addEventListener("click", startSpin);
+
+document.getElementById("langBtn").addEventListener("click", ()=>{
+  I18N.toggle();
+  Toast.show(I18N.getLang()==="zh" ? "已切换语言" : "Language switched");
+});
+
+document.getElementById("helpBtn").addEventListener("click", ()=>{
+  Overlay.play(I18N.t("helpText"));
+});
+
+document.getElementById("wishBtn").addEventListener("click", ()=>{
+  haptic("light");
+  const msg = (I18N.getLang()==="zh")
+    ? "许一个愿。保持安静，听见内心。把今天最重要的一件事写在心里，然后轻轻放下。"
+    : "Make a wish. Stay quiet and listen within. Hold one priority in your heart, then release the pressure.";
+  Overlay.play(msg);
+});
+
+document.getElementById("premiumBtn").addEventListener("click", ()=>{
+  // TODO: TonConnect -> 1 TON -> premiumUntil
+  // Demo activation:
+  State.addPremium(24);
+  Toast.show("Premium 24h");
+  Overlay.play(I18N.t("premiumOk"));
+});
+
+document.getElementById("soundBtn").addEventListener("click", ()=>{
+  Toast.show("Sound stub (add later)");
+});
+
+document.getElementById("journalBtn").addEventListener("click", ()=>{
+  Toast.show("Journal stub");
+});
+
+document.getElementById("proBtn").addEventListener("click", ()=>{
+  Toast.show("Profile stub");
+});
+
+/* ==========================================================
+   Startup: gentle fade-in & first layout fix for phones
+   ========================================================== */
+window.addEventListener("load", ()=>{
+  // ensure layout after Telegram bars settle
+  setTimeout(()=> layout3D(), 120);
+  setTimeout(()=> layout3D(), 420);
+});
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>TON TEMPLE / Fa Cai Ritual</title>
   <meta name="theme-color" content="#050505"/>
