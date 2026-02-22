@@ -1,219 +1,268 @@
-import asyncio
-import sqlite3
-import random
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-
-# ВСТАВЬ СВОЙ ТОКЕН НИЖЕ
-TOKEN = "8429740565:AAGqSQSwCrAEk8YO1mqJLUtYsBMLNimeTwI"
-
-bot = Bot(token=TOKEN)
-dp = Dispatcher()
-
-# Инициализация БД для хранения истории предсказаний
-def init_db():
-    conn = sqlite3.connect('oracle.db')
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS history 
-                      (user_id INTEGER, pred_id INTEGER)''')
-    conn.commit()
-    conn.close()
-
-# База из 100 глубоких предсказаний (пример структуры)
-PREDICTIONS = [
-    {"id": 1, "text": "Сегодня великий Золотой Дракон направляет твой взор внутрь себя. Твой Поток (Flow) требует не усилий, а тишины. Вселенная советует тебе на время отложить меч и заняться восстановлением духа: проведи время с близкими, ведь они — твой истинный якорь в бурном океане цифровой эры. Не позволяй мелким тревогам нарушить твою внутреннюю гармонию. Будь подобен воде — она обтекает препятствия, не теряя своей силы. Сегодня удача не стучит в дверь, она ждет тебя в моменте спокойствия. Используй этот день, чтобы испытать то, что раньше казалось невозможным — начни новое, смени маршрут, доверься интуиции. Твоя вера в успех — это и есть сам успех. Всё получится, ибо печать процветания уже отмечена в твоем коде судьбы..."},
-    # Здесь добавляются остальные 99 предсказаний в таком же стиле
-]
-
-def get_unique_prediction(user_id):
-    conn = sqlite3.connect('oracle.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT pred_id FROM history WHERE user_id = ?", (user_id,))
-    seen_ids = [row[0] for row in cursor.fetchall()]
-    
-    available = [p for p in PREDICTIONS if p['id'] not in seen_ids]
-    if not available: # Если всё посмотрел, обнуляем цикл
-        cursor.execute("DELETE FROM history WHERE user_id = ?", (user_id,))
-        available = PREDICTIONS
-    
-    chosen = random.choice(available)
-    cursor.execute("INSERT INTO history VALUES (?, ?)", (user_id, chosen['id']))
-    conn.commit()
-    conn.close()
-    return chosen['text']
-
-@dp.message(Command("start"))
-async def start(message: types.Message):
-    init_db()
-    markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⛩ ВОЙТИ В ХРАМ ⛩", web_app=WebAppInfo(url="ТВОЯ_ССЫЛКА_НА_ГИТХАБ_ИЛИ_СЕРВЕР"))]
-    ])
-    await message.answer_photo(
-        photo="https://твой-хост.com/dragon.jpg", 
-        caption=f"Приветствую, {message.from_user.first_name}!\n\nДракон ждет тебя. Готов ли ты познать свой Поток?",
-        reply_markup=markup
-    )
-
-async def main():
-    await dp.start_polling(bot)
-
-if __name__ == '__main__':
-    asyncio.run(main())
-    <!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Oracle 2026 AAA+</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Temple Oracle AAA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Cinzel', serif; color: gold; }
-        #canvas-container { position: fixed; top: 0; left: 0; z-index: 1; }
-        
-        /* Слой UI */
-        #ui-layer { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; pointer-events: none; }
-        .btn { pointer-events: auto; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; padding: 15px 40px; border-radius: 30px; color: gold; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
-        .btn:active { transform: scale(0.95); background: gold; color: black; }
-
-        /* Папирус */
-        #scroll-container { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            width: 90%; max-height: 80vh; background: url('https://твой-хост.com/paper_texture.jpg');
-            background-size: cover; z-index: 100; border-radius: 5px; padding: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); display: none; overflow-y: auto;
+        /* ==========================================
+           BASE & LAYOUT
+           ========================================== */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; overflow: hidden;
+            font-family: ui-sans-serif, system-ui, sans-serif;
         }
-        #scroll-text { color: #3d2b1f; font-family: 'Courier New', serif; line-height: 1.6; font-size: 1.1rem; }
-        #seal { width: 100px; display: block; margin: 20px auto 0; opacity: 0; transform: scale(3); }
 
-        /* Монеты */
-        .coin-effect { position: fixed; pointer-events: none; z-index: 99; }
+        #revealOverlay {
+            position: fixed; inset: 0; z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 50% 40%, rgba(15, 15, 25, 0.9), #000);
+            backdrop-filter: blur(8px);
+        }
+
+        #revealStage {
+            position: relative;
+            width: min(100%, 600px);
+            height: min(100%, 800px);
+        }
+
+        /* ==========================================
+           V1.4 STARFIELD & FX
+           ========================================== */
+        #starfieldCanvas, #sealBurstCanvas {
+            position: absolute; inset: 0; pointer-events: none;
+        }
+
+        /* ==========================================
+           HONGBAO & PARCHMENT
+           ========================================== */
+        #hongbao {
+            position: absolute; left: 50%; top: 50%;
+            width: 280px; height: 380px;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0; transition: all 0.6s cubic-bezier(0.15, 0.9, 0.2, 1);
+        }
+        #hongbao img { width: 100%; height: 100%; border-radius: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+
+        #parchmentWrap {
+            position: absolute; inset: 10% 5%;
+            opacity: 0; transform: scale(0.9) translateY(20px);
+            transition: all 0.7s cubic-bezier(0.15, 0.9, 0.2, 1);
+        }
+
+        #parchment {
+            width: 100%; height: 100%; border-radius: 20px;
+            background: radial-gradient(circle at 50% 30%, #fff3d1, #e4cca0);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            position: relative; overflow: hidden;
+            border: 2px solid rgba(255,211,106,0.3);
+        }
+
+        #parchmentHUD {
+            position: absolute; top: 25px; left: 30px; right: 30px;
+            display: flex; justify-content: space-between;
+            font-size: 11px; letter-spacing: 2px; color: #5d4037; opacity: 0.7;
+        }
+
+        #inkCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        /* ==========================================
+           V1.3 WISH MOMENT
+           ========================================== */
+        #wishText {
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+            color: #fff; font-size: 24px; font-weight: bold; opacity: 0;
+            text-shadow: 0 0 20px rgba(255,211,106,0.8); transition: opacity 0.5s;
+        }
+
+        #seal {
+            position: absolute; right: 40px; bottom: 40px;
+            width: 100px; height: 100px; opacity: 0;
+            transform: scale(2) rotate(-15deg);
+        }
+        #seal img { width: 100%; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
+
+        /* ==========================================
+           BUTTONS (DECISION)
+           ========================================== */
+        #revealActions {
+            position: absolute; bottom: -80px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 15px; opacity: 0;
+            transition: opacity 0.5s ease 0.5s;
+        }
+        #revealActions.show { opacity: 1; bottom: 30px; }
+
+        .revealBtn {
+            background: rgba(0,0,0,0.6); color: #ffe082;
+            border: 1px solid #ffe082; padding: 12px 24px;
+            border-radius: 12px; font-weight: bold; cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
     </style>
 </head>
 <body>
 
-<div id="canvas-container"></div>
+<div id="revealOverlay">
+    <canvas id="starfieldCanvas"></canvas>
+    
+    <div id="revealStage">
+        <div id="hongbao"><img src="hongbao.jpg" alt="Hongbao"></div>
 
-<div id="ui-layer">
-    <div id="hud">
-        <div style="font-size: 0.8rem; opacity: 0.7;">QUANTUM ENERGY</div>
-        <div id="qk-val" style="font-size: 2rem; text-shadow: 0 0 10px gold;">888.88</div>
+        <div id="parchmentWrap">
+            <div id="parchment">
+                <div id="parchmentHUD">
+                    <div id="pTitle">TEMPLE GUIDANCE</div>
+                    <div id="pMeta">2024-05-20</div>
+                </div>
+                <canvas id="inkCanvas"></canvas>
+                <div id="wishText">MAKE A WISH</div>
+                <div id="seal"><img src="seal.png" alt="Seal"></div>
+            </div>
+
+            <div id="revealActions">
+                <button class="revealBtn" onclick="closeApp('confirm')">CONFIRM</button>
+                <button class="revealBtn" onclick="closeApp('again')">ONCE MORE</button>
+            </div>
+        </div>
     </div>
-
-    <button class="btn" onclick="startRitual()">ЗАПУСТИТЬ КОЛЕСО</button>
-</div>
-
-<div id="scroll-container">
-    <div id="scroll-text"></div>
-    <img src="royalSeal.jpg" id="seal">
+    <canvas id="sealBurstCanvas"></canvas>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // Звуки
-    const zenMusic = new Audio('zen.mp3');
-    const coinSound = new Audio('coin.mp3');
-    zenMusic.loop = true;
-
-    // 3D Scene Setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    // Добавление Дракона (Texture Layer)
-    const loader = new THREE.TextureLoader();
-    const dragonTex = loader.load('dragon.jpg');
-    const dragonMat = new THREE.SpriteMaterial({ map: dragonTex, transparent: true, opacity: 0.8 });
-    const dragon = new THREE.Sprite(dragonMat);
-    dragon.scale.set(5, 5, 1);
-    dragon.position.y = 1;
-    scene.add(dragon);
-
-    // Частицы фона (Звездная пыль)
-    const starGeo = new THREE.BufferGeometry();
-    const starCount = 3000;
-    const posArray = new Float32Array(starCount * 3);
-    for(let i=0; i<starCount*3; i++) posArray[i] = (Math.random()-0.5)*10;
-    starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const starMat = new THREE.PointsMaterial({ size: 0.005, color: 0xffd700 });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
-
-    camera.position.z = 5;
-
-    function animate() {
-        requestAnimationFrame(animate);
-        stars.rotation.y += 0.001;
-        // Эффект дыхания дракона
-        const time = Date.now() * 0.001;
-        dragon.scale.set(5 + Math.sin(time)*0.1, 5 + Math.sin(time)*0.1, 1);
-        renderer.render(scene, camera);
+/* ==========================================
+   1. ПРЕДСКАЗАНИЯ (DECK SYSTEM)
+   ========================================== */
+const GuidanceParts = {
+    en: {
+        openers: ["Today, move slower on purpose and let your mind settle.", "Stability is your best friend today; don't rush."],
+        family: ["Spending time with family provides hidden protection.", "A warm conversation will dissolve old tensions."],
+        body: ["Movement restores clarity. Walk more today.", "Hydrate and breathe; your nervous system needs peace."],
+        closer: ["Trust the flow. The right timing is coming.", "Consistency is your superpower. Stay calm."]
+    },
+    zh: {
+        openers: ["今天最重要的不是速度，而是心的安定。", "这一天适合“稳”，不适合“冲”。"],
+        family: ["多陪陪家人，温暖能帮你挡掉杂音。", "找个信任的人聊聊，心结会自然打开。"],
+        body: ["多走路，让身体把压力排出去。", "照顾好自己：多喝水、深呼吸。"],
+        closer: ["相信一切自有安排。顺流而行。", "你的坚持即将换来好运。保持沉稳。"]
     }
-    animate();
+};
 
-    // Логика ритуала
-    function startRitual() {
-        if(zenMusic.paused) {
-            zenMusic.volume = 0;
-            zenMusic.play();
-            gsap.to(zenMusic, {volume: 0.5, duration: 3});
-        }
+function generateText(lang, idx) {
+    const p = GuidanceParts[lang];
+    const pick = (arr, k) => arr[(idx + k) % arr.length];
+    const s = [pick(p.openers, 1), pick(p.family, 2), pick(p.body, 3), pick(p.closer, 4)];
+    s.splice(2, 0, lang === 'en' ? "Focus only on what you can control." : "只关注你能够掌控的事物。");
+    return s.join(lang === 'en' ? " " : "");
+}
 
-        tg.HapticFeedback.impactOccurred('heavy');
-        spawnCoins();
-
-        // Имитация задержки "вращения"
-        setTimeout(() => {
-            showScroll("ТВОЕ ПОЛНОЕ ПРЕДСКАЗАНИЕ ИЗ БАЗЫ БОТА...");
-        }, 2000);
+/* ==========================================
+   2. FX SYSTEM (STARS & BURST)
+   ========================================== */
+const FX = {
+    stars: [], speed: 1, 
+    init() {
+        const dpr = window.devicePixelRatio || 1;
+        const sCanvas = document.getElementById('starfieldCanvas');
+        this.sCtx = sCanvas.getContext('2d');
+        sCanvas.width = window.innerWidth * dpr;
+        sCanvas.height = window.innerHeight * dpr;
+        for(let i=0; i<100; i++) this.stars.push({x:Math.random()*100, y:Math.random()*100, z:Math.random(), o:Math.random()});
+        this.animate();
+    },
+    animate() {
+        const w = window.innerWidth; const h = window.innerHeight;
+        this.sCtx.clearRect(0,0,w*2,h*2);
+        this.stars.forEach(s => {
+            s.y += (0.05 + s.z*0.1) * this.speed;
+            if(s.y > 100) s.y = 0;
+            this.sCtx.fillStyle = `rgba(255,243,209,${s.o})`;
+            this.sCtx.beginPath();
+            this.sCtx.arc((s.x/100)*w, (s.y/100)*h, 1 + s.z, 0, Math.PI*2);
+            this.sCtx.fill();
+        });
+        if(this.speed > 1) this.speed -= 0.1;
+        requestAnimationFrame(() => this.animate());
+    },
+    burst() {
+        const bCanvas = document.getElementById('sealBurstCanvas');
+        const bCtx = bCanvas.getContext('2d');
+        // Логика золотых искр вокруг печати
     }
+};
 
-    function spawnCoins() {
-        coinSound.currentTime = 0;
-        coinSound.play();
-        // Здесь можно добавить 3D монеты или спрайты
-        tg.HapticFeedback.notificationOccurred('success');
+/* ==========================================
+   3. CORE REVEAL FLOW
+   ========================================= */
+async function startReveal(symbol = "LUCK") {
+    const lang = 'zh'; // или 'en'
+    const overlay = document.getElementById('revealOverlay');
+    overlay.style.display = 'flex';
+    FX.init();
+
+    // 1. Появление конверта
+    const hb = document.getElementById('hongbao');
+    hb.style.opacity = 1;
+    hb.style.transform = 'translate(-50%, -50%) scale(1)';
+    
+    await new Promise(r => setTimeout(r, 1000));
+
+    // 2. Открытие (Конверт -> Папирус)
+    hb.style.opacity = 0;
+    hb.style.transform = 'translate(-50%, -60%) scale(1.2)';
+    const pw = document.getElementById('parchmentWrap');
+    pw.style.opacity = 1;
+    pw.style.transform = 'scale(1) translateY(0)';
+    FX.speed = 10; // Warp speed эффект
+
+    // 3. Письмо кистью
+    const text = generateText(lang, Math.floor(Math.random()*100));
+    await writeInk(text, lang);
+
+    // 4. Печать
+    const seal = document.getElementById('seal');
+    seal.style.transition = 'all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+    seal.style.opacity = 1;
+    seal.style.transform = 'scale(1) rotate(-8deg)';
+    
+    // Вибрация (Telegram WebApp)
+    if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+
+    // 5. Желание
+    const wt = document.getElementById('wishText');
+    wt.textContent = lang === 'en' ? "MAKE A WISH" : "许一个愿";
+    wt.style.opacity = 1;
+    
+    // Показ кнопок
+    document.getElementById('revealActions').classList.add('show');
+}
+
+async function writeInk(text, lang) {
+    const canvas = document.getElementById('inkCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = lang === 'zh' ? '600 24px "Noto Serif SC"' : '600 20px serif';
+    ctx.fillStyle = 'rgba(60, 30, 10, 0.9)';
+    
+    const chars = Array.from(text);
+    let x = 40, y = 100;
+    
+    for(let char of chars) {
+        ctx.fillText(char, x, y);
+        x += ctx.measureText(char).width + 2;
+        if(x > canvas.width - 60) { x = 40; y += 35; }
+        await new Promise(r => setTimeout(r, 40 + Math.random()*30));
     }
+}
 
-    function showScroll(text) {
-        const scroll = document.getElementById('scroll-container');
-        const content = document.getElementById('scroll-text');
-        const seal = document.getElementById('seal');
+function closeApp(type) {
+    alert("Action: " + type);
+    location.reload(); // Для теста
+}
 
-        scroll.style.display = 'block';
-        gsap.to(scroll, {scale: 1, duration: 1, ease: "back.out"});
-
-        // Эффект печати текста (Каллиграфия)
-        let i = 0;
-        content.innerHTML = "";
-        const timer = setInterval(() => {
-            if(i < text.length) {
-                content.innerHTML += text.charAt(i);
-                i++;
-            } else {
-                clearInterval(timer);
-                // Удар печатью
-                gsap.to(seal, {opacity: 1, scale: 1, duration: 0.5, ease: "bounce.out", onComplete: () => {
-                    tg.HapticFeedback.impactOccurred('heavy');
-                    spawnCoins();
-                }});
-            }
-        }, 30);
-    }
-
-    // Параллакс эффект для PS5 графики
-    window.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 0.5;
-        const y = (e.clientY / window.innerHeight - 0.5) * 0.5;
-        dragon.position.x = x;
-        dragon.position.y = 1 - y;
-    });
+// ЗАПУСК (вызывай эту функцию после остановки колеса)
+// startReveal();
 </script>
 </body>
 </html>
