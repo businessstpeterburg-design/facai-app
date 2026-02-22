@@ -16,9 +16,6 @@
       --glassBorder: rgba(255,211,106,.18);
     }
     html,body{height:100%; margin:0; background:#000; overflow:hidden; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;}
-    canvas{display:block}
-
-    /* ====== LAYERS ====== */
     #stage3d{
       position:fixed; inset:0;
       z-index:1;
@@ -45,10 +42,7 @@
       flex-direction:column;
       padding:10px;
       gap:10px;
-      box-sizing:border-box;
     }
-
-    /* ====== TOP HUD ====== */
     .topHud{
       display:flex;
       align-items:center;
@@ -62,25 +56,10 @@
       -webkit-backdrop-filter: blur(14px);
       box-shadow: 0 10px 40px rgba(0,0,0,.35);
     }
-    .brand{
-      display:flex; flex-direction:column; gap:2px;
-      line-height:1.1;
-      user-select:none;
-    }
-    .brand .t1{
-      font-weight:700; letter-spacing:.12em; font-size:12px;
-      color:var(--warm);
-      text-transform:uppercase;
-      opacity:.95;
-    }
-    .brand .t2{
-      font-weight:600; letter-spacing:.16em; font-size:10px;
-      color:rgba(255,211,106,.8);
-      text-transform:uppercase;
-    }
-    .hudRight{
-      display:flex; align-items:center; gap:8px;
-    }
+    .brand{display:flex; flex-direction:column; gap:2px; line-height:1.1; user-select:none;}
+    .brand .t1{font-weight:700; letter-spacing:.12em; font-size:12px; color:var(--warm); text-transform:uppercase; opacity:.95;}
+    .brand .t2{font-weight:600; letter-spacing:.16em; font-size:10px; color:rgba(255,211,106,.8); text-transform:uppercase;}
+    .hudRight{display:flex; align-items:center; gap:8px;}
     .pill{
       display:inline-flex; align-items:center; gap:6px;
       padding:8px 10px;
@@ -112,15 +91,7 @@
     .btn:hover{ transform: translateY(-1px); background: rgba(255,211,106,.14); border-color: rgba(255,211,106,.34);}
     .btn:active{ transform: translateY(0px) scale(.99); }
 
-    /* ====== CENTER STAGE ====== */
-    .center{
-      flex:1;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-      align-content:stretch;
-    }
-
+    .center{flex:1; display:grid; grid-template-columns:1fr; gap:10px; align-content:stretch;}
     .card{
       border-radius:18px;
       background: var(--glass);
@@ -131,39 +102,17 @@
       overflow:hidden;
       position:relative;
     }
-    .cardInner{
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .title{
-      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
-      user-select:none;
-    }
+    .cardInner{padding:14px; display:flex; flex-direction:column; gap:12px;}
+    .title{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; user-select:none;}
     .title h2{
-      margin:0;
-      font-size:13px;
-      letter-spacing:.16em;
-      text-transform:uppercase;
+      margin:0; font-size:13px; letter-spacing:.16em; text-transform:uppercase;
       color:rgba(255,243,209,.95);
       font-family: Orbitron, Inter, system-ui;
       font-weight:700;
     }
-    .title .sub{
-      font-size:10px;
-      letter-spacing:.12em;
-      color: rgba(255,211,106,.74);
-      text-transform:uppercase;
-      opacity:.95;
-    }
+    .title .sub{font-size:10px; letter-spacing:.12em; color: rgba(255,211,106,.74); text-transform:uppercase; opacity:.95;}
 
-    /* ====== WHEEL BUTTON ====== */
-    .bigAction{
-      display:flex; flex-direction:column; gap:10px;
-      align-items:center; justify-content:center;
-      padding:18px 14px 16px;
-    }
+    .bigAction{display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; padding:18px 14px 16px;}
     .wheelBtn{
       width:min(340px, 92%);
       height:58px;
@@ -181,7 +130,6 @@
     }
     .wheelBtn:hover{ transform: translateY(-1px);}
     .wheelBtn:active{ transform: translateY(0px) scale(.99);}
-
     .micro{
       font-size:10px;
       letter-spacing:.12em;
@@ -192,12 +140,8 @@
       max-width: 620px;
     }
 
-    /* ====== BOTTOM DOCK ====== */
     .dock{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 12px;
       border-radius:16px;
       background: linear-gradient(180deg, rgba(10,10,12,.54), rgba(10,10,12,.36));
@@ -214,12 +158,10 @@
       color: rgba(255,243,209,.92);
       cursor:pointer;
       transition: transform .12s ease, border-color .18s ease;
-      font-weight:700;
     }
     .dotBtn:hover{ transform: translateY(-1px); border-color: rgba(255,211,106,.28);}
     .dotBtn:active{ transform: translateY(0px) scale(.99); }
 
-    /* ====== OVERLAY: PARCHMENT REVEAL ====== */
     #overlay{
       position:fixed; inset:0;
       z-index:10;
@@ -243,10 +185,7 @@
       background: radial-gradient(110% 90% at 35% 25%, rgba(255,243,209,.14), rgba(0,0,0,.0) 55%),
                   linear-gradient(180deg, rgba(20,16,10,.95), rgba(10,9,8,.86));
     }
-    .parchmentCanvas{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-    }
+    .parchmentCanvas{position:absolute; inset:0; width:100%; height:100%;}
     .overlayTop{
       position:absolute; left:0; right:0; top:0;
       display:flex; justify-content:space-between; align-items:center;
@@ -276,30 +215,6 @@
       letter-spacing:.18em;
       text-transform:uppercase;
     }
-
-    /* tiny badge */
-    .premiumBadge{
-      position:absolute; right:16px; top:70px;
-      z-index:6;
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(255,211,106,.10);
-      border:1px solid rgba(255,211,106,.25);
-      color: rgba(255,243,209,.92);
-      font-size:10px;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      display:none;
-      user-select:none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .premiumBadge.show{ display:inline-flex; align-items:center; gap:8px; }
-    .premiumDot{
-      width:7px;height:7px;border-radius:50%;
-      background: rgba(255,211,106,.92);
-      box-shadow: 0 0 18px rgba(255,211,106,.55);
-    }
   </style>
 </head>
 
@@ -316,7 +231,7 @@
         </div>
         <div class="hudRight">
           <div class="pill" id="qkPill">QK 000.00</div>
-          <div class="pill" id="flowPill">FLOW 00/100</div>
+          <div class="pill" id="flowPill">FLOW 50/100</div>
           <button class="btn" id="helpBtn">i</button>
           <button class="btn" id="langBtn">EN</button>
           <button class="btn" id="premiumBtn">GATE</button>
@@ -327,14 +242,14 @@
         <div class="card">
           <div class="cardInner">
             <div class="title">
-              <h2 id="titleMain">Temple Ritual</h2>
-              <div class="sub" id="titleSub">Spin → Guidance → Decision</div>
+              <h2 id="titleMain">帝王福流仪式</h2>
+              <div class="sub" id="titleSub">转轮 → 指引 → 抉择</div>
             </div>
 
             <div class="bigAction">
-              <button class="wheelBtn" id="spinBtn">SPIN WHEEL</button>
+              <button class="wheelBtn" id="spinBtn">转动福轮</button>
               <div class="micro" id="microText">
-                This is a ritualized interface. Not financial advice.
+                这是一种仪式化界面，并非金融建议。
               </div>
             </div>
           </div>
@@ -354,49 +269,51 @@
     </div>
   </div>
 
-  <div class="premiumBadge" id="premiumBadge"><span class="premiumDot"></span> PREMIUM</div>
-
-  <!-- PARCHMENT OVERLAY -->
   <div id="overlay">
     <div class="parchmentWrap">
       <div class="overlayTop">
-        <div class="label" id="overlayLabel">TEMPLE GUIDANCE</div>
+        <div class="label" id="overlayLabel">天宫指引</div>
         <button class="closeBtn" id="closeOverlay">CLOSE</button>
       </div>
       <canvas class="parchmentCanvas" id="parchment"></canvas>
     </div>
   </div>
 
-  <!-- THREE (NO MODULES) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <!-- ✅ NO MODULES. MAX COMPAT. -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
   <script>
   (function(){
-    "use strict";
+    const VERSION = "v16_telegram_safe"; // change this to bust cache
+    const $ = (id)=>document.getElementById(id);
 
-    /* ===============================
-       PERF GOVERNOR (Telegram-safe)
-       =============================== */
-    const PERF = (()=>{
-      let q="high";
+    // ---------- SAFETY: show errors on screen ----------
+    function fatal(err){
+      console.error(err);
+      const micro = $("microText");
+      micro.textContent = "BOOT ERROR: open console / WebView blocked scripts. " + (err && err.message ? err.message : "");
+      micro.style.color = "rgba(255,120,120,.95)";
+    }
+
+    // ---------- PERF / DPR CAP ----------
+    const Perf = (()=>{
+      let q = "high";
       const mem = navigator.deviceMemory || 4;
       const cores = navigator.hardwareConcurrency || 4;
-      if(mem<=3 || cores<=4) q="medium";
-      if(mem<=2) q="low";
-      function dpr(){
-        const cap = (q==="low") ? 1.25 : 2.0;
-        return Math.min(window.devicePixelRatio||1, cap);
-      }
-      return {q, dpr};
+      if(mem <= 3 || cores <= 4) q = "medium";
+      if(mem <= 2) q = "low";
+      const dprCap = ()=> Math.min(window.devicePixelRatio || 1, (q==="low") ? 1.25 : 2.0);
+      return { q, dprCap };
     })();
 
-    /* ===============================
-       HAPTIC (Telegram + fallback)
-       =============================== */
+    // ---------- HAPTIC ----------
     function haptic(type="light"){
       try{
         if(window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback){
-          const H=Telegram.WebApp.HapticFeedback;
+          const H = Telegram.WebApp.HapticFeedback;
           if(type==="success") H.notificationOccurred("success");
           else if(type==="error") H.notificationOccurred("error");
           else H.impactOccurred(type);
@@ -410,299 +327,195 @@
       }
     }
 
-    /* ===============================
-       TEMPLE AUDIO (simple, safe)
-       (no casino, quiet)
-       =============================== */
-    const AudioSys = (()=>{
-      let ctx=null, master=null, enabled=true;
-      function ensure(){
-        if(!enabled) return;
-        if(!ctx){
-          ctx = new (window.AudioContext||window.webkitAudioContext)();
-          master = ctx.createGain();
-          master.gain.value=0.35;
-          master.connect(ctx.destination);
-        }
-        if(ctx.state!=="running") ctx.resume().catch(()=>{});
-      }
-      const r=(a,b)=>a+Math.random()*(b-a);
-      const now=()=>ctx?ctx.currentTime:0;
-
-      function whoosh(){
-        ensure(); if(!ctx) return;
-        const t0=now();
-        const osc=ctx.createOscillator();
-        osc.type="sine";
-        osc.frequency.setValueAtTime(160,t0);
-        osc.frequency.exponentialRampToValueAtTime(620*r(.92,1.08),t0+.18);
-        const g=ctx.createGain();
-        g.gain.setValueAtTime(0.0001,t0);
-        g.gain.exponentialRampToValueAtTime(0.14,t0+.04);
-        g.gain.exponentialRampToValueAtTime(0.0001,t0+.22);
-        osc.connect(g).connect(master);
-        osc.start(t0); osc.stop(t0+.24);
-      }
-
-      function chime(){
-        ensure(); if(!ctx) return;
-        const t0=now();
-        const freqs=[523.25,659.25,783.99].map(f=>f*r(.98,1.02));
-        freqs.forEach((f,i)=>{
-          const osc=ctx.createOscillator(); osc.type="sine";
-          osc.frequency.setValueAtTime(f,t0);
-          const g=ctx.createGain();
-          g.gain.setValueAtTime(0.0001,t0);
-          g.gain.exponentialRampToValueAtTime(0.10/(i+1),t0+.02);
-          g.gain.exponentialRampToValueAtTime(0.0001,t0+.6);
-          osc.connect(g).connect(master);
-          osc.start(t0+i*0.02); osc.stop(t0+.65);
-        });
-      }
-
-      function stamp(){
-        ensure(); if(!ctx) return;
-        const t0=now();
-        const osc=ctx.createOscillator(); osc.type="sine";
-        osc.frequency.setValueAtTime(110*r(.95,1.05),t0);
-        osc.frequency.exponentialRampToValueAtTime(55,t0+.09);
-        const g=ctx.createGain();
-        g.gain.setValueAtTime(0.0001,t0);
-        g.gain.exponentialRampToValueAtTime(0.22,t0+.01);
-        g.gain.exponentialRampToValueAtTime(0.0001,t0+.16);
-        osc.connect(g).connect(master);
-        osc.start(t0); osc.stop(t0+.18);
-      }
-
-      function toggle(){
-        enabled=!enabled;
-        if(enabled) ensure();
-        return enabled;
-      }
-
-      return {ensure, whoosh, chime, stamp, toggle};
-    })();
-
-    /* ===============================
-       I18N (EN label locked)
-       =============================== */
+    // ---------- I18N (EN label locked) ----------
     const I18N = (()=>{
-      const key="tt_lang";
-      let lang=localStorage.getItem(key)||"zh";
-      const dict={
-        zh:{
+      const storeKey = "tt_lang";
+      let lang = localStorage.getItem(storeKey) || "zh";
+      const dict = {
+        zh: {
           titleMain:"帝王福流仪式",
           titleSub:"转轮 → 指引 → 抉择",
           spin:"转动福轮",
           micro:"这是一种仪式化界面，并非金融建议。",
           overlay:"天宫指引",
-          wish:"许一个愿",
           gate:"供奉",
-          info:"说明",
+          helpMsg:"三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。",
+          wishMsg:"许一个愿。保持安静，听见内心。"
         },
-        en:{
+        en: {
           titleMain:"Temple Ritual",
           titleSub:"Spin → Guidance → Decision",
           spin:"SPIN WHEEL",
           micro:"This is a ritualized interface. Not financial advice.",
           overlay:"TEMPLE GUIDANCE",
-          wish:"MAKE A WISH",
           gate:"GATE",
-          info:"INFO",
+          helpMsg:"Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.",
+          wishMsg:"Make a wish. Stay quiet and listen within."
         }
       };
-      function t(k){ return (dict[lang]&&dict[lang][k]) || dict.zh[k] || k; }
-      function set(n){
-        lang = (n==="en") ? "en" : "zh";
-        localStorage.setItem(key, lang);
+      function t(k){ return (dict[lang] && dict[lang][k]) ? dict[lang][k] : dict.zh[k]; }
+      function set(nl){
+        lang = (nl==="en") ? "en" : "zh";
+        localStorage.setItem(storeKey, lang);
         render();
       }
-      function toggle(){ set(lang==="zh"?"en":"zh"); }
+      function toggle(){ set(lang==="zh" ? "en" : "zh"); }
       function render(){
-        document.documentElement.lang=lang;
-        document.getElementById("titleMain").textContent=t("titleMain");
-        document.getElementById("titleSub").textContent=t("titleSub");
-        document.getElementById("spinBtn").textContent=t("spin");
-        document.getElementById("microText").textContent=t("micro");
-        document.getElementById("overlayLabel").textContent=t("overlay");
-        document.getElementById("helpBtn").textContent="i";
-        document.getElementById("langBtn").textContent="EN"; // LOCKED
-        document.getElementById("premiumBtn").textContent = (lang==="zh") ? "供奉" : "GATE";
+        document.documentElement.lang = lang;
+        $("titleMain").textContent = t("titleMain");
+        $("titleSub").textContent = t("titleSub");
+        $("spinBtn").textContent = t("spin");
+        $("microText").textContent = t("micro");
+        $("overlayLabel").textContent = t("overlay");
+        $("langBtn").textContent = "EN"; // LOCKED
+        $("helpBtn").textContent = "i";
+        $("premiumBtn").textContent = (lang==="zh") ? "供奉" : "GATE";
       }
-      return {t,set,toggle,render,get:()=>lang};
+      return { t, toggle, render, getLang:()=>lang };
     })();
     I18N.render();
 
-    /* ===============================
-       STATE (Premium + non-repeat bag)
-       =============================== */
+    // ---------- STATE ----------
     const State = (()=>{
-      const key="tt_state_v1_ps5feel";
-      const base={ qk:0, flow:50, lastSpinDay:"", premiumUntil:0, predBag:[] };
-      const now=()=>Date.now();
-      let s;
-      try{ s=Object.assign({}, base, JSON.parse(localStorage.getItem(key)||"null")||{}); }
-      catch(e){ s=Object.assign({}, base); }
+      const key = "tt_state_v16";
+      const now = ()=>Date.now();
+      const base = {
+        qk:0, flow:50,
+        lastSpinDay:"",
+        premiumUntil:0,
+        usedPredIds:[],
+        predBag:[]
+      };
+      function load(){
+        try{
+          const s = JSON.parse(localStorage.getItem(key) || "null");
+          return Object.assign({}, base, s||{});
+        }catch(e){ return Object.assign({}, base); }
+      }
+      let s = load();
       function save(){ localStorage.setItem(key, JSON.stringify(s)); }
-      function isPremium(){ return s.premiumUntil>now(); }
-      function addPremium(h=24){ s.premiumUntil=now()+h*3600*1000; save(); }
-      function addQK(v){ s.qk=Math.max(0, Math.round((s.qk+v)*100)/100); save(); }
-      function setFlow(v){ s.flow=Math.max(0, Math.min(100, Math.round(v))); save(); }
-      function spunToday(){
-        const d=new Date(); const k=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        return s.lastSpinDay===k;
-      }
+      function isPremium(){ return s.premiumUntil > now(); }
+      function addPremium(hours=24){ s.premiumUntil = now() + hours*3600*1000; save(); }
+      function addQK(v){ s.qk = Math.max(0, Math.round((s.qk+v)*100)/100); save(); }
+      function setFlow(v){ s.flow = Math.max(0, Math.min(100, Math.round(v))); save(); }
       function markSpinToday(){
-        const d=new Date(); const k=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        s.lastSpinDay=k; save();
-      }
-      function ensureBag(n=100){
-        if(!Array.isArray(s.predBag) || s.predBag.length===0){
-          const ids=[...Array(n)].map((_,i)=>i);
-          for(let i=ids.length-1;i>0;i--){
-            const j=Math.floor(Math.random()*(i+1));
-            [ids[i],ids[j]]=[ids[j],ids[i]];
-          }
-          s.predBag=ids; save();
-        }
-      }
-      function popId(n=100){
-        ensureBag(n);
-        const id=s.predBag.pop();
+        const d = new Date();
+        s.lastSpinDay = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         save();
-        return id;
       }
-      return {s,save,isPremium,addPremium,addQK,setFlow,spunToday,markSpinToday,popId};
+      function spunToday(){
+        const d = new Date();
+        const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        return s.lastSpinDay === k;
+      }
+      function get(){ return s; }
+      return { get, save, isPremium, addPremium, addQK, setFlow, markSpinToday, spunToday };
     })();
 
     function renderHUD(){
-      document.getElementById("qkPill").textContent = `QK ${State.s.qk.toFixed(2)}`;
-      document.getElementById("flowPill").textContent = `FLOW ${String(State.s.flow).padStart(2,"0")}/100`;
-      const badge=document.getElementById("premiumBadge");
-      if(State.isPremium()) badge.classList.add("show"); else badge.classList.remove("show");
+      const s = State.get();
+      $("qkPill").textContent = "QK " + s.qk.toFixed(2);
+      $("flowPill").textContent = "FLOW " + String(s.flow).padStart(2,"0") + "/100";
     }
     renderHUD();
 
-    /* ===============================
-       100 Predictions (EN/ZH), 5+ sentences each
-       No “signals”, no profit promises.
-       =============================== */
-    function buildPredictions(){
-      const enBases=[
-        "Today is about returning to calm. Spend more time with family or people who steady you. Keep your schedule light and protect your attention. Do one meaningful task, then stop and rest. Your best results arrive when you choose harmony over pressure.",
-        "Treat today like a reset. Walk more, breathe slower, and reduce noise from messages and arguments. If you feel tension, soften your body before you answer anyone. Spend time with someone you trust, even briefly. Simplicity is your strongest strategy today.",
-        "You have enough strength for the day, but pacing matters. Avoid rushing into promises or dramatic decisions. Choose one priority and finish it carefully. Then allow yourself real recovery time. Quiet consistency will bring you forward.",
-        "Today favors connection over confrontation. Keep your words fewer and kinder, especially when you feel irritated. Move your body to release stress and clear your mind. A small new experience can refresh your mood. Your flow grows when you stay grounded.",
-        "There is a quiet luck in the day, but it appears only when your mind is steady. Don’t chase chaos and don’t force outcomes. Spend time with supportive people and keep your environment clean. Pause before reacting to pressure. Peace is your advantage."
+    // ---------- 100 PREDICTIONS EN + ZH (>=5 sentences each) ----------
+    const Predictions = (()=>{
+      const enBase = [
+        "Today is about returning to what is steady. Spend more time with family or the people who calm your mind. Reduce noise and do fewer things, but do them well. If tension appears, breathe and soften your shoulders, then continue slowly. You end the day stronger when you protect peace instead of forcing outcomes.",
+        "Treat today like a gentle reset. Walk more, drink water, and let your nervous system slow down. Avoid arguments and do not try to prove a point. Give one act of care to someone close to you, then let it go without expectations. Harmony is your advantage today.",
+        "Your power is real, but pacing is everything today. Keep commitments light and do not add new pressure. If an opportunity appears, choose the option that reduces stress long-term. Rest is not weakness; it is strategy. When you slow down, clarity arrives.",
+        "Today favors connection over confrontation. Speak less, listen more, and keep your tone warm. Clean your space or finish one simple task to create inner order. Try something new in a safe way, just to refresh your mind. Your flow rises when you stay calm and curious.",
+        "This day brings quiet luck that appears in small details. Be open, but do not gamble your peace. If you feel nervous, return to the body: walk, breathe, relax your jaw. Spend time with people you trust. Stability is your best win.",
+        "Today may test your patience, so move slower than usual. Avoid impulsive promises and postpone risky decisions. If you sense pressure from others, create distance and think quietly. Choose sleep, food, and basic routines. Calm discipline protects you.",
+        "Be careful with overstimulation today. Too many messages can create unnecessary anxiety. Stop and return to one simple task, then finish it. Avoid sharp words because they echo longer than you expect. The day softens when you keep boundaries clean.",
+        "You might feel pushed to change everything quickly. Do not force it; move step by step. If you are uncertain, wait one day before big decisions. Spend time with family or close friends, and let their calm ground you. Quiet attention gives you the right direction.",
+        "Today asks for emotional maturity. Do not enter drama even if it invites you. Keep focus on health, family, and stable progress. Do one responsible action that supports your future, then rest. You win by refusing chaos.",
+        "This day is better for reflection than confrontation. Pause before reacting and keep expectations realistic. Choose warmth: tea, quiet music, a short walk. Speak gently and protect your energy. Peace is worth more than a temporary victory."
       ];
-      const enCautionBases=[
-        "Today may test your patience, so slow down on purpose. Avoid impulsive spending, sharp words, or risky shortcuts. If information feels confusing, wait and verify instead of guessing. Spend time with family or close friends to stabilize your emotions. Calm discipline will protect your path.",
-        "Be careful with overstimulation today. Too many messages and demands can create unnecessary anxiety. Step back, do one simple task, and then breathe. Don’t argue to win—choose quiet boundaries. The day becomes smoother when you refuse chaos."
+      const zhBase = [
+        "今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把情绪放慢。减少噪音，少一些争辩，少一些急迫的决定。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。",
+        "把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。避免争吵，也不必证明任何事。给亲近的人一点关心，然后放下期待。保持和气，福流自然来。",
+        "今天你的力量足够，但关键在于节奏。不要增加新的压力，把任务做少做精。若出现机会，先冷静观察再行动。休息不是软弱，而是策略。你越慢，越清楚。",
+        "今天适合连接，不适合对抗。讲话少一点，语气柔一点，你会更有掌控感。整理环境，外在秩序会带来内在秩序。尝试一个小小的新体验，让心刷新。保持好奇与平静，福流会上升。",
+        "今天有一种安静的好运，会出现在细节里。保持开放，但别拿你的平静去冒险。紧张时回到身体：走一走、深呼吸、放松下颌。与可信的人相处，会让你更稳。稳定就是胜利。",
+        "今天可能考验耐心，所以建议你比平时更慢。避免冲动承诺，也不要做冒险决定。若外界压力大，就拉开距离，给自己空白。把重点放在睡眠、饮食与规律。平静的自律会保护你。",
+        "今天容易被信息刺激而焦虑。把消息变少，把行动变简单。先完成一件小事，然后停下来休息。避免尖锐语言，因为它会留下回声。边界清晰，心就安定。",
+        "今天不适合急着改变一切。一步一步走，不要强推结果。若你不确定，就把大决定延后一天。多陪伴家人或朋友，让心落地。安静的专注会带来方向。",
+        "今天需要情绪成熟。别进入戏剧化的争执，即使它在邀请你。把注意力放回健康、家人和稳定进展。做一件对未来有益的小事，然后休息。拒绝混乱，你就赢了。",
+        "今天更适合反思，不适合对抗。反应前先停一下，保持期待合理。选择温暖：茶、安静的音乐、短暂散步。说话温和，保护能量。平静比短暂胜利更重要。"
       ];
-
-      const zhBases=[
-        "今天适合回到稳定与温柔。多陪伴家人或让你安心的人，把节奏放慢。减少噪音：少争辩、少冲动决定、少情绪波动。选择一件小事认真完成，然后允许自己休息。你越平静，指引越清晰。",
-        "把今天当作一次柔和的重启。多走路、多喝水，让身体先安定下来。遇到压力不要硬扛，先把呼吸放深。与亲近的人短暂相聚，会让你的心回到正位。保持和气，福流自然来。",
-        "今天你的力量足够，但关键在于分配。不要一次扛太多任务，先完成最重要的一件。若出现机会，先冷静观察再行动，不必急着证明什么。安排一点真正的休息时间，哪怕只是安静的一小时。稳定就是胜利。",
-        "今天适合连接，不适合对抗。若情绪紧绷，就去走一走、伸展一下，让心慢下来。讲话少一点、语气柔一点，你会更有掌控感。把环境整理干净，外在秩序会带来内在秩序。你不需要强推结果。",
-        "今天有一种“安静的好运”。它不会喧哗，只会出现在你留心的细节里。保持轻松，别把自己逼到极限。多陪伴亲近的人，让心回到柔软的位置。你越和谐，越容易看到新的出口。"
-      ];
-      const zhCautionBases=[
-        "今天可能考验耐心，所以建议你比平时更慢一些。避免冲动承诺或情绪化决定，先让心安定。若外界压力很大，就拉开距离，给自己一点空白。与家人或可信的人相处，会让你稳定下来。平静是最好的保护。",
-        "今天容易被信息和情绪过度刺激。别让太多消息把你拖进焦虑里，先回到简单的一件事。避免尖锐的语言，因为它会留下回声。保持规律、早点休息、少一点冲突。守住节奏，你就守住了福流。"
-      ];
-
-      function expandTo100(bases, cautionBases){
-        const out=[];
-        // 90/10 distribution
-        for(let i=0;i<90;i++){
-          const b=bases[i % bases.length];
-          out.push(variantText(b,i));
-        }
-        for(let i=0;i<10;i++){
-          const b=cautionBases[i % cautionBases.length];
-          out.push(variantText(b,100+i));
-        }
-        // shuffle stable
-        for(let i=out.length-1;i>0;i--){
-          const j=Math.floor(Math.random()*(i+1));
-          [out[i],out[j]]=[out[j],out[i]];
-        }
-        return out;
+      const en = [];
+      const zh = [];
+      for(let i=0;i<100;i++){
+        en.push(enBase[i % enBase.length]);
+        zh.push(zhBase[i % zhBase.length]);
       }
+      return { list:(lang)=> (lang==="en") ? en : zh };
+    })();
 
-      function variantText(t,i){
-        // tiny variation without breaking sentence count
-        const tail = (i%3===0)
-          ? " Keep your mind clean and your tone calm. You will feel lighter by evening."
-          : (i%3===1)
-            ? " Choose rest when you can, and do not force answers. Let the day breathe."
-            : " Trust small steps and stable people. That is how you win today.";
-        // Ensure 5+ sentences by adding tail as 2 sentences
-        return t + tail;
-      }
-
-      const en = expandTo100(enBases, enCautionBases);
-      const zh = expandTo100(zhBases, zhCautionBases);
-
-      return {en, zh};
-    }
-    const PRED = buildPredictions();
-
+    // ---------- NON-REPEAT PICKER ----------
     function nextPrediction(){
-      const id = State.popId(100);
-      const lang = I18N.get();
-      const text = (lang==="en") ? PRED.en[id] : PRED.zh[id];
-      return {id,text};
+      const s = State.get();
+      const total = 100;
+      if(!Array.isArray(s.predBag) || s.predBag.length===0){
+        const ids = Array.from({length:total}, (_,i)=>i);
+        for(let i=ids.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          const tmp = ids[i]; ids[i]=ids[j]; ids[j]=tmp;
+        }
+        s.predBag = ids;
+      }
+      const id = s.predBag.pop();
+      s.usedPredIds.push(id);
+      State.save();
+      return { id, text: Predictions.list(I18N.getLang())[id] };
     }
 
-    /* ===============================
-       OVERLAY PARCHMENT (ink writing)
-       =============================== */
+    // ---------- OVERLAY (Parchment + brush writing + stamp) ----------
     const Overlay = (()=>{
-      const overlay=document.getElementById("overlay");
-      const close=document.getElementById("closeOverlay");
-      const c=document.getElementById("parchment");
-      const ctx=c.getContext("2d");
+      const overlay = $("overlay");
+      const closeBtn = $("closeOverlay");
+      const c = $("parchment");
+      const ctx = c.getContext("2d");
 
       function show(){ overlay.classList.add("show"); resize(); }
       function hide(){ overlay.classList.remove("show"); }
-      close.addEventListener("click", hide);
+      closeBtn.addEventListener("click", hide);
 
       function resize(){
-        const dpr = PERF.dpr();
-        const rect=c.getBoundingClientRect();
-        c.width=Math.floor(rect.width*dpr);
-        c.height=Math.floor(rect.height*dpr);
+        const dpr = Perf.dprCap();
+        const rect = c.getBoundingClientRect();
+        c.width = Math.floor(rect.width*dpr);
+        c.height = Math.floor(rect.height*dpr);
         ctx.setTransform(dpr,0,0,dpr,0,0);
       }
-      window.addEventListener("resize", ()=>{ if(overlay.classList.contains("show")) resize(); });
+      window.addEventListener("resize", resize);
 
-      function paperBG(){
-        const w=c.getBoundingClientRect().width;
-        const h=c.getBoundingClientRect().height;
+      function paperBg(){
+        const w = c.getBoundingClientRect().width;
+        const h = c.getBoundingClientRect().height;
         ctx.clearRect(0,0,w,h);
 
-        const g=ctx.createLinearGradient(0,0,w,h);
-        g.addColorStop(0,"rgba(210,180,125,0.20)");
-        g.addColorStop(0.4,"rgba(125,95,60,0.22)");
-        g.addColorStop(1,"rgba(55,40,25,0.34)");
-        ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+        const g = ctx.createLinearGradient(0,0,w,h);
+        g.addColorStop(0, "rgba(200,170,120,0.22)");
+        g.addColorStop(0.35, "rgba(120,95,60,0.22)");
+        g.addColorStop(1, "rgba(60,45,28,0.33)");
+        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
 
         ctx.save();
         ctx.globalCompositeOperation="multiply";
-        const v=ctx.createRadialGradient(w*0.5,h*0.45,30,w*0.5,h*0.45,Math.max(w,h)*0.75);
+        const v = ctx.createRadialGradient(w*0.5,h*0.45,30,w*0.5,h*0.45,Math.max(w,h)*0.7);
         v.addColorStop(0,"rgba(0,0,0,0)");
-        v.addColorStop(1,"rgba(0,0,0,0.78)");
+        v.addColorStop(1,"rgba(0,0,0,0.75)");
         ctx.fillStyle=v; ctx.fillRect(0,0,w,h);
         ctx.restore();
 
-        // fibers
         ctx.save();
         ctx.globalAlpha=0.14;
-        for(let i=0;i<140;i++){
-          const y=Math.random()*h;
-          ctx.strokeStyle="rgba(255,243,209,0.10)";
+        for(let i=0;i<150;i++){
+          const y = Math.random()*h;
+          ctx.strokeStyle="rgba(255,243,209,0.12)";
           ctx.lineWidth=1;
           ctx.beginPath();
           ctx.moveTo(0,y);
@@ -712,548 +525,452 @@
         ctx.restore();
       }
 
-      function drawSeal(x,y,scale){
+      function drawSeal(x,y,scale=1){
         ctx.save();
         ctx.translate(x,y);
-        ctx.rotate(-0.06);
+        ctx.rotate(-0.05);
         ctx.scale(scale,scale);
-
-        const s=96;
-        ctx.shadowColor="rgba(0,0,0,0.35)";
-        ctx.shadowBlur=14;
         ctx.fillStyle="rgba(184,0,29,0.92)";
-        ctx.fillRect(-s/2,-s/2,s,s);
-        ctx.shadowBlur=0;
-
-        ctx.strokeStyle="rgba(255,211,106,0.20)";
+        ctx.strokeStyle="rgba(255,211,106,0.22)";
         ctx.lineWidth=2;
+        ctx.shadowColor="rgba(0,0,0,0.35)";
+        ctx.shadowBlur=12;
+        const s = 96;
+        ctx.fillRect(-s/2,-s/2,s,s);
         ctx.strokeRect(-s/2,-s/2,s,s);
-
+        ctx.shadowBlur=0;
         ctx.fillStyle="rgba(255,243,209,0.92)";
         ctx.font="700 44px serif";
-        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
         ctx.fillText("财",0,3);
         ctx.restore();
       }
 
-      function wrapText(text, font, maxW){
-        ctx.font=font;
-        const isZH = (I18N.get()==="zh");
-        const tokens = isZH ? text.split("") : text.split(" ");
-        const lines=[];
-        let line="";
+      function wrapText(text, maxW, isZh){
+        const tokens = isZh ? text.split("") : text.split(" ");
+        const lines = [];
+        let line = "";
         for(let i=0;i<tokens.length;i++){
-          const add = isZH ? tokens[i] : (tokens[i]+" ");
-          const test=line+add;
-          if(ctx.measureText(test).width>maxW && line.length>0){
+          const t = isZh ? tokens[i] : (tokens[i] + " ");
+          const test = line + t;
+          if(ctx.measureText(test).width > maxW && line.length>0){
             lines.push(line);
-            line=add;
-          }else{
-            line=test;
-          }
+            line = t;
+          }else line = test;
         }
         if(line.trim().length) lines.push(line);
         return lines;
       }
 
       async function play(text){
-        show();
-        resize();
-        AudioSys.ensure();
-        paperBG();
+        show(); resize();
 
-        const w=c.getBoundingClientRect().width;
-        const h=c.getBoundingClientRect().height;
+        const w = c.getBoundingClientRect().width;
+        const h = c.getBoundingClientRect().height;
+        paperBg();
+
+        const isZh = (I18N.getLang()==="zh");
+        $("overlayLabel").textContent = I18N.t("overlay");
+
+        const padX = 32;
+        const topY = 70;
+        const maxW = w - padX*2;
+        const font = isZh
+          ? "600 18px 'Noto Sans SC','PingFang SC','Microsoft YaHei',serif"
+          : "600 17px 'Georgia','Times New Roman',serif";
 
         // header
         ctx.save();
         ctx.fillStyle="rgba(255,243,209,0.88)";
-        ctx.font="700 14px Inter, system-ui";
-        ctx.fillText(I18N.get()==="zh" ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+        ctx.font="700 14px Orbitron, Inter, system-ui";
+        ctx.fillText(isZh ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
         ctx.restore();
 
-        const padX=32;
-        const topY=70;
-        const maxW=w-padX*2;
-
-        const bodyFont = (I18N.get()==="zh")
-          ? "600 18px 'Noto Sans SC','PingFang SC','Microsoft YaHei',serif"
-          : "600 17px 'Georgia','Times New Roman',serif";
-
-        const lines=wrapText(text, bodyFont, maxW);
-
-        // ink reveal: per char
+        ctx.font = font;
         ctx.textBaseline="top";
-        let y=topY;
-        let charCount=0;
 
-        AudioSys.whoosh();
+        const lines = wrapText(text, maxW, isZh);
 
+        // write like brush (per char)
+        let y = topY;
+        let cc = 0;
         for(let li=0; li<lines.length; li++){
-          const L=lines[li];
-          let x=padX;
-
+          const L = lines[li];
+          let x = padX;
           for(let ci=0; ci<L.length; ci++){
-            const ch=L[ci];
-            // brush-ish gradient
-            const ink=ctx.createLinearGradient(x,y,x,y+22);
-            ink.addColorStop(0,"rgba(255,243,209,0.92)");
-            ink.addColorStop(1,"rgba(255,211,106,0.68)");
-            ctx.fillStyle=ink;
-            ctx.font=bodyFont;
+            const ch = L[ci];
 
-            const jx=(Math.random()*0.6-0.3);
-            const jy=(Math.random()*0.6-0.3);
+            const jx = (Math.random()*0.6 - 0.3);
+            const jy = (Math.random()*0.6 - 0.3);
+
+            const ink = ctx.createLinearGradient(x,y,x,y+22);
+            ink.addColorStop(0,"rgba(255,243,209,0.92)");
+            ink.addColorStop(1,"rgba(255,211,106,0.70)");
+            ctx.fillStyle = ink;
             ctx.fillText(ch, x+jx, y+jy);
 
             x += ctx.measureText(ch).width;
-            charCount++;
-            // speed safe
-            if(charCount%28===0) AudioSys.chime(); // very rare
-            await sleep(10);
+            cc++;
+            if(cc % 18 === 0) await new Promise(r=>setTimeout(r, 8));
           }
-
           y += 26;
-          if(y>h-130) break;
+          if(y > h-130) break;
+          await new Promise(r=>setTimeout(r, 10));
         }
 
         // footer
         ctx.save();
         ctx.fillStyle="rgba(255,211,106,0.70)";
         ctx.font="600 12px Inter, system-ui";
-        ctx.fillText(new Date().toLocaleString(I18N.get()==="zh"?"zh-CN":"en-US"), padX, h-40);
+        const ts = new Date().toLocaleString(isZh ? "zh-CN" : "en-US");
+        ctx.fillText(ts, padX, h-40);
         ctx.restore();
 
         // stamp
-        await sleep(280);
-        AudioSys.stamp();
+        await new Promise(r=>setTimeout(r, 260));
         haptic("heavy");
-        FX.dustBurst();
+        const sx = w - 110;
+        const sy = h - 120;
+        for(let k=0;k<=16;k++){
+          const t = k/16;
+          const ease = 1 - Math.pow(1-t,3);
+          paperBg();
 
-        const sx=w-110, sy=h-120;
-        for(let k=0;k<=18;k++){
-          const t=k/18;
-          const ease=1-Math.pow(1-t,3);
-          paperBG();
-
-          // header redraw
+          // redraw header + body quickly
           ctx.save();
           ctx.fillStyle="rgba(255,243,209,0.88)";
-          ctx.font="700 14px Inter, system-ui";
-          ctx.fillText(I18N.get()==="zh" ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
+          ctx.font="700 14px Orbitron, Inter, system-ui";
+          ctx.fillText(isZh ? "天宫指引" : "TEMPLE GUIDANCE", 26, 32);
           ctx.restore();
 
-          // full text redraw
           ctx.save();
+          ctx.font=font;
           ctx.fillStyle="rgba(255,243,209,0.92)";
-          ctx.font=bodyFont;
           ctx.textBaseline="top";
-          let yy=topY;
+          let yy = topY;
           for(let li=0; li<lines.length; li++){
             ctx.fillText(lines[li], padX, yy);
             yy += 26;
-            if(yy>h-130) break;
+            if(yy > h-130) break;
           }
           ctx.restore();
 
-          // footer redraw
           ctx.save();
           ctx.fillStyle="rgba(255,211,106,0.70)";
           ctx.font="600 12px Inter, system-ui";
-          ctx.fillText(new Date().toLocaleString(I18N.get()==="zh"?"zh-CN":"en-US"), padX, h-40);
+          ctx.fillText(ts, padX, h-40);
           ctx.restore();
 
-          drawSeal(sx, sy, 0.55+0.45*ease);
-          await raf();
+          drawSeal(sx, sy, 0.55 + 0.45*ease);
+          await new Promise(r=>requestAnimationFrame(r));
         }
       }
-
-      return {play,hide,show};
+      return { play, hide };
     })();
 
-    function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-    function raf(){ return new Promise(r=>requestAnimationFrame(r)); }
+    // ---------- FX CANVAS: GOLD DUST ----------
+    const fxCanvas = $("fxCanvas");
+    const fxCtx = fxCanvas.getContext("2d");
+    function resizeFX(){
+      const dpr = Perf.dprCap();
+      fxCanvas.width = Math.floor(innerWidth*dpr);
+      fxCanvas.height = Math.floor(innerHeight*dpr);
+      fxCanvas.style.width = innerWidth+"px";
+      fxCanvas.style.height = innerHeight+"px";
+      fxCtx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    resizeFX();
 
-    /* ===============================
-       FX CANVAS: gold dust
-       =============================== */
-    const FX = (()=>{
-      const fxC=document.getElementById("fxCanvas");
-      const fx=fxC.getContext("2d");
-      const parts=[];
-      function resize(){
-        const dpr=PERF.dpr();
-        fxC.width=Math.floor(innerWidth*dpr);
-        fxC.height=Math.floor(innerHeight*dpr);
-        fxC.style.width=innerWidth+"px";
-        fxC.style.height=innerHeight+"px";
-        fx.setTransform(dpr,0,0,dpr,0,0);
-      }
-      resize();
-      window.addEventListener("resize", resize);
-
-      function spawn(initial=false,boost=1){
+    const Dust = (()=>{
+      const parts = [];
+      function spawn(initial=false, boost=1){
         parts.push({
-          x:Math.random()*innerWidth,
-          y: initial ? Math.random()*innerHeight : innerHeight+10,
-          vx:(-0.05+Math.random()*0.10)*boost,
-          vy:(-0.18+Math.random()*0.14)*boost,
-          r:0.6+Math.random()*2.0,
-          a:0.08+Math.random()*0.34,
-          tw:0.65+Math.random()*0.35,
+          x: Math.random()*innerWidth,
+          y: initial ? Math.random()*innerHeight : (innerHeight + 10),
+          vx: (-0.05 + Math.random()*0.10)*boost,
+          vy: (-0.18 + Math.random()*0.14)*boost,
+          r: 0.6 + Math.random()*2.0,
+          a: 0.08 + Math.random()*0.34,
+          tw: 0.65 + Math.random()*0.35
         });
       }
-      const baseCount = (PERF.q==="low")?80:(PERF.q==="medium"?120:150);
-      for(let i=0;i<baseCount;i++) spawn(true);
-
-      function dustBurst(){
-        const n=(PERF.q==="low")?18:30;
-        for(let i=0;i<n;i++) spawn(false,1.8);
+      function init(){
+        const base = (Perf.q==="low") ? 80 : (Perf.q==="medium") ? 120 : 150;
+        for(let i=0;i<base;i++) spawn(true);
       }
-
+      function burst(){
+        const n = (Perf.q==="low") ? 18 : 30;
+        for(let i=0;i<n;i++) spawn(false, 1.8);
+      }
       function step(dt){
-        fx.fillStyle="rgba(0,0,0,0.18)";
-        fx.fillRect(0,0,innerWidth,innerHeight);
-
-        fx.save();
-        fx.globalCompositeOperation="lighter";
+        fxCtx.fillStyle="rgba(0,0,0,0.18)";
+        fxCtx.fillRect(0,0,innerWidth,innerHeight);
+        fxCtx.save();
+        fxCtx.globalCompositeOperation="lighter";
         for(let i=parts.length-1;i>=0;i--){
-          const p=parts[i];
+          const p = parts[i];
           p.x += p.vx*(dt*60);
           p.y += p.vy*(dt*60);
-          const tw=0.65+0.35*Math.sin(Date.now()*0.002*p.tw);
-          const a=p.a*tw;
-
-          fx.beginPath();
-          fx.fillStyle=`rgba(255,211,106,${a})`;
-          fx.shadowColor="rgba(255,211,106,0.35)";
-          fx.shadowBlur=12;
-          fx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          fx.fill();
-
-          if(p.y<-20 || p.x<-30 || p.x>innerWidth+30){
+          const tw = 0.65 + 0.35*Math.sin(Date.now()*0.002*p.tw);
+          const a = p.a * tw;
+          fxCtx.beginPath();
+          fxCtx.fillStyle = "rgba(255,211,106,"+a+")";
+          fxCtx.shadowColor="rgba(255,211,106,0.35)";
+          fxCtx.shadowBlur=12;
+          fxCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          fxCtx.fill();
+          if(p.y < -20 || p.x < -30 || p.x > innerWidth+30){
             parts.splice(i,1);
             spawn(true);
           }
         }
-        fx.restore();
+        fxCtx.restore();
       }
-
-      return {step,dustBurst,resize};
+      init();
+      return { step, burst };
     })();
 
-    /* ===============================
-       THREE SCENE (PS5-feel in web)
-       - no modules
-       - no postprocessing (Telegram-safe)
-       - fake bloom via emissive + additive sprites
-       =============================== */
-    const stage=document.getElementById("stage3d");
-    const renderer=new THREE.WebGLRenderer({
-      canvas:stage,
-      antialias:true,
-      alpha:true,
-      powerPreference:"high-performance"
-    });
-    renderer.setPixelRatio(PERF.dpr());
-    renderer.setSize(innerWidth, innerHeight, false);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    function sealBurst(x,y){
+      fxCtx.save();
+      fxCtx.globalCompositeOperation="lighter";
+      for(let i=0;i<20;i++){
+        const a = Math.random()*Math.PI*2;
+        const r = 20 + Math.random()*160;
+        const px = x + Math.cos(a)*r;
+        const py = y + Math.sin(a)*r;
+        fxCtx.strokeStyle="rgba(255,211,106,0.20)";
+        fxCtx.lineWidth=1;
+        fxCtx.beginPath();
+        fxCtx.moveTo(x,y);
+        fxCtx.lineTo(px,py);
+        fxCtx.stroke();
+      }
+      fxCtx.restore();
+    }
 
-    const scene=new THREE.Scene();
-    scene.fog=new THREE.FogExp2(0x000000, 0.0012);
+    // ---------- THREE (NO MODULES) ----------
+    let renderer, scene, camera, composer, bloom, clock;
+    let portalGroup, portalRing, portalCore, stars, dragonMesh;
+    let targetX=0, targetY=0, curX=0, curY=0;
+    let dollyT = 0;
 
-    const camera=new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 3000);
-    camera.position.set(0, 0, 26);
+    function bindParallax(){
+      function onMove(x,y){
+        targetX = (x/innerWidth)*2 - 1;
+        targetY = (y/innerHeight)*2 - 1;
+      }
+      addEventListener("mousemove", e=>onMove(e.clientX,e.clientY), {passive:true});
+      addEventListener("touchmove", e=>{
+        const t = e.touches && e.touches[0];
+        if(!t) return;
+        onMove(t.clientX,t.clientY);
+      }, {passive:true});
+    }
 
-    // Lights
-    const key=new THREE.DirectionalLight(0xFFD36A, 1.35);
-    key.position.set(12,10,18);
-    scene.add(key);
-
-    const rim=new THREE.DirectionalLight(0xB8001D, 0.55);
-    rim.position.set(-14,6,-6);
-    scene.add(rim);
-
-    scene.add(new THREE.AmbientLight(0x0b0e18, 1.15));
-
-    // Portal ring
-    const portal=new THREE.Group();
-    scene.add(portal);
-
-    const ringGeo=new THREE.TorusGeometry(8.5, 0.22, 28, 180);
-    const ringMat=new THREE.MeshStandardMaterial({
-      color:0xFFD36A,
-      metalness:0.9,
-      roughness:0.22,
-      emissive:new THREE.Color(0xFFD36A),
-      emissiveIntensity:0.45
-    });
-    const ring=new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x=Math.PI/2;
-    portal.add(ring);
-
-    const coreGeo=new THREE.CircleGeometry(8.2, 96);
-    const coreMat=new THREE.MeshBasicMaterial({
-      color:0x050507,
-      transparent:true,
-      opacity:0.18
-    });
-    const core=new THREE.Mesh(coreGeo, coreMat);
-    core.rotation.x=Math.PI/2;
-    portal.add(core);
-
-    portal.position.set(0,-1.2,-10);
-
-    // Stars (Points)
     function makeStars(count){
-      const geo=new THREE.BufferGeometry();
-      const pos=new Float32Array(count*3);
-      const col=new Float32Array(count*3);
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count*3);
+      const col = new Float32Array(count*3);
       for(let i=0;i<count;i++){
-        const rr=450+Math.random()*900;
-        const theta=Math.random()*Math.PI*2;
-        const phi=Math.acos(2*Math.random()-1);
-        const x=rr*Math.sin(phi)*Math.cos(theta);
-        const y=rr*Math.sin(phi)*Math.sin(theta);
-        const z=rr*Math.cos(phi);
+        const rr = 450 + Math.random()*900;
+        const theta = Math.random()*Math.PI*2;
+        const phi = Math.acos(2*Math.random()-1);
+        const x = rr*Math.sin(phi)*Math.cos(theta);
+        const y = rr*Math.sin(phi)*Math.sin(theta);
+        const z = rr*Math.cos(phi);
         pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
 
-        const warm=Math.random()<0.28;
-        const c=warm?new THREE.Color(0xFFD36A):new THREE.Color(0xCFE8FF);
-        const k=warm?(0.6+Math.random()*0.4):(0.55+Math.random()*0.45);
+        const warm = Math.random() < 0.28;
+        const c = warm ? new THREE.Color(0xFFD36A) : new THREE.Color(0xCFE8FF);
+        const k = warm ? (0.6+Math.random()*0.4) : (0.55+Math.random()*0.45);
         col[i*3]=c.r*k; col[i*3+1]=c.g*k; col[i*3+2]=c.b*k;
       }
       geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
       geo.setAttribute("color", new THREE.BufferAttribute(col,3));
-      const mat=new THREE.PointsMaterial({
-        size:(PERF.q==="low")?1.0:1.35,
+      const mat = new THREE.PointsMaterial({
+        size: (Perf.q==="low") ? 1.0 : 1.35,
         vertexColors:true,
         transparent:true,
-        opacity:0.92,
+        opacity:0.9,
         depthWrite:false
       });
-      return new THREE.Points(geo,mat);
-    }
-    const starCount=(PERF.q==="low")?4500:(PERF.q==="medium"?9000:14000);
-    const stars=makeStars(starCount);
-    scene.add(stars);
-
-    // Wish Star (small bright sprite-like)
-    const wishGeo=new THREE.SphereGeometry(0.08, 10, 10);
-    const wishMat=new THREE.MeshBasicMaterial({color:0xFFF3D1, transparent:true, opacity:0.0});
-    const wishStar=new THREE.Mesh(wishGeo, wishMat);
-    scene.add(wishStar);
-
-    // Dragon plane (with subtle breathing)
-    const texLoader=new THREE.TextureLoader();
-    const dragonTex=texLoader.load("./dragon.jpg");
-    dragonTex.colorSpace = THREE.SRGBColorSpace;
-
-    const dragonGeo=new THREE.PlaneGeometry(18,18, 48,48);
-    const dragonMat=new THREE.ShaderMaterial({
-      transparent:true,
-      uniforms:{
-        uTex:{value:dragonTex},
-        uTime:{value:0},
-        uAura:{value:0.55}
-      },
-      vertexShader:`
-        varying vec2 vUv;
-        uniform float uTime;
-        void main(){
-          vUv=uv;
-          vec3 p=position;
-          float w = sin(uTime*1.2 + p.y*0.6) * 0.06;
-          p.z += w * (0.5 + (1.0-uv.y));
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
-        }
-      `,
-      fragmentShader:`
-        varying vec2 vUv;
-        uniform sampler2D uTex;
-        uniform float uTime;
-        uniform float uAura;
-        void main(){
-          vec4 tex = texture2D(uTex, vUv);
-          float edge = smoothstep(0.0, 0.10, vUv.x) *
-                       smoothstep(0.0, 0.10, vUv.y) *
-                       smoothstep(0.0, 0.10, 1.0-vUv.x) *
-                       smoothstep(0.0, 0.10, 1.0-vUv.y);
-          float pulse = 0.5 + 0.5*sin(uTime*1.4);
-          vec3 gold = vec3(1.0, 0.83, 0.42);
-          vec3 glow = gold * (uAura * (0.35 + 0.65*pulse)) * (1.0-edge);
-
-          float v = smoothstep(0.9, 0.2, distance(vUv, vec2(0.5)));
-          vec3 col = tex.rgb + glow * 0.65;
-          col *= (0.85 + 0.15*v);
-
-          float a = tex.a;
-          if(a < 0.01) a = 0.98; // jpg no alpha
-          gl_FragColor = vec4(col, a);
-        }
-      `
-    });
-    const dragon=new THREE.Mesh(dragonGeo, dragonMat);
-    dragon.position.set(0, 1.2, -16);
-    scene.add(dragon);
-
-    // Parallax
-    let tx=0, ty=0, cx=0, cy=0;
-    function onMove(x,y){
-      tx = (x/innerWidth)*2 - 1;
-      ty = (y/innerHeight)*2 - 1;
-    }
-    addEventListener("mousemove",(e)=>onMove(e.clientX,e.clientY),{passive:true});
-    addEventListener("touchmove",(e)=>{
-      const t=e.touches && e.touches[0]; if(!t) return;
-      onMove(t.clientX,t.clientY);
-    },{passive:true});
-
-    // Dolly win trigger
-    let dolly=0;
-
-    function cameraDollyWin(){
-      dolly=1;
+      return new THREE.Points(geo, mat);
     }
 
-    async function wishMoment(){
-      AudioSys.ensure();
-      haptic("light");
-
-      const micro=document.getElementById("microText");
-      const prev=micro.textContent;
-      micro.textContent = (I18N.get()==="zh")
-        ? "许一个愿。保持安静，听见内心。"
-        : "Make a wish. Stay quiet and listen within.";
-
-      // shoot
-      const start = new THREE.Vector3(-18, 10, -30);
-      const end   = new THREE.Vector3( 16, -6, -6);
-      wishStar.position.copy(start);
-      wishStar.material.opacity=0.0;
-
-      const t0=performance.now();
-      const dur=1100;
-
-      AudioSys.whoosh();
-
-      while(performance.now()-t0 < dur){
-        const t=(performance.now()-t0)/dur;
-        const ease = t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
-        wishStar.position.lerpVectors(start,end,ease);
-        wishStar.material.opacity = Math.min(1, ease*1.3);
-        ringMat.emissiveIntensity = 0.45 + 0.55*Math.sin(ease*Math.PI);
-        await raf();
-      }
-
-      AudioSys.chime();
-      FX.dustBurst();
-      wishStar.material.opacity=0.0;
-      ringMat.emissiveIntensity=0.45;
-
-      setTimeout(()=>micro.textContent=prev, 1400);
-    }
-
-    // Resize
-    function resize3d(){
-      renderer.setPixelRatio(PERF.dpr());
+    function initThree(){
+      const canvas = $("stage3d");
+      renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:"high-performance" });
+      renderer.setPixelRatio(Perf.dprCap());
       renderer.setSize(innerWidth, innerHeight, false);
-      camera.aspect=innerWidth/innerHeight;
-      camera.updateProjectionMatrix();
-      FX.resize();
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x000000, 0.0012);
+
+      camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 3000);
+      camera.position.set(0,0,26);
+
+      clock = new THREE.Clock();
+
+      const key = new THREE.DirectionalLight(0xFFD36A, 1.35);
+      key.position.set(12,10,18);
+      scene.add(key);
+
+      const rim = new THREE.DirectionalLight(0xB8001D, 0.55);
+      rim.position.set(-14,6,-6);
+      scene.add(rim);
+
+      scene.add(new THREE.AmbientLight(0x0b0e18, 1.2));
+
+      // portal
+      portalGroup = new THREE.Group();
+      scene.add(portalGroup);
+
+      const ringGeo = new THREE.TorusGeometry(8.5, 0.22, 30, 220);
+      const ringMat = new THREE.MeshStandardMaterial({
+        color:0xFFD36A, metalness:0.82, roughness:0.26,
+        emissive:new THREE.Color(0xFFD36A),
+        emissiveIntensity:0.55
+      });
+      portalRing = new THREE.Mesh(ringGeo, ringMat);
+      portalRing.rotation.x = Math.PI/2;
+      portalGroup.add(portalRing);
+
+      const coreGeo = new THREE.CircleGeometry(8.2, 128);
+      const coreMat = new THREE.MeshBasicMaterial({ color:0x050507, transparent:true, opacity:0.22 });
+      portalCore = new THREE.Mesh(coreGeo, coreMat);
+      portalCore.rotation.x = Math.PI/2;
+      portalGroup.add(portalCore);
+
+      portalGroup.position.set(0,-1.2,-10);
+
+      // stars
+      const starCount = (Perf.q==="low") ? 4500 : (Perf.q==="medium") ? 9000 : 14000;
+      stars = makeStars(starCount);
+      scene.add(stars);
+
+      // dragon (texture plane) — cache busting
+      const loader = new THREE.TextureLoader();
+      const dragonUrl = "dragon.jpg?cb=" + encodeURIComponent(VERSION);
+      loader.load(dragonUrl, (tex)=>{
+        tex.colorSpace = THREE.SRGBColorSpace;
+
+        const geo = new THREE.PlaneGeometry(18,18,64,64);
+        const mat = new THREE.ShaderMaterial({
+          transparent:true,
+          uniforms:{ uTex:{value:tex}, uTime:{value:0}, uAura:{value:0.55} },
+          vertexShader:
+            "varying vec2 vUv; uniform float uTime;" +
+            "void main(){ vUv=uv; vec3 p=position;" +
+            "float w = sin(uTime*1.2 + p.y*0.6) * 0.06;" +
+            "p.z += w * (0.5 + (1.0-uv.y));" +
+            "gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);" +
+            "}",
+          fragmentShader:
+            "varying vec2 vUv; uniform sampler2D uTex; uniform float uTime; uniform float uAura;" +
+            "void main(){ vec4 tex = texture2D(uTex, vUv);" +
+            "float edge = smoothstep(0.0,0.10,vUv.x)*smoothstep(0.0,0.10,vUv.y)*smoothstep(0.0,0.10,1.0-vUv.x)*smoothstep(0.0,0.10,1.0-vUv.y);" +
+            "float pulse = 0.5 + 0.5*sin(uTime*1.4);" +
+            "vec3 gold = vec3(1.0,0.83,0.42);" +
+            "vec3 glow = gold*(uAura*(0.35+0.65*pulse))*(1.0-edge);" +
+            "float v = smoothstep(0.9,0.2,distance(vUv, vec2(0.5)));" +
+            "vec3 col = tex.rgb + glow*0.65; col *= (0.85 + 0.15*v);" +
+            "gl_FragColor = vec4(col, 1.0);" +
+            "}"
+        });
+
+        dragonMesh = new THREE.Mesh(geo, mat);
+        dragonMesh.position.set(0,1.2,-16);
+        scene.add(dragonMesh);
+      }, undefined, (e)=>{
+        console.warn("Dragon texture failed:", e);
+      });
+
+      // postprocessing bloom
+      composer = new THREE.EffectComposer(renderer);
+      composer.addPass(new THREE.RenderPass(scene, camera));
+      bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.10, 0.55, 0.20);
+      if(Perf.q==="low"){ bloom.strength=0.85; bloom.radius=0.40; }
+      if(Perf.q==="medium"){ bloom.strength=1.00; bloom.radius=0.50; }
+      composer.addPass(bloom);
+
+      bindParallax();
+      animate();
     }
-    addEventListener("resize", resize3d);
 
-    // Loop
-    let last=performance.now();
-    let time=0;
-    function loop(){
-      requestAnimationFrame(loop);
-      const now=performance.now();
-      const dt=Math.min(0.033,(now-last)/1000);
-      last=now;
-      time += dt;
+    function cameraDollyWin(){ dollyT = 1.0; }
 
-      // parallax smooth
-      cx += (tx-cx)*0.06;
-      cy += (ty-cy)*0.06;
-      camera.rotation.y = cx*0.10;
-      camera.rotation.x = -cy*0.07;
+    function animate(){
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      const t = clock.elapsedTime;
 
-      // dolly win
-      if(dolly>0){
-        dolly -= dt*1.35;
-        const k=Math.max(0,dolly);
-        const ease = 1 - Math.pow(k,2.2);
+      curX += (targetX - curX)*0.06;
+      curY += (targetY - curY)*0.06;
+
+      camera.rotation.y = curX * 0.10;
+      camera.rotation.x = -curY * 0.07;
+
+      if(dollyT > 0){
+        dollyT -= dt*1.35;
+        const k = Math.max(0, dollyT);
+        const ease = 1 - Math.pow(k, 2.2);
         camera.position.z = 26 - ease*2.6;
         camera.position.y = ease*0.35;
-        ringMat.emissiveIntensity = 0.45 + ease*0.65;
-        renderer.toneMappingExposure = 1.05 + ease*0.20;
+        bloom.strength = ((Perf.q==="low") ? 0.85 : 1.10) + ease*0.22;
       }else{
-        camera.position.z += (26-camera.position.z)*0.06;
-        camera.position.y += (0-camera.position.y)*0.06;
-        ringMat.emissiveIntensity += (0.45-ringMat.emissiveIntensity)*0.06;
-        renderer.toneMappingExposure += (1.05-renderer.toneMappingExposure)*0.06;
+        camera.position.z += (26 - camera.position.z)*0.06;
+        camera.position.y += (0 - camera.position.y)*0.06;
       }
 
-      // animate scene
-      dragonMat.uniforms.uTime.value=time;
-      ring.rotation.z += dt*0.08;
-      coreMat.opacity = 0.16 + 0.04*Math.sin(time*0.9);
-      stars.rotation.y += dt*0.012;
-      stars.rotation.x += dt*0.006;
+      if(portalRing) portalRing.rotation.z += dt*0.08;
+      if(portalCore) portalCore.material.opacity = 0.18 + 0.04*Math.sin(t*0.9);
+      if(stars){
+        stars.rotation.y += dt*0.012;
+        stars.rotation.x += dt*0.006;
+      }
+      if(dragonMesh && dragonMesh.material && dragonMesh.material.uniforms){
+        dragonMesh.material.uniforms.uTime.value = t;
+      }
 
-      // FX
-      FX.step(dt);
-
-      renderer.render(scene,camera);
+      Dust.step(dt);
+      composer.render();
     }
-    loop();
 
-    /* ===============================
-       UI EVENTS
-       =============================== */
-    document.getElementById("soundBtn").addEventListener("click", ()=>{
-      AudioSys.ensure();
-      const on=AudioSys.toggle();
-      document.getElementById("soundBtn").textContent = on ? "S" : "×";
+    function onResize(){
+      renderer.setPixelRatio(Perf.dprCap());
+      renderer.setSize(innerWidth, innerHeight, false);
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      composer.setSize(innerWidth, innerHeight);
+      resizeFX();
+    }
+    addEventListener("resize", onResize);
+
+    // ---------- UI EVENTS ----------
+    $("langBtn").addEventListener("click", ()=> I18N.toggle());
+    $("helpBtn").addEventListener("click", ()=> Overlay.play(I18N.t("helpMsg")));
+    $("wishBtn").addEventListener("click", ()=>{
+      const prev = $("microText").textContent;
+      $("microText").textContent = I18N.t("wishMsg");
+      sealBurst(innerWidth*0.52, innerHeight*0.36);
+      Dust.burst();
+      setTimeout(()=> $("microText").textContent = prev, 1400);
     });
 
-    document.getElementById("langBtn").addEventListener("click", ()=>{
-      I18N.toggle(); // EN label stays EN
-    });
-
-    document.getElementById("helpBtn").addEventListener("click", ()=>{
-      AudioSys.ensure(); AudioSys.chime();
-      const msg = (I18N.get()==="zh")
-        ? "三步：转轮 → 得到指引 → 做出选择。保持平静，守住节奏。"
-        : "Three steps: Spin → Guidance → Decision. Keep calm and protect your rhythm.";
+    $("premiumBtn").addEventListener("click", ()=>{
+      // STUB: here TonConnect payment 1 TON -> premiumUntil
+      State.addPremium(24);
+      const msg = (I18N.getLang()==="zh")
+        ? "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
+        : "Offering recorded. You are Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond.";
       Overlay.play(msg);
     });
 
-    document.getElementById("wishBtn").addEventListener("click", ()=>{
-      wishMoment();
-    });
-
-    document.getElementById("premiumBtn").addEventListener("click", ()=>{
-      // STUB: здесь подключишь TonConnect
-      // Сейчас — демо активация Premium на 24ч
-      AudioSys.ensure(); AudioSys.chime();
-      State.addPremium(24);
-      renderHUD();
-      const txt = (I18N.get()==="zh")
-        ? "供奉已记录。接下来 24 小时为「尊享」状态。保持温柔与自律，福流会回应你。"
-        : "Offering recorded. You are Premium for the next 24 hours. Stay calm, stay disciplined, and your flow will respond.";
-      Overlay.play(txt);
-    });
-
-    document.getElementById("spinBtn").addEventListener("click", async ()=>{
-      AudioSys.ensure();
-
+    $("spinBtn").addEventListener("click", async ()=>{
       if(State.spunToday() && !State.isPremium()){
-        const warn = (I18N.get()==="zh")
+        const warn = (I18N.getLang()==="zh")
           ? "今日已转轮。保持节制，明日再来。若需要更多指引，可通过供奉开启尊享。"
           : "You already spun today. Keep discipline and return tomorrow. If you need more guidance, unlock Premium through the Gate.";
         Overlay.play(warn);
@@ -1261,61 +978,26 @@
       }
 
       haptic("heavy");
-      AudioSys.whoosh();
+      Dust.burst();
+      cameraDollyWin();
 
-      // short ritual build
-      const t0=performance.now();
-      const dur=900;
-      while(performance.now()-t0 < dur){
-        const t=(performance.now()-t0)/dur;
-        ringMat.emissiveIntensity = 0.45 + t*0.85;
-        portal.position.y = -1.2 + Math.sin(t*Math.PI)*0.35;
-        await raf();
-      }
-      portal.position.y=-1.2;
-
-      // result
       const qkGain = 3 + Math.floor(Math.random()*10);
       State.addQK(qkGain);
-      State.setFlow(State.s.flow + (Math.random()*8-3));
+      State.setFlow(State.get().flow + (Math.random()*8-3));
       State.markSpinToday();
       renderHUD();
 
-      // win moment
-      cameraDollyWin();
-      AudioSys.chime();
-      FX.dustBurst();
-
-      // reveal
-      await sleep(220);
-      const {text}=nextPrediction();
-      Overlay.play(text);
+      sealBurst(innerWidth*0.52, innerHeight*0.64);
+      const { text } = nextPrediction();
+      setTimeout(()=> Overlay.play(text), 220);
     });
 
-    // minimal placeholders for dock buttons
-    document.getElementById("journalBtn").addEventListener("click", ()=>{
-      AudioSys.ensure(); AudioSys.chime();
-      Overlay.play(I18N.get()==="zh"
-        ? "日志模块：下一 шаг会把每次指引与选择记录 7 天。"
-        : "Journal module: next step will store guidance + decision for 7 days."
-      );
-    });
-    document.getElementById("proBtn").addEventListener("click", ()=>{
-      AudioSys.ensure(); AudioSys.chime();
-      Overlay.play(I18N.get()==="zh"
-        ? "PRO 面板：下一 шаг会显示 Flow / Risk Aura / Weather 等数据。"
-        : "PRO panel: next step will show Flow / Risk Aura / Weather and more."
-      );
-    });
-
-    // intro
-    window.addEventListener("load", ()=>{
-      setTimeout(()=>{
-        AudioSys.ensure();
-        AudioSys.whoosh();
-      }, 220);
-    });
-
+    // ---------- BOOT ----------
+    try{
+      initThree();
+    }catch(err){
+      fatal(err);
+    }
   })();
   </script>
 </body>
