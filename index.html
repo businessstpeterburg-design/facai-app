@@ -2,168 +2,78 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>TON Temple • Living Dragon</title>
+    <title>TON Temple • Living Artifact</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        #ui {
+        body { margin: 0; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        /* Фон - Око Бога */
+        #universe {
             position: absolute; width: 100%; height: 100%;
+            background: url('background.jpg') center center / cover no-repeat;
+            z-index: 1;
+        }
+
+        /* Контейнер для дракона */
+        #dragon-container {
+            position: relative; z-index: 2; width: 80vh; height: 80vh;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1000px;
+        }
+
+        /* Сам Дракон */
+        #dragon-img {
+            width: 100%; height: auto;
+            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6)); /* Золотое свечение */
+            animation: 
+                breathe 4s ease-in-out infinite, /* Эффект дыхания */
+                float 6s ease-in-out infinite;  /* Невесомость */
+            user-select: none;
+        }
+
+        /* Анимация Дыхания (плавное расширение и сжатие) */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 30px rgba(212, 175, 55, 0.6)); }
+            50% { transform: scale(1.05); filter: brightness(1.3) drop-shadow(0 0 50px rgba(212, 175, 55, 0.9)); }
+        }
+
+        /* Анимация Невесомости (покачивание и дрейф) */
+        @keyframes float {
+            0%, 100% { translate: 0 0; rotate: 0deg; }
+            33% { translate: 10px -20px; rotate: 1deg; }
+            66% { translate: -10px 10px; rotate: -1deg; }
+        }
+
+        /* Интерфейс из твоих скринов */
+        #ui-overlay {
+            position: absolute; inset: 0; z-index: 10; pointer-events: none;
+            padding: 40px; color: #d4af37; font-family: sans-serif;
             display: flex; flex-direction: column; justify-content: space-between;
-            pointer-events: none; padding: 30px; box-sizing: border-box;
-            z-index: 10;
         }
-        .header { display: flex; justify-content: space-between; color: #d4af37; letter-spacing: 2px; font-size: 12px; opacity: 0.8; }
-        .stats { width: 260px; pointer-events: auto; }
-        .card { 
-            background: rgba(10, 10, 10, 0.85); border: 1px solid rgba(212, 175, 55, 0.2);
-            padding: 12px; border-radius: 4px; color: #fff; margin-bottom: 10px;
-            backdrop-filter: blur(15px); box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        .stats { 
+            background: rgba(0,0,0,0.6); border: 1px solid #d4af37; 
+            padding: 15px; border-radius: 10px; width: 220px; backdrop-filter: blur(5px);
         }
-        .card h3 { margin: 0; font-size: 9px; color: #d4af37; text-transform: uppercase; opacity: 0.7; }
-        .card p { margin: 4px 0 0; font-size: 16px; font-weight: bold; font-family: monospace; }
-        .footer { text-align: center; padding-bottom: 20px; }
-        .status-line { color: #d4af37; font-size: 10px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-<div id="ui">
-    <div class="header">
-        <div>TON TEMPLE V9.0 | NEURAL ODYSSEY</div>
-        <div id="time">22:45:12</div>
-    </div>
-    
-    <div class="stats">
-        <div class="card"><h3>NEURAL SYNC</h3><p>99.28%</p></div>
-        <div class="card"><h3>DRAGON VITALITY</h3><p id="vitality">STABLE</p></div>
-        <div class="card"><h3>ENERGY FLOW</h3><p>#2048.BT</p></div>
-    </div>
+    <div id="universe"></div>
 
-    <div class="footer">
-        <div class="status-line">System: Dragon breathing confirmed</div>
-    </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<script>
-let scene, camera, renderer, eyeBG, dragonSegments = [];
-const SEGMENT_COUNT = 120;
-let clock = new THREE.Clock();
-
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 40;
-
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.body.appendChild(renderer.domElement);
-
-    // 1. ШЕЙДЕРНЫЙ ФОН "ОКО ВСЕЛЕННОЙ"
-    const bgGeo = new THREE.PlaneGeometry(2, 2);
-    const bgMat = new THREE.ShaderMaterial({
-        uniforms: { time: { value: 0 } },
-        vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
-        fragmentShader: `
-            uniform float time;
-            void main() {
-                vec2 uv = gl_FragCoord.xy / vec2(${window.innerWidth}.0, ${window.innerHeight}.0) - 0.5;
-                uv.x *= ${window.innerWidth / window.innerHeight};
-                float d = length(uv);
-                vec3 col = vec3(0.02, 0.04, 0.08);
-                float eye = smoothstep(0.4, 0.0, d);
-                col += vec3(0.1, 0.2, 0.4) * eye * (0.5 + 0.5 * sin(time * 0.5));
-                float pupil = smoothstep(0.1, 0.08, d);
-                col = mix(col, vec3(0.0), pupil);
-                gl_FragColor = vec4(col, 1.0);
-            }
-        `
-    });
-    const bg = new THREE.Mesh(bgGeo, bgMat);
-    bg.renderOrder = -1;
-    scene.add(bg);
-    eyeBG = bgMat;
-
-    // 2. СОЗДАНИЕ ЖИВОГО ДРАКОНА
-    const dragonMat = new THREE.MeshStandardMaterial({ 
-        color: 0xffd700, 
-        metalness: 0.9, 
-        roughness: 0.15,
-        emissive: 0x443300
-    });
-
-    for(let i = 0; i < SEGMENT_COUNT; i++) {
-        // Голова чуть больше, хвост сужается
-        let size = i === 0 ? 1.5 : 1.2 * Math.pow(1 - i/SEGMENT_COUNT, 0.5);
-        const geo = i === 0 ? new THREE.BoxGeometry(size, size*0.8, size*1.2) : new THREE.SphereGeometry(size, 16, 12);
-        const mesh = new THREE.Mesh(geo, dragonMat);
+    <div id="ui-overlay">
+        <div style="letter-spacing: 2px;">TON TEMPLE V9.0 | NEURAL ODYSSEY</div>
         
-        dragonSegments.push({
-            mesh: mesh,
-            offset: i * 0.4 // Расстояние между звеньями
-        });
-        scene.add(mesh);
-    }
+        <div class="stats">
+            <h3 style="margin:0; font-size: 10px; opacity: 0.7;">DRAGON STATUS</h3>
+            <p style="margin:5px 0 0; font-weight:bold; font-size: 18px;">VITALITY: ACTIVE</p>
+            <p style="margin:2px 0 0; font-size: 12px; color: #fff;">SYNC: 99.2%</p>
+        </div>
 
-    // Освещение для золотого блеска
-    const light1 = new THREE.DirectionalLight(0xffffff, 1.5);
-    light1.position.set(5, 10, 20);
-    scene.add(light1);
-    
-    const light2 = new THREE.PointLight(0xffaa00, 2);
-    light2.position.set(-10, -5, 10);
-    scene.add(light2);
+        <div style="text-align: center; font-size: 12px; opacity: 0.8;">BREATHING STABILIZED</div>
+    </div>
 
-    animate();
-}
+    <div id="dragon-container">
+        <img src="dragon.jpg" id="dragon-img" alt="Golden Dragon">
+    </div>
 
-function animate() {
-    requestAnimationFrame(animate);
-    let t = clock.getElapsedTime();
-    eyeBG.uniforms.time.value = t;
-
-    // Эффект дыхания (Vitality)
-    let breathing = Math.sin(t * 0.8) * 0.1;
-    document.getElementById('vitality').style.opacity = 0.7 + breathing * 2;
-
-    dragonSegments.forEach((seg, i) => {
-        // Математика извивающегося тела (синусоиды в 3D)
-        let phase = t * 1.2 - i * 0.15;
-        
-        // Основная траектория "Невесомости"
-        let x = Math.sin(phase) * 5 * Math.sin(t * 0.3);
-        let y = Math.cos(phase * 0.7) * 4 + Math.sin(t * 1.5) * 0.5; // Дыхание тут
-        let z = Math.cos(phase) * 3;
-
-        // Если это голова, она плавно "смотрит" на зрителя
-        if(i === 0) {
-            seg.mesh.position.set(x * 0.5, y * 0.5 + breathing * 5, 10);
-            seg.mesh.rotation.y = Math.sin(t * 0.5) * 0.3;
-            seg.mesh.rotation.x = Math.cos(t * 0.5) * 0.2;
-        } else {
-            // Тело следует за головой с задержкой (эффект змеи)
-            seg.mesh.position.lerp(new THREE.Vector3(x, y + breathing * 5, z), 0.1);
-        }
-        
-        // Золотой перелив
-        seg.mesh.material.emissiveIntensity = 0.5 + Math.sin(t + i*0.1) * 0.5;
-    });
-
-    // Обновление часов
-    let now = new Date();
-    document.getElementById('time').innerText = now.toTimeString().split(' ')[0];
-
-    renderer.render(scene, camera);
-}
-
-init();
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-</script>
 </body>
 </html>
