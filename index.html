@@ -3,128 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TON Temple - Gold Dragon</title>
+    <title>TON Temple • Eye of Eternity</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         body { margin: 0; background-color: #000; overflow: hidden; }
         canvas { display: block; }
-        #ui { position: absolute; bottom: 40px; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
+        #ui { position: absolute; bottom: 50px; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
         .btn { 
-            pointer-events: auto; padding: 18px 40px; 
+            pointer-events: auto; padding: 20px 50px; 
             background: linear-gradient(135deg, #8a6d1d 0%, #d4af37 50%, #8a6d1d 100%); 
             border: 1px solid #ffec8b; border-radius: 50px; 
-            color: white; font-weight: 900; font-size: 16px; 
-            text-transform: uppercase; box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); 
-            cursor: pointer; font-family: sans-serif; 
+            color: white; font-weight: 900; font-size: 18px; 
+            text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); 
+            cursor: pointer; font-family: 'Segoe UI', Roboto, sans-serif;
+            transition: transform 0.2s;
         }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
     <div id="ui"><button class="btn" onclick="triggerAction()">УЗНАТЬ СУДЬБУ</button></div>
 
     <script>
-        let scene, camera, renderer, starGroup, blinkGroup, comet, dragon;
+        let scene, camera, renderer, starGroup, blinkGroup, comet, dragon, bgSphere;
         let blinkPhases = [];
 
-        window.onload = function() {
-            init();
-            animate();
-        };
+        window.onload = init;
 
         function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1, 12);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 0, 15);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            // Настройки для правильного отображения золота
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
             document.body.appendChild(renderer.domElement);
 
-            // --- СВЕТ ДЛЯ ЗОЛОТА ---
-            const sun = new THREE.DirectionalLight(0xffffff, 2);
-            sun.position.set(5, 5, 5);
-            scene.add(sun);
+            // --- 1. ФОН "ОКО БОГА" ---
+            const texLoader = new THREE.TextureLoader();
+            texLoader.load('background.jpg', (texture) => {
+                const geometry = new THREE.SphereGeometry(500, 60, 40);
+                const material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    side: THREE.BackSide,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                bgSphere = new THREE.Mesh(geometry, material);
+                scene.add(bgSphere);
+            });
 
-            const backLight = new THREE.PointLight(0xffd700, 2);
-            backLight.position.set(-5, 2, -5);
-            scene.add(backLight);
+            // --- 2. СВЕТ ДЛЯ ПРЕМИУМ ЗОЛОТА ---
+            const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
+            mainLight.position.set(5, 10, 7);
+            scene.add(mainLight);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const sideLight = new THREE.PointLight(0xffaa00, 2);
+            sideLight.position.set(-10, 5, 5);
+            scene.add(sideLight);
 
-            // --- ТЕКСТУРА ЗВЕЗДЫ ---
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(32, 12); ctx.lineTo(32, 52); ctx.moveTo(12, 32); ctx.lineTo(52, 32); ctx.stroke();
-            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 15);
-            grad.addColorStop(0, 'white'); grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad; ctx.arc(32, 32, 15, 0, Math.PI*2); ctx.fill();
-            const starTex = new THREE.CanvasTexture(canvas);
+            const ambient = new THREE.AmbientLight(0x404040, 1); 
+            scene.add(ambient);
 
+            // --- 3. ЗВЕЗДНАЯ ПЫЛЬ (ДРЕЙФ) ---
+            const starTex = createStarTexture();
             starGroup = new THREE.Group();
 
-            // --- СТАТИЧНЫЕ ЗВЕЗДЫ ---
+            // Статичный слой (глубина)
             const staticGeo = new THREE.BufferGeometry();
-            const staticPos = []; const staticColors = [];
-            for(let i=0; i<2000; i++) {
-                staticPos.push((Math.random()-0.5)*200, (Math.random()-0.5)*120, (Math.random()-0.5)*150);
+            const staticPos = []; const staticCols = [];
+            for(let i=0; i<3000; i++) {
+                staticPos.push((Math.random()-0.5)*400, (Math.random()-0.5)*200, (Math.random()-0.5)*300);
                 const b = 0.1 + Math.random() * 0.4;
-                staticColors.push(b, b, b);
+                staticCols.push(b, b, b);
             }
             staticGeo.setAttribute('position', new THREE.Float32BufferAttribute(staticPos, 3));
-            staticGeo.setAttribute('color', new THREE.Float32BufferAttribute(staticColors, 3));
-            const sStars = new THREE.Points(staticGeo, new THREE.PointsMaterial({size: 0.4, map: starTex, transparent: true, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false}));
+            staticGeo.setAttribute('color', new THREE.Float32BufferAttribute(staticCols, 3));
+            const sStars = new THREE.Points(staticGeo, new THREE.PointsMaterial({size: 0.6, map: starTex, transparent: true, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false}));
             starGroup.add(sStars);
 
-            // --- МЕРЦАЮЩИЕ ЗВЕЗДЫ ---
+            // Мерцающий слой
             const blinkGeo = new THREE.BufferGeometry();
-            const blinkPos = []; const blinkColors = [];
-            for(let i=0; i<800; i++) {
-                blinkPos.push((Math.random()-0.5)*180, (Math.random()-0.5)*100, (Math.random()-0.5)*120);
+            const blinkPos = []; const blinkCols = [];
+            for(let i=0; i<1000; i++) {
+                blinkPos.push((Math.random()-0.5)*300, (Math.random()-0.5)*150, (Math.random()-0.5)*200);
                 blinkPhases.push(Math.random() * Math.PI * 2);
-                blinkColors.push(1, 1, 1);
+                blinkCols.push(1, 1, 1);
             }
             blinkGeo.setAttribute('position', new THREE.Float32BufferAttribute(blinkPos, 3));
-            blinkGeo.setAttribute('color', new THREE.Float32BufferAttribute(blinkColors, 3));
-            blinkGroup = new THREE.Points(blinkGeo, new THREE.PointsMaterial({size: 0.8, map: starTex, transparent: true, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false}));
+            blinkGeo.setAttribute('color', new THREE.Float32BufferAttribute(blinkCols, 3));
+            blinkGroup = new THREE.Points(blinkGeo, new THREE.PointsMaterial({size: 1.2, map: starTex, transparent: true, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false}));
             starGroup.add(blinkGroup);
             scene.add(starGroup);
 
-            // --- КОМЕТА ---
-            const cometGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(-2.5, 2.5, 0)]);
+            // --- 4. МЕДЛЕННАЯ КОМЕТА ---
+            const cometGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(-3, 3, 0)]);
             comet = new THREE.Line(cometGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 }));
             scene.add(comet);
 
-            // --- ЗАГРУЗКА ДРАКОНА ---
+            // --- 5. ЗОЛОТОЙ ДРАКОН ---
             const loader = new THREE.GLTFLoader();
-            loader.load('dragon.glb', function(gltf) {
+            loader.load('dragon.glb', (gltf) => {
                 dragon = gltf.scene;
-                dragon.traverse((node) => {
-                    if (node.isMesh) {
-                        node.material = new THREE.MeshStandardMaterial({
+                dragon.traverse((n) => {
+                    if (n.isMesh) {
+                        n.material = new THREE.MeshStandardMaterial({
                             color: 0xffd700,
                             metalness: 1.0,
-                            roughness: 0.2
+                            roughness: 0.15,
+                            emissive: 0x221100
                         });
                     }
                 });
                 const box = new THREE.Box3().setFromObject(dragon);
-                const scale = 7 / box.getSize(new THREE.Vector3()).length();
+                const scale = 8 / box.getSize(new THREE.Vector3()).length();
                 dragon.scale.set(scale, scale, scale);
                 dragon.position.set(0, -1, 0);
                 scene.add(dragon);
-            }, undefined, (e) => console.error("Файл dragon.glb не найден рядом с index.html"));
+            });
 
-            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('resize', onResize);
+            animate();
         }
 
-        function onWindowResize() {
+        function createStarTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(32, 32, 6, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(32, 5); ctx.lineTo(32, 59); ctx.moveTo(5, 32); ctx.lineTo(59, 32); ctx.stroke();
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -134,35 +153,45 @@
             requestAnimationFrame(animate);
             const t = Date.now() * 0.001;
 
-            if(starGroup) starGroup.position.x += 0.003;
+            // Движение фона (параллакс)
+            if(bgSphere) bgSphere.rotation.y += 0.0003;
 
+            // Движение звезд
+            if(starGroup) starGroup.position.x += 0.005;
+
+            // Индивидуальное мерцание
             if(blinkGroup) {
-                const colors = blinkGroup.geometry.attributes.color.array;
+                const cols = blinkGroup.geometry.attributes.color.array;
                 for(let i = 0; i < blinkPhases.length; i++) {
-                    const b = 0.2 + Math.abs(Math.sin(t * 1.2 + blinkPhases[i])) * 0.8;
-                    colors[i*3] = b; colors[i*3+1] = b; colors[i*3+2] = b;
+                    const b = 0.3 + Math.abs(Math.sin(t * 1.5 + blinkPhases[i])) * 0.7;
+                    cols[i*3] = b; cols[i*3+1] = b; cols[i*3+2] = b;
                 }
                 blinkGroup.geometry.attributes.color.needsUpdate = true;
             }
 
+            // Плавная комета
             if(comet && comet.material.opacity > 0) {
-                comet.position.x += 0.3; comet.position.y -= 0.3;
-                comet.material.opacity -= 0.01;
-            } else if (Math.random() < 0.005) {
-                comet.position.set((Math.random()-0.5)*50, 15, (Math.random()-0.5)*10);
+                comet.position.x += 0.25; comet.position.y -= 0.25;
+                comet.material.opacity -= 0.007;
+            } else if (Math.random() < 0.003) {
+                comet.position.set((Math.random()-0.5)*60, 20, (Math.random()-0.5)*10);
                 comet.material.opacity = 1;
             }
 
+            // Анимация дракона
             if(dragon) {
                 dragon.rotation.y += 0.005;
-                dragon.position.y = -1 + Math.sin(t) * 0.2;
+                dragon.position.y = -1 + Math.sin(t * 0.8) * 0.3;
             }
 
             renderer.render(scene, camera);
         }
 
         function triggerAction() {
-            if(dragon) dragon.rotation.y += 2.0; // Крутануть при клике
+            if(dragon) {
+                // Эффект ускорения при нажатии
+                dragon.rotation.y += 1.5;
+            }
         }
     </script>
 </body>
