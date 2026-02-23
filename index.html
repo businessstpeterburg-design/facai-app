@@ -2,150 +2,181 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TON Temple • Warp Drive</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+    <title>TON Temple • Neural Odyssey</title>
     <style>
-        body { margin: 0; background-color: #000; overflow: hidden; }
-        canvas { display: block; }
-        #ui { position: absolute; bottom: 50px; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
-        .btn { 
-            pointer-events: auto; padding: 20px 50px; 
-            background: linear-gradient(135deg, #8a6d1d 0%, #d4af37 50%, #8a6d1d 100%); 
-            border: 1px solid #ffec8b; border-radius: 50px; 
-            color: white; font-weight: 900; font-size: 18px; 
-            text-transform: uppercase; letter-spacing: 2px;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); 
-            cursor: pointer; font-family: sans-serif;
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        #overlay {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-between;
+            pointer-events: none; padding: 40px; box-sizing: border-box;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.4) 100%);
+        }
+        .header { display: flex; justify-content: space-between; color: #d4af37; letter-spacing: 2px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 300px; pointer-events: auto; }
+        .stat-card { 
+            background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 15px; border-radius: 8px; color: #fff; backdrop-filter: blur(10px);
+        }
+        .stat-card h3 { margin: 0; font-size: 10px; color: #d4af37; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 18px; font-weight: bold; }
+        .footer { text-align: center; }
+        .btn-activate {
+            padding: 20px 60px; background: linear-gradient(to bottom, #d4af37, #b8860b);
+            border: none; border-radius: 40px; color: #000; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 3px; cursor: pointer;
+            pointer-events: auto; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
         }
     </style>
 </head>
 <body>
-    <div id="ui"><button class="btn" onclick="boost()">УЗНАТЬ СУДЬБУ</button></div>
 
-    <script>
-        let scene, camera, renderer, dragon, stars, comet;
-        let starData = []; // Данные для хаотичного движения звезд
+<div id="overlay">
+    <div class="header">
+        <div>TON TEMPLE V9.0 | NEURAL ODYSSEY</div>
+        <div>#4.90B</div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card"><h3>NAV</h3><p>72.810</p></div>
+        <div class="stat-card"><h3>Sync Status</h3><p>99.2%</p></div>
+        <div class="stat-card"><h3>Value</h3><p>#2000</p></div>
+        <div class="stat-card"><h3>VAR</h3><p>72.315</p></div>
+    </div>
 
-        window.onload = init;
+    <div class="footer">
+        <button class="btn-activate" onclick="toggleDragon()">ACTIVATE FLOW</button>
+    </div>
+</div>
 
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 15;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.outputEncoding = THREE.sRGBEncoding;
-            document.body.appendChild(renderer.domElement);
+<script>
+let scene, camera, renderer, eyeShader, dragonParts = [], stones = [];
+let dragonActive = false;
+let clock = new THREE.Clock();
 
-            // --- ФОН (ОКО БОГА) ---
-            const texLoader = new THREE.TextureLoader();
-            texLoader.load('background.jpg', (tex) => {
-                scene.background = tex;
-            });
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 35;
 
-            // --- СВЕТ ---
-            const light = new THREE.PointLight(0xffffff, 2, 100);
-            light.position.set(5, 5, 10);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
 
-            // --- ЧАСТИЦЫ (ХАОТИЧНЫЙ ПОЛЕТ) ---
-            const starGeo = new THREE.BufferGeometry();
-            const positions = [];
-            for (let i = 0; i < 2000; i++) {
-                const x = (Math.random() - 0.5) * 100;
-                const y = (Math.random() - 0.5) * 100;
-                const z = (Math.random() - 0.5) * 100;
-                positions.push(x, y, z);
+    // 1. ШЕЙДЕРНОЕ ОКО БОГА (Прямо в коде)
+    const bgGeo = new THREE.PlaneGeometry(150, 100);
+    const bgMat = new THREE.ShaderMaterial({
+        uniforms: { time: { value: 0 } },
+        vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 1.0); }`,
+        fragmentShader: `
+            varying vec2 vUv;
+            uniform float time;
+            void main() {
+                vec2 uv = vUv - 0.5;
+                uv.x *= 1.7;
+                float dist = length(uv);
                 
-                // Случайная скорость для каждой звезды
-                starData.push({
-                    speed: 0.1 + Math.random() * 0.5,
-                    chaos: Math.random() * 0.02
-                });
+                // Космическая туманность
+                vec3 color = vec3(0.05, 0.1, 0.2) * (1.0 - dist);
+                
+                // Эффект глаза
+                float eyeShape = smoothstep(0.5, 0.0, abs(uv.y) + dist * 0.5);
+                float iris = smoothstep(0.25, 0.15, dist);
+                float pupil = smoothstep(0.08, 0.07, dist);
+                
+                vec3 irisCol = mix(vec3(0.0, 0.6, 0.8), vec3(0.8, 0.4, 0.0), sin(dist * 10.0 - time) * 0.5 + 0.5);
+                vec3 eyeCol = mix(irisCol, vec3(0.0), pupil);
+                eyeCol *= iris;
+                
+                // Сияние
+                float glow = exp(-dist * 4.0) * 0.5;
+                color += eyeCol + glow * vec3(1.0, 0.8, 0.5);
+                
+                gl_FragColor = vec4(color, 1.0);
             }
-            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        `
+    });
+    const bg = new THREE.Mesh(bgGeo, bgMat);
+    bg.renderOrder = -1;
+    scene.add(bg);
+    eyeShader = bgMat;
+
+    // 2. ПРОЦЕДУРНЫЙ ЗОЛОТОЙ ДРАКОН
+    const dragonGroup = new THREE.Group();
+    const goldMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffd700, metalness: 1, roughness: 0.2, emissive: 0x332200 
+    });
+
+    for(let i = 0; i < 60; i++) {
+        const size = i === 0 ? 1.2 : 0.8 * (1.0 - i/70);
+        const seg = new THREE.Mesh(new THREE.SphereGeometry(size, 16, 16), goldMat);
+        dragonParts.push(seg);
+        dragonGroup.add(seg);
+    }
+    scene.add(dragonGroup);
+
+    // 3. ЗОЛОТЫЕ МЕТЕОРИТЫ
+    for(let i = 0; i < 40; i++) {
+        const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(Math.random()*0.7, 0), goldMat);
+        stone.position.set((Math.random()-0.5)*60, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        stones.push(stone);
+        scene.add(stone);
+    }
+
+    // Свет
+    const pLight = new THREE.PointLight(0xffffff, 2, 100);
+    pLight.position.set(0, 5, 20);
+    scene.add(pLight);
+    scene.add(new THREE.AmbientLight(0x444444));
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    let t = clock.getElapsedTime();
+    eyeShader.uniforms.time.value = t;
+
+    // Анимация Дракона
+    dragonParts.forEach((p, i) => {
+        let angle = t * 1.5 - i * 0.15;
+        if (!dragonActive) {
+            // Дракон летает кругами вдали
+            p.position.x = Math.sin(angle) * (15 + i * 0.1);
+            p.position.y = Math.cos(angle * 0.5) * 10;
+            p.position.z = -10 - i * 0.5;
+        } else {
+            // Дракон вылетает и замирает перед лицом
+            let targetZ = 15 - i * 0.7;
+            let targetX = Math.sin(t * 2 - i * 0.2) * 1.5;
+            let targetY = Math.cos(t * 2 - i * 0.2) * 1.5;
             
-            const starMat = new THREE.PointsMaterial({
-                size: 0.4,
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.8,
-                blending: THREE.AdditiveBlending
-            });
-            stars = new THREE.Points(starGeo, starMat);
-            scene.add(stars);
-
-            // --- МЕТЕОРИТ (КОМЕТА) ---
-            const cometGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(-4, 4, 0)]);
-            comet = new THREE.Line(cometGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 }));
-            scene.add(comet);
-
-            // --- ДРАКОН ---
-            new THREE.GLTFLoader().load('dragon.glb', (gltf) => {
-                dragon = gltf.scene;
-                dragon.traverse(n => {
-                    if(n.isMesh) n.material = new THREE.MeshStandardMaterial({color: 0xffd700, metalness: 1, roughness: 0.2});
-                });
-                dragon.position.y = -1;
-                scene.add(dragon);
-            });
-
-            animate();
+            p.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.05);
         }
+    });
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = Date.now() * 0.001;
+    // Анимация метеоритов
+    stones.forEach((s, i) => {
+        s.position.y += Math.sin(t + i) * 0.01;
+        s.rotation.y += 0.01;
+    });
 
-            // Анимация звезд: летим вперед!
-            if (stars) {
-                const pos = stars.geometry.attributes.position.array;
-                for (let i = 0; i < pos.length; i += 3) {
-                    const idx = i / 3;
-                    // Движение на камеру (Z)
-                    pos[i+2] += starData[idx].speed;
-                    
-                    // Хаотичное пошатывание (X и Y)
-                    pos[i] += Math.sin(time + idx) * starData[idx].chaos;
-                    pos[i+1] += Math.cos(time + idx) * starData[idx].chaos;
+    renderer.render(scene, camera);
+}
 
-                    // Если звезда вылетела за камеру, возвращаем её назад вглубь
-                    if (pos[i+2] > 15) {
-                        pos[i+2] = -85;
-                        pos[i] = (Math.random() - 0.5) * 100;
-                        pos[i+1] = (Math.random() - 0.5) * 100;
-                    }
-                }
-                stars.geometry.attributes.position.needsUpdate = true;
-            }
+function toggleDragon() {
+    dragonActive = !dragonActive;
+}
 
-            // Комета
-            if (comet && comet.material.opacity > 0) {
-                comet.position.x += 0.6; comet.position.y -= 0.6;
-                comet.material.opacity -= 0.01;
-            } else if (Math.random() < 0.01) {
-                comet.position.set((Math.random()-0.5)*80, 20, (Math.random()-0.5)*20);
-                comet.material.opacity = 1;
-            }
+init();
 
-            if (dragon) {
-                dragon.rotation.y += 0.005;
-                dragon.position.y = -1 + Math.sin(time) * 0.2;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.boost = function() {
-            // При нажатии звезды ускоряются
-            starData.forEach(s => s.speed *= 2);
-            setTimeout(() => starData.forEach(s => s.speed /= 2), 1000);
-        };
-    </script>
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
 </body>
 </html>
