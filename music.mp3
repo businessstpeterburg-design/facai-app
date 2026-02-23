@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TON TEMPLE V9.0 | PS5 MASTER EDITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&family=Space+Mono:wght@400;700&family=Cinzel+Decorative:wght@900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #dfc27d; --gold-br: #fff3d1; --gold-dk: #a67c00;
+            --bg: #010101; --panel: rgba(10, 10, 10, 0.9);
+            --mythic-glow: 0 0 30px rgba(223, 194, 125, 0.4);
+            --safe-top: env(safe-area-inset-top);
+        }
+
+        /* --- GLOBAL OPTIMIZATION --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; }
+        body { 
+            background: var(--bg); color: var(--gold); 
+            font-family: 'Space Mono', monospace; height: 100vh; overflow: hidden;
+            perspective: 1000px; /* 3D Depth */
+        }
+
+        /* --- LAYER 0: QUANTUM BACKGROUND --- */
+        #particle-canvas { position: fixed; inset: 0; z-index: 0; filter: blur(1px); }
+
+        /* --- LAYER 1: THE DRAGON (GUARDIAN ENTITY) --- */
+        .dragon-entity {
+            position: fixed; top: 15%; left: 50%; transform: translateX(-50%) translateZ(-100px);
+            width: 110%; max-width: 700px; opacity: 0.15; z-index: 1;
+            transition: all 2s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: grayscale(1) contrast(1.2);
+        }
+        .active-ritual .dragon-entity { opacity: 0.8; filter: grayscale(0) contrast(1) drop-shadow(0 0 80px var(--gold-dk)); transform: translateX(-50%) scale(1.05); }
+
+        /* --- LAYER 2: AAA HUD SYSTEM --- */
+        .hud-overlay { position: relative; z-index: 100; height: 100%; display: flex; flex-direction: column; pointer-events: none; }
+        .hud-overlay * { pointer-events: auto; }
+
+        .header-v9 { padding: calc(20px + var(--safe-top)) 25px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .temple-id { display: flex; gap: 15px; align-items: center; }
+        .logo-box { width: 55px; height: 55px; background: var(--gold); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #000; box-shadow: var(--mythic-glow); }
+
+        /* --- DYNAMIC DATA TILES --- */
+        .data-stream { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 25px; }
+        .tile { 
+            background: var(--panel); border: 1px solid rgba(223,194,125,0.1); 
+            padding: 18px; border-radius: 22px; backdrop-filter: blur(20px);
+            position: relative; overflow: hidden;
+        }
+        .tile::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: sweep 4s infinite; }
+        @keyframes sweep { 100% { left: 200%; } }
+
+        .tile .val { font-size: 24px; font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .tile .label { font-size: 9px; letter-spacing: 2px; opacity: 0.6; margin-bottom: 6px; }
+
+        /* --- CENTER ACTION: THE ALTAR --- */
+        .ritual-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .altar-disc {
+            width: 88vw; height: 88vw; max-width: 420px; max-height: 420px;
+            position: relative; border-radius: 50%;
+            transition: transform 9s cubic-bezier(0.15, 0, 0.15, 1);
+            filter: drop-shadow(0 0 40px rgba(0,0,0,0.8));
+        }
+        .altar-disc img { width: 100%; height: 100%; }
+        
+        /* --- BUTTONS: PS5 CONTROLLER STYLE --- */
+        .action-footer { padding: 30px 25px calc(40px + env(safe-area-inset-bottom)); }
+        .btn-zenith {
+            width: 100%; padding: 26px; border-radius: 25px; border: none;
+            background: linear-gradient(135deg, var(--gold-br), var(--gold-dk), #4d3a00);
+            background-size: 200% 200%;
+            color: #000; font-weight: 900; font-size: 20px; letter-spacing: 6px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7); cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+            animation: gradientMove 5s infinite alternate;
+        }
+        .btn-zenith:active { transform: scale(0.96) rotateX(10deg); }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+        /* --- CINEMATIC OVERLAYS --- */
+        #cinematic-reveal { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.99); display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .hongbao-v9 { width: 280px; filter: drop-shadow(0 0 30px #f00); animation: pulseHb 1.5s infinite; }
+        @keyframes pulseHb { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .parchment-v9 {
+            width: 92%; max-width: 450px; background: #fdf5e6; border-radius: 2px;
+            padding: 50px; color: #111; display: none; flex-direction: column;
+            box-shadow: 0 0 100px #000; position: relative; transform-style: preserve-3d;
+        }
+        .ink-v9 { font-family: 'Noto Serif SC', serif; font-size: 22px; line-height: 1.7; font-weight: 900; }
+        .seal-v9 { position: absolute; bottom: 40px; right: 40px; width: 100px; opacity: 0; transform: scale(4) rotate(45deg); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    </style>
+</head>
+<body id="app-body">
+
+<canvas id="particle-canvas"></canvas>
+<img src="dragon.jpg" class="dragon-entity" id="dragon">
+
+<div class="hud-overlay">
+    <header class="header-v9">
+        <div class="temple-id">
+            <div class="logo-box">財</div>
+            <div>
+                <h1 style="font-family: 'Cinzel Decorative'; font-size: 18px;">TEMPLE V9</h1>
+                <p style="font-size: 9px; opacity: 0.5; letter-spacing: 2px;">AAA PS5 ENGINE RENDER</p>
+            </div>
+        </div>
+        <div class="tile" style="padding: 10px 20px;">
+            <div class="val" style="font-size: 14px;">1.28 TON</div>
+        </div>
+    </header>
+
+    <div class="data-stream">
+        <div class="tile">
+            <div class="label">NEURAL ENTROPY</div>
+            <div class="val" id="entropy-cpu">72.809</div>
+        </div>
+        <div class="tile">
+            <div class="label">SYNC STATUS</div>
+            <div class="val" style="color: #00f2ff;">99.1%</div>
+        </div>
+        <div class="tile" style="grid-column: span 2;">
+            <div class="label">CURRENT ARTIFACT</div>
+            <div class="val" style="font-size: 16px; color: var(--gold-br);">SEAL OF PROSPERITY V8.2</div>
+        </div>
+    </div>
+
+    <main class="ritual-center">
+        <div class="altar-disc" id="wheel-disc">
+            <img src="https://i.ibb.co/mF7mYmS/wheel.png" alt="Wheel">
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                <span style="font-size: 80px; text-shadow: 0 0 50px var(--gold); color: #000;">財</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="action-footer">
+        <button class="btn-zenith" id="master-trigger">ACTIVATE FLOW</button>
+    </footer>
+</div>
+
+<div id="cinematic-reveal">
+    <img src="hongbao.jpg" class="hongbao-v9" id="hb-asset">
+    <div class="parchment-v9" id="parchment-v9">
+        <div class="ink-v9" id="ink-v9"></div>
+        <img src="royalSeal.jpg" class="seal-v9" id="seal-v9">
+        <button class="btn-zenith" style="margin-top: 40px; padding: 15px; font-size: 14px;" onclick="location.reload()">SYNC COMPLETED</button>
+    </div>
+</div>
+
+<audio id="coin-fx" src="coin.mp3" loop></audio>
+
+<script>
+/**
+ * THE OMEGA SCRIPT V9.0 (PS5 ARCHITECTURE)
+ */
+
+class PS5Engine {
+    constructor() {
+        this.canvas = document.getElementById('particle-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.speed = 0.5;
+        this.init();
+    }
+
+    init() {
+        this.resize();
+        window.onresize = () => this.resize();
+        for(let i=0; i<400; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                z: Math.random() * 1000,
+                size: Math.random() * 2
+            });
+        }
+        this.render();
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    render() {
+        this.ctx.fillStyle = 'rgba(1, 1, 1, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.particles.forEach(p => {
+            p.z -= this.speed;
+            if(p.z <= 0) p.z = 1000;
+            
+            let x = (p.x - this.canvas.width/2) * (1000/p.z) + this.canvas.width/2;
+            let y = (p.y - this.canvas.height/2) * (1000/p.z) + this.canvas.height/2;
+            let s = p.size * (1000/p.z);
+            
+            this.ctx.fillStyle = `rgba(223, 194, 125, ${1 - p.z/1000})`;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, s, 0, Math.PI*2);
+            this.ctx.fill();
+        });
+        requestAnimationFrame(() => this.render());
+    }
+}
+
+const TempleSystem = {
+    engine: new PS5Engine(),
+    audio: document.getElementById('coin-fx'),
+    isRunning: false,
+
+    async run() {
+        if(this.isRunning) return;
+        this.isRunning = true;
+
+        const body = document.getElementById('app-body');
+        const wheel = document.getElementById('wheel-disc');
+        const btn = document.getElementById('master-trigger');
+
+        btn.disabled = true;
+        body.classList.add('active-ritual');
+        
+        // AAA Sound Implementation
+        this.audio.volume = 0;
+        this.audio.play();
+        this.fadeAudio(0, 1, 2000); // Fade in over 2s
+
+        // Hyper-Speed Physics
+        this.engine.speed = 40;
+        const targetDeg = 8000 + Math.random()*5000;
+        wheel.style.transform = `rotate(${targetDeg}deg)`;
+
+        if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+
+        // Sequence: Spin -> Slow Down -> Fade Audio -> Reveal
+        setTimeout(() => {
+            this.fadeAudio(1, 0, 3000);
+            setTimeout(() => this.triggerCinematic(), 3500);
+        }, 5500);
+    },
+
+    fadeAudio(from, to, duration) {
+        let start = Date.now();
+        let timer = setInterval(() => {
+            let time = Date.now() - start;
+            let volume = from + (to - from) * (time / duration);
+            if(volume < 0) volume = 0; if(volume > 1) volume = 1;
+            this.audio.volume = volume;
+            if(time >= duration) clearInterval(timer);
+        }, 50);
+    },
+
+    async triggerCinematic() {
+        this.engine.speed = 0.5;
+        const reveal = document.getElementById('cinematic-reveal');
+        const hb = document.getElementById('hb-asset');
+        const p = document.getElementById('parchment-v9');
+        const ink = document.getElementById('ink-v9');
+        const seal = document.getElementById('seal-v9');
+
+        reveal.style.display = 'flex';
+        
+        // Phase 1: Hongbao
+        setTimeout(() => {
+            hb.style.display = 'none';
+            p.style.display = 'flex';
+            this.typeWriter(ink, seal);
+        }, 2500);
+    },
+
+    async typeWriter(el, seal) {
+        const text = "Сенсорная синхронизация завершена. Дракон выбрал твою ветку реальности. Протокол TON TEMPLE активирован на максимум. Твоё число удачи — в тишине.";
+        for(let char of Array.from(text)) {
+            el.innerHTML += char;
+            await new Promise(r => setTimeout(r, 40));
+        }
+        
+        // Phase 2: The Seal Strike
+        setTimeout(() => {
+            seal.style.opacity = '1';
+            seal.style.transform = 'scale(1) rotate(-15deg)';
+            if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+        }, 500);
+    },
+
+    simulateStats() {
+        setInterval(() => {
+            document.getElementById('entropy-cpu').innerText = (72.809 + (Math.random()*0.005 - 0.0025)).toFixed(3);
+        }, 80);
+    }
+};
+
+window.onload = () => {
+    TempleSystem.simulateStats();
+    document.getElementById('master-trigger').onclick = () => TempleSystem.run();
+};
+</script>
+</body>
+</html>
