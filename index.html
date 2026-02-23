@@ -10,11 +10,11 @@
         body { margin: 0; background-color: #000; overflow: hidden; }
         #ui { position: absolute; bottom: 10%; width: 100%; text-align: center; z-index: 100; }
         .btn { 
-            padding: 20px 60px; background: rgba(0,0,0,0.8); 
+            padding: 22px 65px; background: rgba(0,0,0,0.8); 
             border: 1px solid #d4af37; border-radius: 60px; color: #ffec8b;
             font-size: 14px; text-transform: uppercase; letter-spacing: 5px;
             cursor: pointer; backdrop-filter: blur(15px); transition: 0.5s;
-            font-family: sans-serif; box-shadow: 0 0 30px rgba(212,175,55,0.3);
+            box-shadow: 0 0 30px rgba(212,175,55,0.3);
         }
     </style>
 </head>
@@ -28,7 +28,7 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x050508, 0.012);
+            scene.fog = new THREE.FogExp2(0x050508, 0.012); // Глубокий космос
 
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 0, 25);
@@ -57,7 +57,7 @@
                 loadAssets(loader);
             });
 
-            // 2. СВЕТ
+            // 2. КИНОШНЫЙ СВЕТ
             const sun = new THREE.DirectionalLight(0xffffff, 3);
             sun.position.set(10, 15, 20);
             scene.add(sun);
@@ -70,11 +70,11 @@
         }
 
         function loadAssets(loader) {
-            // Текстура самородка (твоё фото)
+            // Текстура самородка (твоё фото 'gold_ore.jpg')
             const goldTex = loader.load('gold_ore.jpg');
             const goldMat = new THREE.MeshStandardMaterial({
-                map: goldTex, bumpMap: goldTex, bumpScale: 0.4,
-                metalness: 1.0, roughness: 0.2, envMap: envMap, envMapIntensity: 2.0
+                map: goldTex, bumpMap: goldTex, bumpScale: 0.5,
+                metalness: 1.0, roughness: 0.25, envMap: envMap, envMapIntensity: 2.0
             });
 
             // 3. НЕСУРАЗНЫЕ МЕТЕОРИТЫ
@@ -92,8 +92,8 @@
             }
 
             // 4. КОСМИЧЕСКАЯ ПЫЛЬ
-            const dustGeo = new THREE.PlaneGeometry(4, 4);
-            const dustMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, transparent: true, opacity: 0.04, blending: THREE.AdditiveBlending, depthWrite: false });
+            const dustGeo = new THREE.PlaneGeometry(5, 5);
+            const dustMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, transparent: true, opacity: 0.03, blending: THREE.AdditiveBlending, depthWrite: false });
             for(let i=0; i<40; i++) {
                 const dust = new THREE.Mesh(dustGeo, dustMat);
                 dust.position.set((Math.random()-0.5)*80, (Math.random()-0.5)*60, (Math.random()-0.5)*80);
@@ -101,31 +101,37 @@
                 dustParticles.push(dust);
             }
 
-            // 5. ПОПЫТКА ЗАГРУЗКИ ДРАКОНА
+            // 5. ЗАГРУЗКА ДРАКОНА ПО ССЫЛКЕ
             const gltfLoader = new THREE.GLTFLoader();
-            gltfLoader.load('dragon.glb', (gltf) => {
-                dragon = gltf.scene;
-                dragon.traverse(n => { if(n.isMesh) n.material = goldMat; });
-                const box = new THREE.Box3().setFromObject(dragon);
+            // Ссылка на классического дракона из репозитория Three.js
+            const dragonUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Dragon.glb';
+            
+            gltfLoader.load(dragonUrl, (gltf) => {
+                const model = gltf.scene;
+                model.traverse(n => { if(n.isMesh) n.material = goldMat; });
+                
+                // Центрируем и масштабируем
+                const box = new THREE.Box3().setFromObject(model);
                 const size = box.getSize(new THREE.Vector3());
-                const scale = 12 / size.y;
-                dragon.scale.set(scale, scale, scale);
-                dragon.position.set(0, -3, 0);
-                scene.add(dragon);
-            }, undefined, () => {
-                // ЕСЛИ ДРАКОН НЕ ГРУЗИТСЯ — СОЗДАЕМ КРИСТАЛЛ СУДЬБЫ
-                console.log("Файл дракона поврежден. Создаю Кристалл.");
-                const crystalGeo = new THREE.OctahedronGeometry(5, 0);
-                dragon = new THREE.Mesh(crystalGeo, goldMat);
-                dragon.position.set(0, 0, 0);
+                const center = box.getCenter(new THREE.Vector3());
+                
+                model.position.set(-center.x, -center.y, -center.z);
+                
+                dragon = new THREE.Group();
+                dragon.add(model);
+                dragon.position.set(0, -3, 5); // Прямо перед тобой
+                
+                const scaleFactor = 16 / size.y;
+                dragon.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                
                 scene.add(dragon);
             });
         }
 
         function resetStone(s, init = false) {
             s.position.set((Math.random()-0.5)*60, (Math.random()-0.5)*40, init ? (Math.random()*-150) : -150);
-            s.userData.vRot = new THREE.Vector3(Math.random()*0.005, Math.random()*0.005, Math.random()*0.005);
-            s.userData.speed = 0.02 + Math.random()*0.04;
+            s.userData.vRot = new THREE.Vector3(Math.random()*0.003, Math.random()*0.003, Math.random()*0.003);
+            s.userData.speed = 0.02 + Math.random()*0.03; // Вальяжный дрейф
         }
 
         function animate() {
@@ -135,24 +141,25 @@
             stones.forEach(s => {
                 s.position.z += s.userData.speed;
                 s.rotation.x += s.userData.vRot.x;
+                s.rotation.y += s.userData.vRot.y;
                 if(s.position.z > 30) resetStone(s);
             });
 
             dustParticles.forEach(d => {
-                d.position.z += 0.02;
-                if(d.position.z > 30) d.position.z = -50;
+                d.position.z += 0.015;
+                if(d.position.z > 30) d.position.z = -60;
             });
 
             if(dragon) {
-                dragon.rotation.y += 0.005;
-                dragon.position.y = Math.sin(t*0.5) * 0.5;
+                dragon.rotation.y = Math.sin(t*0.2) * 0.3; // Величественное покачивание
+                dragon.position.y = -3 + Math.sin(t*0.5) * 0.5;
             }
 
             renderer.render(scene, camera);
         }
 
         function startApp() {
-            document.getElementById('music').play();
+            document.getElementById('music').play().catch(() => {});
             document.getElementById('ui').style.display = 'none';
         }
 
