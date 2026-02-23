@@ -1,162 +1,36 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TON Temple • Zero Gravity Gold</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
-    <style>
-        body { margin: 0; background-color: #000; overflow: hidden; }
-        #ui { position: absolute; bottom: 10%; width: 100%; text-align: center; z-index: 100; }
-        .btn { 
-            padding: 22px 65px; background: rgba(0,0,0,0.5); 
-            border: 1px solid #d4af37; border-radius: 60px; color: #d4af37;
-            font-size: 14px; text-transform: uppercase; letter-spacing: 5px;
-            cursor: pointer; backdrop-filter: blur(8px); transition: 0.3s;
-        }
-        .btn:hover { background: #d4af37; color: #000; }
-    </style>
-</head>
-<body>
-    <div id="ui"><button class="btn" onclick="startAll()">Начать медитацию</button></div>
-    <audio id="music" loop><source src="music.mp3" type="audio/mpeg"></audio>
-
-    <script>
-        let scene, camera, renderer, dragon, stars, blinkStars, comet;
-        let stones = [];
-        let blinkPhases = [];
-        let lastCometTime = 0;
-
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 18;
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.outputEncoding = THREE.sRGBEncoding;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            document.body.appendChild(renderer.domElement);
-
-            // 1. ФОН
-            new THREE.TextureLoader().load('background.jpg', (t) => { scene.background = t; });
-
-            // 2. ЗВЕЗДЫ (МЕРЦАЮЩИЕ И ДВИЖУЩИЕСЯ)
-            createStars();
-
-            // 3. ЗОЛОТЫЕ САМОРОДКИ (НЕПРАВИЛЬНЫЕ ФОРМЫ)
-            const goldMat = new THREE.MeshStandardMaterial({
-                color: 0xffd700, metalness: 1, roughness: 0.2, flatShading: true
+// --- ЗАГРУЗКА ДРАКОНА С ПРОВЕРКОЙ ---
+const gltfLoader = new THREE.GLTFLoader();
+gltfLoader.load('dragon.glb', (gltf) => {
+    dragon = gltf.scene;
+    
+    // Настройка материала (Реалистичное матовое золото)
+    dragon.traverse(n => {
+        if(n.isMesh) {
+            n.material = new THREE.MeshStandardMaterial({
+                color: 0xffd700, 
+                metalness: 1.0, 
+                roughness: 0.35, // Убираем "пластиковый" блеск
+                emissive: 0x110a00 // Еле заметное теплое свечение в тенях
             });
-
-            for(let i=0; i<12; i++) {
-                // Используем Додекаэдр для угловатости
-                const geo = new THREE.DodecahedronGeometry(Math.random()*0.6 + 0.4, 1);
-                const pos = geo.attributes.position;
-                // Искажаем форму до "несуразности"
-                for(let j=0; j<pos.count; j++) {
-                    const s = 0.7 + Math.random() * 0.6;
-                    pos.setXYZ(j, pos.getX(j)*s, pos.getY(j)*s, pos.getZ(j)*s);
-                }
-                const stone = new THREE.Mesh(geo, goldMat);
-                resetStone(stone, true);
-                scene.add(stone);
-                stones.push(stone);
-            }
-
-            // 4. ДРАКОН
-            new THREE.GLTFLoader().load('dragon.glb', (gltf) => {
-                dragon = gltf.scene;
-                dragon.traverse(n => { if(n.isMesh) n.material = goldMat; });
-                dragon.scale.set(5, 5, 5);
-                dragon.position.y = -2;
-                scene.add(dragon);
-            });
-
-            // 5. КОМЕТА
-            const cGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(-5, 5, 0)]);
-            comet = new THREE.Line(cGeo, new THREE.LineBasicMaterial({color: 0xffffff, transparent: true, opacity: 0}));
-            scene.add(comet);
-
-            // СВЕТ
-            const sun = new THREE.DirectionalLight(0xffffff, 2.5);
-            sun.position.set(10, 10, 10);
-            scene.add(sun);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-
-            animate();
         }
+    });
 
-        function createStars() {
-            const geo = new THREE.BufferGeometry();
-            const p = []; const c = [];
-            for(let i=0; i<1500; i++) {
-                p.push((Math.random()-0.5)*200, (Math.random()-0.5)*200, (Math.random()-0.5)*200);
-                blinkPhases.push(Math.random()*Math.PI*2);
-                c.push(1,1,1);
-            }
-            geo.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
-            geo.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
-            blinkStars = new THREE.Points(geo, new THREE.PointsMaterial({size: 0.15, vertexColors: true, transparent: true}));
-            scene.add(blinkStars);
-        }
+    // Центрируем модель
+    const box = new THREE.Box3().setFromObject(dragon);
+    const center = box.getCenter(new THREE.Vector3());
+    dragon.position.x += (dragon.position.x - center.x);
+    dragon.position.y += (dragon.position.y - center.y);
+    dragon.position.z = 5; // ВЫНОСИМ ВПЕРЕД (ближе к камере, чтобы точно увидеть)
 
-        function resetStone(s, initial = false) {
-            s.position.set((Math.random()-0.5)*30, (Math.random()-0.5)*20, initial ? (Math.random()*-100) : -100);
-            s.userData.vRot = new THREE.Vector3(Math.random()*0.01, Math.random()*0.01, Math.random()*0.01);
-            s.userData.speed = 0.02 + Math.random()*0.03;
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const t = Date.now() * 0.001;
-
-            // Метеориты (вальяжно)
-            stones.forEach(s => {
-                s.position.z += s.userData.speed;
-                s.rotation.x += s.userData.vRot.x;
-                s.rotation.y += s.userData.vRot.y;
-                if(s.position.z > 20) resetStone(s);
-            });
-
-            // Звезды
-            if(blinkStars) {
-                const colors = blinkStars.geometry.attributes.color.array;
-                for(let i=0; i<blinkPhases.length; i++) {
-                    const b = 0.3 + Math.abs(Math.sin(t + blinkPhases[i])) * 0.7;
-                    colors[i*3] = colors[i*3+1] = colors[i*3+2] = b;
-                }
-                blinkStars.geometry.attributes.color.needsUpdate = true;
-                blinkStars.rotation.y += 0.0002;
-            }
-
-            // Падение звезды (каждые 3 секунды)
-            if(t - lastCometTime > 3) {
-                comet.position.set((Math.random()-0.5)*40, 15, -20);
-                comet.material.opacity = 1;
-                lastCometTime = t;
-            }
-            if(comet && comet.material.opacity > 0) {
-                comet.position.x += 0.8; comet.position.y -= 0.8;
-                comet.material.opacity -= 0.015;
-            }
-
-            if(dragon) {
-                dragon.rotation.y = Math.sin(t*0.2) * 0.2;
-                dragon.position.y = -2 + Math.sin(t*0.5) * 0.3;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.startAll = () => {
-            document.getElementById('music').play();
-            document.querySelector('#ui').style.display = 'none';
-        };
-
-        init();
-    </script>
-</body>
-</html>
+    // Масштаб (делаем его внушительным)
+    dragon.scale.set(10, 10, 10); 
+    
+    scene.add(dragon);
+    console.log("Дракон успешно добавлен в сцену!");
+}, 
+(xhr) => {
+    console.log((xhr.loaded / xhr.total * 100) + '% загружено');
+}, 
+(err) => {
+    console.error("ОШИБКА: Файл dragon.glb не найден или поврежден!", err);
+});
