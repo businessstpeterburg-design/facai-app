@@ -2,78 +2,1483 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>TON Temple • Living Artifact</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏯 TON TEMPLE · LEGENDARY EDITION · 龍之寺</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        :root { 
+            --gold: #ffd700; 
+            --ton-blue: #0088cc; 
+            --bg: #0a0c14;
+            --dark-red: #8B0000;
+        }
         
-        /* Фон - Око Бога */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        body { 
+            background: #000; 
+            min-height: 100vh; 
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; 
+            overflow: hidden; 
+            color: #e4d5b9; 
+            display: flex; 
+            justify-content: center; 
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Атмосферный фон с параллаксом */
         #universe {
-            position: absolute; width: 100%; height: 100%;
-            background: url('background.jpg') center center / cover no-repeat;
+            position: fixed; 
+            inset: 0; 
+            z-index: 0;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
+            background-image: url('background.jpg'); 
+            background-size: cover;
+            transition: transform 0.2s ease-out; 
+            opacity: 0.8;
+        }
+
+        /* Фоновые частицы (звездное небо) */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
             z-index: 1;
         }
 
-        /* Контейнер для дракона */
-        #dragon-container {
-            position: relative; z-index: 2; width: 80vh; height: 80vh;
-            display: flex; justify-content: center; align-items: center;
-            perspective: 1000px;
+        /* 7D Дракон (поверх всего) */
+        #dragonCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: auto;
+            z-index: 2;
+            cursor: pointer;
         }
 
-        /* Сам Дракон */
-        #dragon-img {
-            width: 100%; height: auto;
-            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6)); /* Золотое свечение */
-            animation: 
-                breathe 4s ease-in-out infinite, /* Эффект дыхания */
-                float 6s ease-in-out infinite;  /* Невесомость */
-            user-select: none;
+        /* Основной интерфейс */
+        #app {
+            position: relative; 
+            z-index: 3; 
+            width: 100%; 
+            max-width: 430px; 
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(10,12,20,0.5) 0%, rgba(10,12,20,0.95) 100%);
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border-left: 1px solid rgba(255,215,0,0.15);
+            border-right: 1px solid rgba(255,215,0,0.15);
+            display: flex; 
+            flex-direction: column;
+            margin: 0 auto;
         }
 
-        /* Анимация Дыхания (плавное расширение и сжатие) */
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 30px rgba(212, 175, 55, 0.6)); }
-            50% { transform: scale(1.05); filter: brightness(1.3) drop-shadow(0 0 50px rgba(212, 175, 55, 0.9)); }
+        /* Language Toggle */
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--gold);
+            border-radius: 30px;
+            padding: 6px 12px;
+            color: var(--gold);
+            font-size: 14px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
-        /* Анимация Невесомости (покачивание и дрейф) */
-        @keyframes float {
-            0%, 100% { translate: 0 0; rotate: 0deg; }
-            33% { translate: 10px -20px; rotate: 1deg; }
-            66% { translate: -10px 10px; rotate: -1deg; }
+        /* Header & Progress */
+        .header { 
+            padding: 60px 20px 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .rank-badge { 
+            background: rgba(255,215,0,0.1); 
+            border: 1px solid var(--gold); 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            color: var(--gold); 
+            text-shadow: 0 0 10px var(--gold);
+        }
+        
+        .streak-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 40px;
+            padding: 6px 15px;
+            border: 1px solid rgba(255,215,0,0.3);
+            backdrop-filter: blur(5px);
         }
 
-        /* Интерфейс из твоих скринов */
-        #ui-overlay {
-            position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            padding: 40px; color: #d4af37; font-family: sans-serif;
-            display: flex; flex-direction: column; justify-content: space-between;
+        .streak-flame {
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle at 30% 30%, #ffaa00, #ff5500);
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: flamePulse 2s infinite;
         }
-        .stats { 
-            background: rgba(0,0,0,0.6); border: 1px solid #d4af37; 
-            padding: 15px; border-radius: 10px; width: 220px; backdrop-filter: blur(5px);
+
+        @keyframes flamePulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .xp-container { 
+            padding: 0 20px; 
+            margin-bottom: 20px; 
+        }
+        
+        .xp-bar { 
+            width: 100%; 
+            height: 4px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 2px; 
+            margin-top: 5px; 
+            overflow: hidden; 
+        }
+        
+        #xpFill { 
+            width: 0%; 
+            height: 100%; 
+            background: var(--gold); 
+            transition: width 0.5s; 
+        }
+
+        /* Табы Пути */
+        .path-selector { 
+            display: flex; 
+            gap: 10px; 
+            padding: 0 20px; 
+            margin-bottom: 20px; 
+        }
+        
+        .path-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); 
+            color: #888; 
+            text-align: center; 
+            font-size: 14px;
+            font-weight: bold; 
+            transition: 0.3s; 
+            cursor: pointer;
+        }
+        
+        .path-btn.active { 
+            border-color: var(--gold); 
+            color: var(--gold); 
+            background: rgba(255,215,0,0.1); 
+        }
+
+        /* Колесо фортуны */
+        .wheel-box { 
+            flex: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            position: relative; 
+        }
+        
+        #sacredWheel { 
+            width: 80vw; 
+            max-width: 320px; 
+            height: 80vw; 
+            max-height: 320px; 
+            filter: drop-shadow(0 0 40px rgba(255,215,0,0.5));
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        #sacredWheel:active {
+            transform: scale(0.98);
+        }
+
+        .center-trigger {
+            position: absolute; 
+            width: 80px; 
+            height: 80px; 
+            background: radial-gradient(circle, var(--gold), #b8860b);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%; 
+            z-index: 10; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            text-align: center; 
+            font-size: 10px; 
+            font-weight: bold; 
+            cursor: pointer;
+            box-shadow: 0 0 40px var(--gold); 
+            transition: transform 0.1s;
+            color: #0a0c14;
+        }
+
+        .center-trigger:active {
+            transform: scale(0.95);
+        }
+
+        /* Altar Section */
+        .altar-section {
+            padding: 20px;
+            background: linear-gradient(to top, #0a0c14, transparent);
+            border-top: 1px solid rgba(255,215,0,0.2);
+            position: relative;
+            z-index: 4;
+        }
+
+        .offering-button {
+            background: linear-gradient(145deg, #2a2e3a, #1e212a);
+            border: 1px solid var(--gold);
+            border-radius: 60px;
+            padding: 16px;
+            width: 100%;
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .offering-button:active {
+            transform: scale(0.98);
+            background: linear-gradient(145deg, #323644, #262a36);
+        }
+
+        .journal-preview {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: none;
+        }
+
+        .journal-card {
+            min-width: 100px;
+            background: rgba(30, 34, 42, 0.8);
+            border: 1px solid #3a3e4a;
+            border-radius: 15px;
+            padding: 12px;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+
+        /* Revelation Area */
+        .overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.98); 
+            backdrop-filter: blur(30px);
+            z-index: 100; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .hongbao {
+            width: 280px;
+            height: 360px;
+            background-image: url('hongbao.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.8);
+            border: 2px solid var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .hongbao.opened {
+            transform: rotateY(180deg);
+        }
+
+        .scroll-card { 
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f4e4c1;
+            background-image: url('scroll-texture.jpg');
+            background-size: cover;
+            border-radius: 15px;
+            padding: 30px;
+            color: #2c1810;
+            font-size: 18px;
+            line-height: 2;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            font-family: 'KaiTi', '楷体', 'STKaiti', serif;
+            text-align: justify;
+        }
+
+        .golden-dust {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.2) 0%, transparent 60%);
+            animation: dustParticles 2s infinite;
+        }
+
+        @keyframes dustParticles {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .seal-stamp {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            background-image: url('royalSeal.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5));
+        }
+
+        .seal-stamp.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .brush-text { 
+            font-family: "Georgia", "KaiTi", serif; 
+            font-size: 1.2rem; 
+            line-height: 1.8; 
+            font-style: italic; 
+        }
+
+        .brush-char {
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: brushAppear 0.3s forwards;
+        }
+
+        @keyframes brushAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(10px);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        #rarityLabel {
+            margin-top: 15px; 
+            font-weight: bold; 
+            font-size: 12px; 
+            letter-spacing: 2px;
+        }
+
+        /* NFT Canvas */
+        #nftCanvas { 
+            width: 280px; 
+            height: 380px; 
+            border-radius: 10px; 
+            border: 4px solid var(--gold); 
+            margin-bottom: 20px; 
+            background: #111;
+        }
+
+        /* Action Buttons */
+        .action-btn { 
+            width: 100%; 
+            max-width: 280px; 
+            padding: 16px; 
+            border-radius: 30px; 
+            border: none;
+            background: var(--gold); 
+            color: #000; 
+            font-weight: bold; 
+            font-size: 16px;
+            margin-top: 10px; 
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+        }
+
+        /* Leaderboard */
+        .leader-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            width: 100%; 
+        }
+
+        #leaderList {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
+        #leaderboardOverlay h2 {
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        /* Coins Container */
+        .coins-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .coin { 
+            position: absolute; 
+            width: 40px; 
+            height: 40px; 
+            background: url('coin.png') center/contain no-repeat; 
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px gold);
+            animation: coinFall linear forwards;
+        }
+
+        @keyframes coinFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .revelation-footer {
+            margin-top: 30px;
+            color: var(--gold);
+            font-size: 14px;
+            display: flex;
+            gap: 20px;
         }
     </style>
 </head>
 <body>
 
     <div id="universe"></div>
+    <canvas id="particleCanvas"></canvas>
+    <canvas id="dragonCanvas"></canvas>
+    
+    <div class="coins-container" id="coinsContainer"></div>
 
-    <div id="ui-overlay">
-        <div style="letter-spacing: 2px;">TON TEMPLE V9.0 | NEURAL ODYSSEY</div>
-        
-        <div class="stats">
-            <h3 style="margin:0; font-size: 10px; opacity: 0.7;">DRAGON STATUS</h3>
-            <p style="margin:5px 0 0; font-weight:bold; font-size: 18px;">VITALITY: ACTIVE</p>
-            <p style="margin:2px 0 0; font-size: 12px; color: #fff;">SYNC: 99.2%</p>
+    <div class="lang-toggle" id="langToggle" onclick="app.toggleLanguage()">EN / 中文</div>
+
+    <div id="app">
+        <div class="header">
+            <div class="rank-badge" id="rankDisplay">PILGRIM</div>
+            <div class="streak-counter">
+                <div class="streak-flame"></div>
+                <span id="streakDisplay">0</span>
+            </div>
+            <div id="balanceDisplay" style="color:var(--gold)">0 💎</div>
         </div>
 
-        <div style="text-align: center; font-size: 12px; opacity: 0.8;">BREATHING STABILIZED</div>
+        <div class="xp-container">
+            <div style="font-size: 10px; display:flex; justify-content:space-between; margin-bottom: 4px;">
+                <span id="xpLabel">ПРОСВЕТЛЕНИЕ</span>
+                <span id="xpText">0/100 XP</span>
+            </div>
+            <div class="xp-bar"><div id="xpFill"></div></div>
+        </div>
+
+        <div class="path-selector">
+            <div class="path-btn active" id="btn-life" onclick="app.setPath('life')">🌿 ДУХ</div>
+            <div class="path-btn" id="btn-ton" onclick="app.setPath('ton')">⚡ TON</div>
+            <div class="path-btn" onclick="app.showLeaderboard()">🏆 ТОП</div>
+        </div>
+
+        <div class="wheel-box">
+            <svg id="sacredWheel" viewBox="0 0 400 400"></svg>
+            <div class="center-trigger" id="wheelCenter" onclick="app.startRitual()">РИТУАЛ<br>УДАЧИ</div>
+        </div>
+
+        <div class="altar-section">
+            <div class="offering-button" id="offeringButton" onclick="app.makeOffering()">
+                <span>🏯</span>
+                <span id="offeringText">Очистить ауру · 1 TON</span>
+            </div>
+            
+            <div class="journal-preview" id="journalPreview"></div>
+        </div>
     </div>
 
-    <div id="dragon-container">
-        <img src="dragon.jpg" id="dragon-img" alt="Golden Dragon">
+    <!-- Oracle Overlay -->
+    <div class="overlay" id="oracleOverlay">
+        <div class="hongbao" id="hongbao" onclick="app.openHongbao()">
+            <div class="scroll-card" id="scrollContent">
+                <div class="golden-dust"></div>
+            </div>
+        </div>
+        <div class="revelation-footer">
+            <span id="sealDate"></span>
+            <span id="pathIndicator"></span>
+        </div>
+        <button class="action-btn" onclick="app.prepareNFT()">МИНИТЬ NFT</button>
+        <button class="action-btn secondary" onclick="app.closeOverlays()">ЗАКРЫТЬ</button>
     </div>
 
+    <!-- NFT Overlay -->
+    <div class="overlay" id="nftOverlay">
+        <canvas id="nftCanvas"></canvas>
+        <button class="action-btn" onclick="app.mintFinal()">ПОДТВЕРДИТЬ В TON</button>
+        <button class="action-btn secondary" onclick="app.closeOverlays()">ОТМЕНА</button>
+    </div>
+
+    <!-- Leaderboard Overlay -->
+    <div class="overlay" id="leaderboardOverlay">
+        <h2>ТОП ПАЛОМНИКОВ</h2>
+        <div id="leaderList"></div>
+        <button class="action-btn secondary" onclick="app.closeOverlays()">НАЗАД</button>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="musicPlayer" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="coinSound" preload="auto">
+        <source src="coin.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        class TonTempleLegendary {
+            constructor() {
+                // Core State
+                this.xp = parseInt(localStorage.getItem('xp')) || 0;
+                this.balance = parseInt(localStorage.getItem('balance')) || 0;
+                this.streak = parseInt(localStorage.getItem('streak')) || 0;
+                this.path = 'life';
+                this.language = 'ru';
+                this.dailyRitualsUsed = 0;
+                this.maxDailyRituals = 1;
+                this.userId = tg.initDataUnsafe?.user?.id || 'local';
+                
+                // Ritual State
+                this.isSpinning = false;
+                this.rotation = 0;
+                this.spinVelocity = 0;
+                this.lastTimestamp = 0;
+                this.selectedSegment = 0;
+                
+                // Data
+                this.wheelSymbols = [
+                    { zh: '福', en: 'Fortune', ru: 'Удача' },
+                    { zh: '禄', en: 'Prosperity', ru: 'Процветание' },
+                    { zh: '寿', en: 'Longevity', ru: 'Долголетие' },
+                    { zh: '喜', en: 'Joy', ru: 'Радость' },
+                    { zh: '财', en: 'Wealth', ru: 'Богатство' },
+                    { zh: '吉', en: 'Luck', ru: 'Успех' },
+                    { zh: '祥', en: 'Auspicious', ru: 'Благодать' },
+                    { zh: '瑞', en: 'Good Omen', ru: 'Знак' },
+                    { zh: '龙', en: 'Dragon', ru: 'Дракон' },
+                    { zh: '凤', en: 'Phoenix', ru: 'Феникс' },
+                    { zh: '安', en: 'Peace', ru: 'Мир' },
+                    { zh: '康', en: 'Health', ru: 'Здоровье' },
+                    { zh: '顺', en: 'Smooth', ru: 'Гармония' },
+                    { zh: '发', en: 'Wealth', ru: 'Изобилие' },
+                    { zh: '旺', en: 'Prosperous', ru: 'Расцвет' },
+                    { zh: '盛', en: 'Flourishing', ru: 'Процветание' }
+                ];
+
+                this.oracles = {
+                    life: {
+                        ru: [
+                            "Твое терпение — мост к величию. Сегодня тишина скажет больше слов.",
+                            "Удача любит тех, кто благодарен. Твоя энергия притягивает возможности.",
+                            "Дракон на востоке охраняет твой путь. Действуй с уверенностью.",
+                            "Твоя аура сегодня подобна чистому золоту. Сохраняй спокойствие.",
+                            "Мудрость приходит к тем, кто слушает свое сердце. Прими этот дар."
+                        ],
+                        en: [
+                            "Your patience is a bridge to greatness. Today silence speaks louder than words.",
+                            "Fortune favors the grateful. Your energy attracts opportunities.",
+                            "The Dragon in the east guards your path. Move with confidence.",
+                            "Your aura today is like pure gold. Remain calm and centered.",
+                            "Wisdom comes to those who listen to their heart. Accept this gift."
+                        ],
+                        zh: [
+                            "你的耐心是通往伟大的桥梁。今天，寂静胜千言。",
+                            "幸运眷顾感恩者。你的能量吸引机遇。",
+                            "东方之龙守护你的道路。自信前行。",
+                            "今日你的气场如纯金般闪耀。保持平静。",
+                            "智慧降临于倾听内心之人。接受这份礼物。"
+                        ]
+                    },
+                    ton: {
+                        ru: [
+                            "График рисует путь, но сердце знает цель. Доверяй интуиции.",
+                            "Кит спит — альты растут. Будь готов к движению.",
+                            "Твой кошелек станет тяжелее сегодня. Действуй мудро.",
+                            "Волны рынка несут удачу тем, кто сохраняет спокойствие.",
+                            "Блокчейн шепчет о возможностях. Прислушайся."
+                        ],
+                        en: [
+                            "The chart draws the path, but the heart knows the goal. Trust your intuition.",
+                            "While whales sleep, altcoins grow. Be ready for movement.",
+                            "Your wallet will grow heavier today. Act wisely.",
+                            "Market waves bring fortune to those who remain calm.",
+                            "The blockchain whispers of opportunities. Listen closely."
+                        ],
+                        zh: [
+                            "图表描绘路径，但心灵知晓目标。相信直觉。",
+                            "鲸鱼沉睡时，小币生长。准备行动。",
+                            "今日你的钱包将更充实。明智行动。",
+                            "市场浪潮眷顾保持平静之人。",
+                            "区块链低语机遇。仔细聆听。"
+                        ]
+                    }
+                };
+
+                this.init();
+                this.updateUI();
+            }
+
+            init() {
+                this.drawWheel();
+                this.initDragon();
+                this.initParticles();
+                this.initParallax();
+                this.initAudio();
+                this.loadUserData();
+                this.setupEventListeners();
+                this.startAnimation();
+            }
+
+            drawWheel() {
+                const svg = document.getElementById('sacredWheel');
+                svg.innerHTML = '';
+                
+                const segments = 16;
+                const r = 180;
+                const cx = 200, cy = 200;
+                
+                for(let i = 0; i < segments; i++) {
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    
+                    const startAngle = (i * 360 / segments - 90) * Math.PI / 180;
+                    const endAngle = ((i + 1) * 360 / segments - 90) * Math.PI / 180;
+                    
+                    const x1 = cx + r * Math.cos(startAngle);
+                    const y1 = cy + r * Math.sin(startAngle);
+                    const x2 = cx + r * Math.cos(endAngle);
+                    const y2 = cy + r * Math.sin(endAngle);
+                    
+                    path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
+                    
+                    // Dark red velvet background with gradient
+                    const gradientId = `grad${i}`;
+                    const gradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+                    gradient.setAttribute("id", gradientId);
+                    gradient.setAttribute("cx", "30%");
+                    gradient.setAttribute("cy", "30%");
+                    gradient.setAttribute("r", "70%");
+                    
+                    const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    stop1.setAttribute("offset", "0%");
+                    stop1.setAttribute("stop-color", "#B22222");
+                    
+                    const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    stop2.setAttribute("offset", "100%");
+                    stop2.setAttribute("stop-color", "#8B0000");
+                    
+                    gradient.appendChild(stop1);
+                    gradient.appendChild(stop2);
+                    svg.appendChild(gradient);
+                    
+                    path.setAttribute("fill", `url(#${gradientId})`);
+                    path.setAttribute("stroke", "#4A0404");
+                    path.setAttribute("stroke-width", "1.5");
+                    svg.appendChild(path);
+                    
+                    // Golden symbol
+                    const textX = cx + 100 * Math.cos(startAngle + (endAngle - startAngle) / 2);
+                    const textY = cy + 100 * Math.sin(startAngle + (endAngle - startAngle) / 2);
+                    
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.setAttribute("x", textX);
+                    text.setAttribute("y", textY);
+                    text.setAttribute("text-anchor", "middle");
+                    text.setAttribute("dominant-baseline", "middle");
+                    text.setAttribute("fill", "#FFD700");
+                    text.setAttribute("font-size", "24");
+                    text.setAttribute("font-weight", "bold");
+                    text.setAttribute("filter", "drop-shadow(0 0 5px #FFD700)");
+                    text.textContent = this.wheelSymbols[i].zh;
+                    
+                    svg.appendChild(text);
+                }
+                
+                // Center circle
+                const center = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                center.setAttribute("cx", cx);
+                center.setAttribute("cy", cy);
+                center.setAttribute("r", "45");
+                center.setAttribute("fill", "#2a1e0e");
+                center.setAttribute("stroke", "#FFD700");
+                center.setAttribute("stroke-width", "3");
+                svg.appendChild(center);
+            }
+
+            initDragon() {
+                const canvas = document.getElementById('dragonCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                this.dragonImage = new Image();
+                this.dragonImage.src = 'dragon.jpg';
+                
+                this.dragon = {
+                    x: canvas.width * 0.7,
+                    y: canvas.height * 0.3,
+                    scale: 0.8,
+                    rotation: 0,
+                    wingPhase: 0,
+                    glowIntensity: 0.5,
+                    time: 0
+                };
+                
+                this.dragonImage.onload = () => {
+                    this.animateDragon();
+                };
+                
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const dragonX = this.dragon.x;
+                    const dragonY = this.dragon.y;
+                    const distance = Math.sqrt(
+                        Math.pow(x - dragonX, 2) + 
+                        Math.pow(y - dragonY, 2)
+                    );
+                    
+                    if (distance < 150) {
+                        this.createGoldenRain(x, y);
+                    }
+                });
+            }
+
+            animateDragon() {
+                const canvas = document.getElementById('dragonCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (this.dragonImage.complete) {
+                    this.dragon.time += 0.02;
+                    
+                    // 7D effects: levitation, rotation, glow
+                    this.dragon.y = canvas.height * 0.3 + Math.sin(this.dragon.time * 1.5) * 30;
+                    this.dragon.rotation = Math.sin(this.dragon.time * 0.8) * 0.05;
+                    this.dragon.wingPhase = Math.sin(this.dragon.time * 3) * 0.1;
+                    this.dragon.glowIntensity = 0.5 + Math.sin(this.dragon.time * 2) * 0.3;
+                    
+                    ctx.save();
+                    
+                    // Apply transformations for 7D effect
+                    ctx.translate(this.dragon.x, this.dragon.y);
+                    ctx.rotate(this.dragon.rotation);
+                    
+                    // Multiple layers for depth
+                    ctx.shadowColor = `rgba(255, 215, 0, ${this.dragon.glowIntensity})`;
+                    ctx.shadowBlur = 40;
+                    ctx.shadowOffsetX = Math.sin(this.dragon.time) * 5;
+                    ctx.shadowOffsetY = Math.cos(this.dragon.time) * 5;
+                    
+                    ctx.globalAlpha = 0.9;
+                    ctx.drawImage(
+                        this.dragonImage,
+                        -150 * this.dragon.scale,
+                        -100 * this.dragon.scale,
+                        300 * this.dragon.scale * (1 + this.dragon.wingPhase * 0.2),
+                        200 * this.dragon.scale
+                    );
+                    
+                    // Second layer for ghosting effect
+                    ctx.globalAlpha = 0.3;
+                    ctx.shadowBlur = 60;
+                    ctx.shadowOffsetX = Math.sin(this.dragon.time + 2) * 8;
+                    ctx.shadowOffsetY = Math.cos(this.dragon.time + 2) * 8;
+                    
+                    ctx.drawImage(
+                        this.dragonImage,
+                        -150 * this.dragon.scale,
+                        -100 * this.dragon.scale,
+                        300 * this.dragon.scale,
+                        200 * this.dragon.scale
+                    );
+                    
+                    ctx.restore();
+                }
+                
+                requestAnimationFrame(() => this.animateDragon());
+            }
+
+            initParticles() {
+                const canvas = document.getElementById('particleCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                this.particles = [];
+                
+                for (let i = 0; i < 150; i++) {
+                    this.particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 3 + 1,
+                        speed: Math.random() * 0.8 + 0.2,
+                        opacity: Math.random() * 0.6 + 0.2,
+                        drift: (Math.random() - 0.5) * 0.3,
+                        color: `hsl(${40 + Math.random() * 20}, 80%, ${50 + Math.random() * 30}%)`
+                    });
+                }
+                
+                const animateParticles = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    this.particles.forEach(p => {
+                        p.y -= p.speed;
+                        p.x += p.drift;
+                        
+                        if (p.y < 0) {
+                            p.y = canvas.height;
+                            p.x = Math.random() * canvas.width;
+                        }
+                        
+                        if (p.x < 0 || p.x > canvas.width) {
+                            p.x = Math.random() * canvas.width;
+                        }
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.shadowColor = '#ffd966';
+                        ctx.shadowBlur = 8;
+                        ctx.fill();
+                    });
+                    
+                    requestAnimationFrame(animateParticles);
+                };
+                
+                animateParticles();
+            }
+
+            initAudio() {
+                this.musicPlayer = document.getElementById('musicPlayer');
+                this.coinSound = document.getElementById('coinSound');
+                
+                // Music starts on first interaction
+                document.addEventListener('click', () => {
+                    if (this.musicPlayer.paused) {
+                        this.musicPlayer.volume = 0.3;
+                        this.musicPlayer.play().catch(e => console.log('Audio play failed:', e));
+                    }
+                }, { once: true });
+                
+                this.musicPlayer.volume = 0.3;
+                this.coinSound.volume = 0.5;
+            }
+
+            initParallax() {
+                window.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                    document.getElementById('universe').style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
+                });
+            }
+
+            setupEventListeners() {
+                window.addEventListener('resize', () => {
+                    const canvas = document.getElementById('dragonCanvas');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            }
+
+            createGoldenRain(x, y) {
+                // Play coin sound
+                this.coinSound.currentTime = 0;
+                this.coinSound.play().catch(e => console.log('Coin sound failed:', e));
+                
+                // Create coins
+                const container = document.getElementById('coinsContainer');
+                const count = 20;
+                
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        const coin = document.createElement('div');
+                        coin.className = 'coin';
+                        
+                        const offsetX = (Math.random() - 0.5) * 300;
+                        coin.style.left = (x + offsetX) + 'px';
+                        coin.style.top = y + 'px';
+                        
+                        const duration = 2 + Math.random() * 2;
+                        coin.style.animation = `coinFall ${duration}s linear forwards`;
+                        
+                        container.appendChild(coin);
+                        
+                        setTimeout(() => coin.remove(), duration * 1000);
+                    }, i * 50);
+                }
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            }
+
+            setPath(p) {
+                this.path = p;
+                document.getElementById('btn-life').classList.toggle('active', p === 'life');
+                document.getElementById('btn-ton').classList.toggle('active', p === 'ton');
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+
+            startRitual() {
+                if (this.isSpinning) return;
+                
+                if (this.dailyRitualsUsed >= this.maxDailyRituals) {
+                    this.showAltarMessage();
+                    return;
+                }
+                
+                this.isSpinning = true;
+                this.dailyRitualsUsed++;
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
+                const wheel = document.getElementById('sacredWheel');
+                const spins = 5 + Math.floor(Math.random() * 3);
+                const deg = spins * 360 + Math.random() * 360;
+                this.rotation += deg;
+                
+                wheel.style.transition = 'transform 5s cubic-bezier(0.15, 0.8, 0.15, 1)';
+                wheel.style.transform = `rotate(${this.rotation}deg)`;
+
+                setTimeout(() => this.showResult(), 5200);
+                
+                this.saveUserData();
+            }
+
+            showResult() {
+                this.isSpinning = false;
+                
+                // Determine which segment we landed on
+                const segmentSize = 360 / 16;
+                const normalizedRotation = (360 - (this.rotation % 360)) % 360;
+                this.selectedSegment = Math.floor(normalizedRotation / segmentSize);
+                
+                // Random rarity
+                const chance = Math.random();
+                this.lastRarity = chance > 0.9 ? 'LEGENDARY' : (chance > 0.7 ? 'RARE' : 'COMMON');
+                
+                // Select oracle text
+                const oracles = this.oracles[this.path][this.language] || this.oracles[this.path].ru;
+                this.lastText = oracles[Math.floor(Math.random() * oracles.length)];
+                
+                // Show revelation
+                this.showRevelation();
+                
+                // Add XP
+                this.addXP(20);
+                
+                // Spawn coins
+                this.spawnCoins();
+            }
+
+            showRevelation() {
+                const overlay = document.getElementById('oracleOverlay');
+                const scrollContent = document.getElementById('scrollContent');
+                
+                // Clear and prepare scroll
+                scrollContent.innerHTML = '<div class="golden-dust"></div>';
+                
+                // Set date
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('ru-RU', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                document.getElementById('sealDate').textContent = `🏮 ${dateStr}`;
+                document.getElementById('pathIndicator').textContent = 
+                    this.path === 'life' ? '🌿 ДУХ' : '⚡ TON';
+                
+                // Animate brush writing
+                this.animateBrushWriting(this.lastText);
+                
+                overlay.style.display = 'flex';
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                if (tg.BackButton) tg.BackButton.show();
+            }
+
+            animateBrushWriting(text) {
+                const scrollContent = document.getElementById('scrollContent');
+                const goldenDust = scrollContent.querySelector('.golden-dust');
+                
+                let index = 0;
+                
+                const writeNextChar = () => {
+                    if (index < text.length) {
+                        const char = document.createElement('span');
+                        char.className = 'brush-char';
+                        char.textContent = text[index];
+                        char.style.animationDelay = `${index * 0.05}s`;
+                        
+                        scrollContent.insertBefore(char, goldenDust);
+                        index++;
+                        
+                        if (index % 3 === 0 && tg.HapticFeedback) {
+                            tg.HapticFeedback.impactOccurred('light');
+                        }
+                        
+                        setTimeout(writeNextChar, 100); // Human-like writing speed
+                    } else {
+                        setTimeout(() => this.applyRoyalSeal(), 300);
+                    }
+                };
+                
+                writeNextChar();
+            }
+
+            applyRoyalSeal() {
+                const scrollContent = document.getElementById('scrollContent');
+                
+                const seal = document.createElement('div');
+                seal.className = 'seal-stamp';
+                scrollContent.appendChild(seal);
+                
+                setTimeout(() => {
+                    seal.classList.add('active');
+                    this.createGoldenDust();
+                    this.playSealSound();
+                    
+                    if (tg.HapticFeedback) {
+                        tg.HapticFeedback.impactOccurred('heavy');
+                        tg.HapticFeedback.notificationOccurred('success');
+                    }
+                }, 50);
+            }
+
+            createGoldenDust() {
+                const canvas = document.getElementById('particleCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const particle = {
+                            x: canvas.width / 2 + (Math.random() - 0.5) * 300,
+                            y: canvas.height / 2 + (Math.random() - 0.5) * 300,
+                            radius: Math.random() * 5 + 2,
+                            opacity: 1,
+                            speedX: (Math.random() - 0.5) * 3,
+                            speedY: (Math.random() - 0.5) * 3 - 1
+                        };
+                        
+                        const animateParticle = () => {
+                            particle.x += particle.speedX;
+                            particle.y += particle.speedY;
+                            particle.opacity -= 0.02;
+                            particle.radius *= 0.98;
+                            
+                            ctx.beginPath();
+                            ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(255, 215, 0, ${particle.opacity})`;
+                            ctx.shadowBlur = 15;
+                            ctx.fill();
+                            
+                            if (particle.opacity > 0) {
+                                requestAnimationFrame(animateParticle);
+                            }
+                        };
+                        
+                        animateParticle();
+                    }, i * 30);
+                }
+            }
+
+            playSealSound() {
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(150, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + 0.5);
+            }
+
+            openHongbao() {
+                const hongbao = document.getElementById('hongbao');
+                hongbao.classList.add('opened');
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            }
+
+            prepareNFT() {
+                const canvas = document.getElementById('nftCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = 400;
+                canvas.height = 600;
+                
+                // Background
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, 400, 600);
+                
+                // Border with rarity color
+                ctx.strokeStyle = this.lastRarity === 'LEGENDARY' ? '#ffd700' : 
+                                (this.lastRarity === 'RARE' ? '#c0c0c0' : '#8b4513');
+                ctx.lineWidth = 15;
+                ctx.strokeRect(10, 10, 380, 580);
+                
+                // Scroll texture
+                ctx.fillStyle = '#f2e6d0';
+                ctx.fillRect(20, 20, 360, 560);
+                
+                // Text
+                ctx.fillStyle = '#2c1810';
+                ctx.font = 'italic 20px Georgia, "KaiTi", serif';
+                ctx.textAlign = 'center';
+                this.wrapText(ctx, this.lastText, 200, 150, 300, 35);
+                
+                // Symbol
+                const symbol = this.wheelSymbols[this.selectedSegment]?.zh || '福';
+                ctx.font = 'bold 60px "KaiTi", serif';
+                ctx.fillStyle = '#8B0000';
+                ctx.fillText(symbol, 200, 350);
+                
+                // Rarity
+                ctx.font = 'bold 20px Arial';
+                ctx.fillStyle = this.lastRarity === 'LEGENDARY' ? '#ffd700' : '#666';
+                ctx.fillText(this.lastRarity, 200, 500);
+                
+                document.getElementById('oracleOverlay').style.display = 'none';
+                document.getElementById('nftOverlay').style.display = 'flex';
+            }
+
+            wrapText(ctx, text, x, y, maxW, lineH) {
+                let words = text.split(' ');
+                let line = '';
+                
+                for (let n = 0; n < words.length; n++) {
+                    let test = line + words[n] + ' ';
+                    let metrics = ctx.measureText(test);
+                    
+                    if (metrics.width > maxW && n > 0) {
+                        ctx.fillText(line, x, y);
+                        line = words[n] + ' ';
+                        y += lineH;
+                    } else {
+                        line = test;
+                    }
+                }
+                ctx.fillText(line, x, y);
+            }
+
+            addXP(v) {
+                this.xp += v;
+                
+                if (this.xp >= 100) {
+                    this.xp = 0;
+                    this.balance += 50;
+                    this.maxDailyRituals++;
+                    
+                    // Level up notification
+                    if (tg.showPopup) {
+                        tg.showPopup({
+                            title: '✨ ПРОСВЕТЛЕНИЕ',
+                            message: 'Вы достигли нового уровня! +50 💎',
+                            buttons: [{ type: 'close' }]
+                        });
+                    }
+                }
+                
+                this.updateUI();
+                this.saveUserData();
+            }
+
+            updateUI() {
+                document.getElementById('xpFill').style.width = this.xp + '%';
+                document.getElementById('xpText').innerText = `${this.xp}/100 XP`;
+                document.getElementById('balanceDisplay').innerText = `${this.balance} 💎`;
+                document.getElementById('streakDisplay').innerText = this.streak;
+                
+                // Rank based on balance
+                let rank = 'PILGRIM';
+                if (this.balance > 500) rank = 'SAGE';
+                else if (this.balance > 200) rank = 'PATRON';
+                else if (this.balance > 100) rank = 'GUARDIAN';
+                else if (this.balance > 50) rank = 'DISCIPLE';
+                
+                document.getElementById('rankDisplay').innerText = rank;
+            }
+
+            showLeaderboard() {
+                const list = document.getElementById('leaderList');
+                
+                // Mock leaderboard data
+                const players = [
+                    { name: "TonKing", xp: 2540 },
+                    { name: "LuckyDragon", xp: 1870 },
+                    { name: "CryptoWhale", xp: 1620 },
+                    { name: "You", xp: this.xp + this.balance * 10 },
+                    { name: "MoonWalker", xp: 890 }
+                ].sort((a, b) => b.xp - a.xp);
+                
+                list.innerHTML = players.map((p, i) => `
+                    <div class="leader-row">
+                        <span>${i+1}. ${p.name}</span>
+                        <span style="color:#ffd700">${p.xp} XP</span>
+                    </div>
+                `).join('');
+                
+                document.getElementById('leaderboardOverlay').style.display = 'flex';
+            }
+
+            makeOffering() {
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+                
+                this.createGoldenRain(window.innerWidth / 2, window.innerHeight / 4);
+                
+                this.maxDailyRituals++;
+                this.balance += 10;
+                this.updateUI();
+                
+                this.showNotification(
+                    '供奉已接受。寺庙感谢您的慷慨。'
+                );
+                
+                this.saveUserData();
+            }
+
+            mintFinal() {
+                tg.showConfirm("Минтинг NFT стоит 0.1 TON. Продолжить?", (confirmed) => {
+                    if (confirmed) {
+                        this.showNotification('NFT успешно заминен!');
+                        this.closeOverlays();
+                    }
+                });
+            }
+
+            toggleLanguage() {
+                const languages = ['ru', 'en', 'zh'];
+                const currentIndex = languages.indexOf(this.language);
+                this.language = languages[(currentIndex + 1) % languages.length];
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                
+                // Update UI text based on language
+                const offeringText = document.getElementById('offeringText');
+                const wheelCenter = document.getElementById('wheelCenter');
+                const xpLabel = document.getElementById('xpLabel');
+                
+                if (this.language === 'ru') {
+                    offeringText.innerText = 'Очистить ауру · 1 TON';
+                    wheelCenter.innerHTML = 'РИТУАЛ<br>УДАЧИ';
+                    xpLabel.innerText = 'ПРОСВЕТЛЕНИЕ';
+                } else if (this.language === 'en') {
+                    offeringText.innerText = 'Cleanse Aura · 1 TON';
+                    wheelCenter.innerHTML = 'EXECUTE<br>RITUAL';
+                    xpLabel.innerText = 'ENLIGHTENMENT';
+                } else {
+                    offeringText.innerText = '净化气场 · 1 TON';
+                    wheelCenter.innerHTML = '执 行<br>仪 式';
+                    xpLabel.innerText = '启迪';
+                }
+            }
+
+            loadUserData() {
+                const saved = localStorage.getItem(`templeData_${this.userId}`);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.xp = data.xp || 0;
+                    this.balance = data.balance || 0;
+                    this.streak = data.streak || 0;
+                    this.dailyRitualsUsed = data.ritualsUsed || 0;
+                    this.maxDailyRituals = data.maxRituals || 1;
+                }
+                
+                // Check streak
+                const lastVisit = localStorage.getItem(`lastVisit_${this.userId}`);
+                const today = new Date().toDateString();
+                
+                if (lastVisit !== today) {
+                    if (lastVisit === new Date(Date.now() - 86400000).toDateString()) {
+                        this.streak++;
+                    } else {
+                        this.streak = 1;
+                    }
+                    this.dailyRitualsUsed = 0;
+                    localStorage.setItem(`lastVisit_${this.userId}`, today);
+                }
+                
+                this.updateUI();
+            }
+
+            saveUserData() {
+                const data = {
+                    xp: this.xp,
+                    balance: this.balance,
+                    streak: this.streak,
+                    ritualsUsed: this.dailyRitualsUsed,
+                    maxRituals: this.maxDailyRituals
+                };
+                localStorage.setItem(`templeData_${this.userId}`, JSON.stringify(data));
+            }
+
+            spawnCoins() {
+                this.createGoldenRain(window.innerWidth / 2, 100);
+            }
+
+            showAltarMessage() {
+                tg.showPopup({
+                    title: 'Ежедневный ритуал завершен',
+                    message: 'Возвращайтесь завтра или посетите алтарь.',
+                    buttons: [{
+                        id: 'altar',
+                        type: 'default',
+                        text: 'Перейти к алтарю'
+                    }, {
+                        id: 'close',
+                        type: 'cancel',
+                        text: 'Закрыть'
+                    }]
+                }, (buttonId) => {
+                    if (buttonId === 'altar') {
+                        this.makeOffering();
+                    }
+                });
+            }
+
+            showNotification(message) {
+                tg.showPopup({
+                    title: '🏯 Храм',
+                    message: message,
+                    buttons: [{ type: 'close' }]
+                });
+            }
+
+            closeOverlays() {
+                document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+                document.getElementById('hongbao')?.classList.remove('opened');
+                if (tg.BackButton) tg.BackButton.hide();
+                
+                // Add to journal
+                this.updateJournal();
+            }
+
+            updateJournal() {
+                const journalPreview = document.getElementById('journalPreview');
+                const card = document.createElement('div');
+                card.className = 'journal-card';
+                
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                const symbol = this.wheelSymbols[this.selectedSegment]?.[this.language] || '福';
+                
+                card.innerHTML = `
+                    <div style="color: #ffd966; margin-bottom: 5px;">${dateStr}</div>
+                    <div style="font-size: 24px; color: #FFD700;">${symbol}</div>
+                    <div style="font-size: 10px; opacity: 0.7;">${this.path === 'life' ? '🌿' : '⚡'}</div>
+                `;
+                
+                journalPreview.insertBefore(card, journalPreview.firstChild);
+                if (journalPreview.children.length > 7) {
+                    journalPreview.removeChild(journalPreview.lastChild);
+                }
+            }
+
+            startAnimation() {
+                // Start animation loop for wheel physics if needed
+            }
+        }
+
+        // Initialize the app
+        const app = new TonTempleLegendary();
+        window.app = app; // Make globally accessible for onclick handlers
+    </script>
 </body>
 </html>
