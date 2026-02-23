@@ -2,77 +2,71 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Тест Загрузки</title>
+    <title>Проверка файлов</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
     <style>
-        body { margin: 0; background: #111; color: white; font-family: sans-serif; overflow: hidden; }
-        #info { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid gold; }
+        body { margin: 0; background: #111; color: white; font-family: sans-serif; }
+        #log { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid gold; line-height: 1.6; }
+        .ok { color: lime; }
+        .err { color: red; }
     </style>
 </head>
 <body>
-    <div id="info">
-        <b>Статус проверки:</b><br>
-        1. Движок: <span id="s1">Запуск...</span><br>
-        2. Фон (background.jpg): <span id="s2">Ожидание...</span><br>
-        3. Текстура (gold_ore.jpg): <span id="s3">Ожидание...</span><br>
-        4. Дракон (dragon.glb): <span id="s4">Ожидание...</span>
+    <div id="log">
+        <b>Диагностика:</b><br>
+        1. Графический движок: <span id="s1">...</span><br>
+        2. Файл фона (background.jpg): <span id="s2">...</span><br>
+        3. Текстура золота (gold_ore.jpg): <span id="s3">...</span><br>
+        4. Модель дракона (dragon.glb): <span id="s4">...</span><br>
+        <hr>
+        <i>Если всё "ОК", ты увидишь синий фон и крутящийся куб.</i>
     </div>
 
     <script>
-        const s1 = document.getElementById('s1'), s2 = document.getElementById('s2');
-        const s3 = document.getElementById('s3'), s4 = document.getElementById('s4');
-
-        // 1. Создаем сцену
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-        s1.innerHTML = "✅ Работает"; s1.style.color = "lime";
-
-        // Свет (очень яркий, чтобы всё видеть)
-        const light = new THREE.AmbientLight(0xffffff, 1);
-        scene.add(light);
-        const point = new THREE.PointLight(0xffffff, 2);
-        point.position.set(5, 5, 5);
-        scene.add(point);
+        
+        document.getElementById('s1').innerHTML = "✅ ЗАПУЩЕН";
+        document.getElementById('s1').className = "ok";
 
         const loader = new THREE.TextureLoader();
 
-        // 2. Проверка Фона
+        // Проверка фона
         loader.load('background.jpg', 
-            (t) => { scene.background = t; s2.innerHTML = "✅ Загружен"; s2.style.color = "lime"; },
+            () => { document.getElementById('s2').innerHTML = "✅ НАЙДЕН"; document.getElementById('s2').className="ok"; },
             undefined, 
-            () => { s2.innerHTML = "❌ Ошибка (файл не найден)"; s2.style.color = "red"; }
+            () => { document.getElementById('s2').innerHTML = "❌ НЕ НАЙДЕН"; document.getElementById('s2').className="err"; }
         );
 
-        // 3. Проверка Текстуры и Куб вместо метеорита
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshStandardMaterial({ color: 0xffff00 }); // Желтый по умолчанию
-        const cube = new THREE.Mesh(geometry, material);
-        cube.position.x = -3;
-        scene.add(cube);
-
+        // Проверка текстуры
         loader.load('gold_ore.jpg', 
-            (t) => { material.map = t; material.needsUpdate = true; s3.innerHTML = "✅ Загружена"; s3.style.color = "lime"; },
-            undefined,
-            () => { s3.innerHTML = "❌ Ошибка (использую цвет)"; s3.style.color = "orange"; }
+            () => { document.getElementById('s3').innerHTML = "✅ НАЙДЕНА"; document.getElementById('s3').className="ok"; },
+            undefined, 
+            () => { document.getElementById('s3').innerHTML = "❌ НЕ НАЙДЕНА"; document.getElementById('s3').className="err"; }
         );
 
-        // 4. Проверка Дракона
+        // Проверка дракона
         const gltfLoader = new THREE.GLTFLoader();
         gltfLoader.load('dragon.glb', 
-            (gltf) => { 
-                scene.add(gltf.scene); 
-                gltf.scene.position.x = 3;
-                s4.innerHTML = "✅ Загружен"; s4.style.color = "lime"; 
+            () => { document.getElementById('s4').innerHTML = "✅ ЗАГРУЖЕН"; document.getElementById('s4').className="ok"; },
+            (xhr) => { 
+                if (xhr.total > 0) {
+                    document.getElementById('s4').innerHTML = "Загрузка: " + Math.round(xhr.loaded/xhr.total*100) + "%";
+                } else {
+                    document.getElementById('s4').innerHTML = "Загрузка... (" + (xhr.loaded/1024/1024).toFixed(1) + " MB)";
+                }
             },
-            (xhr) => { if(xhr.total > 0) s4.innerHTML = Math.round(xhr.loaded/xhr.total*100) + "%"; },
-            (err) => { s4.innerHTML = "❌ Ошибка (файл поврежден или 0 байт)"; s4.style.color = "red"; }
+            () => { document.getElementById('s4').innerHTML = "❌ ОШИБКА ФАЙЛА"; document.getElementById('s4').className="err"; }
         );
 
-        camera.position.z = 10;
+        // Тестовый куб
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshBasicMaterial({color: 0x00ff00}));
+        scene.add(cube);
+        camera.position.z = 5;
 
         function animate() {
             requestAnimationFrame(animate);
@@ -80,12 +74,6 @@
             renderer.render(scene, camera);
         }
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
