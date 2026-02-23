@@ -1,79 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Проверка файлов</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+    <title>TON Temple • Pure Code Universe</title>
     <style>
-        body { margin: 0; background: #111; color: white; font-family: sans-serif; }
-        #log { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid gold; line-height: 1.6; }
-        .ok { color: lime; }
-        .err { color: red; }
+        body { margin: 0; background: #000; overflow: hidden; }
+        #ui { position: absolute; bottom: 20px; width: 100%; text-align: center; font-family: sans-serif; }
+        .btn { padding: 15px 40px; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #ffec8b; border-radius: 30px; cursor: pointer; backdrop-filter: blur(5px); text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .btn:hover { background: rgba(212,175,55,0.5); box-shadow: 0 0 20px #d4af37; }
     </style>
 </head>
 <body>
-    <div id="log">
-        <b>Диагностика:</b><br>
-        1. Графический движок: <span id="s1">...</span><br>
-        2. Файл фона (background.jpg): <span id="s2">...</span><br>
-        3. Текстура золота (gold_ore.jpg): <span id="s3">...</span><br>
-        4. Модель дракона (dragon.glb): <span id="s4">...</span><br>
-        <hr>
-        <i>Если всё "ОК", ты увидишь синий фон и крутящийся куб.</i>
-    </div>
-
+    <div id="ui"><button class="btn" onclick="startAnim()">Активировать Вселенную</button></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        
-        document.getElementById('s1').innerHTML = "✅ ЗАПУЩЕН";
-        document.getElementById('s1').className = "ok";
+        let scene, camera, renderer, eye, dragonParts = [], stones = [];
+        let clock = new THREE.Clock();
+        let isLooking = false;
 
-        const loader = new THREE.TextureLoader();
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
 
-        // Проверка фона
-        loader.load('background.jpg', 
-            () => { document.getElementById('s2').innerHTML = "✅ НАЙДЕН"; document.getElementById('s2').className="ok"; },
-            undefined, 
-            () => { document.getElementById('s2').innerHTML = "❌ НЕ НАЙДЕН"; document.getElementById('s2').className="err"; }
-        );
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
 
-        // Проверка текстуры
-        loader.load('gold_ore.jpg', 
-            () => { document.getElementById('s3').innerHTML = "✅ НАЙДЕНА"; document.getElementById('s3').className="ok"; },
-            undefined, 
-            () => { document.getElementById('s3').innerHTML = "❌ НЕ НАЙДЕНА"; document.getElementById('s3').className="err"; }
-        );
+            // 1. ПРОЦЕДУРНЫЙ ГЛАЗ (ШЕЙДЕРНЫЙ ФОН)
+            const eyeGeo = new THREE.PlaneGeometry(100, 100);
+            const eyeMat = new THREE.ShaderMaterial({
+                uniforms: { time: { value: 0 } },
+                vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `
+                    varying vec2 vUv;
+                    uniform float time;
+                    void main() {
+                        vec2 uv = vUv - 0.5;
+                        float dist = length(uv);
+                        // Создаем радужку
+                        float iris = smoothstep(0.4, 0.1, dist) * smoothstep(0.05, 0.15, dist);
+                        vec3 color = vec3(0.1, 0.4, 0.8) * iris; // Синий
+                        color += vec3(0.8, 0.5, 0.1) * (1.0 - smoothstep(0.1, 0.4, dist)) * 0.3; // Золотой отблеск
+                        // Пульсация зрачка
+                        float pupil = smoothstep(0.08 + sin(time*2.0)*0.01, 0.07, dist);
+                        color = mix(color, vec3(0.0), pupil);
+                        // Звездная пыль
+                        float stars = pow(fract(sin(dot(uv, vec2(12.9898,78.233))) * 43758.5453), 20.0);
+                        gl_FragColor = vec4(color + stars * iris, 1.0);
+                    }
+                `,
+                transparent: true
+            });
+            const bg = new THREE.Mesh(eyeGeo, eyeMat);
+            bg.position.z = -10;
+            scene.add(bg);
+            eye = bg;
 
-        // Проверка дракона
-        const gltfLoader = new THREE.GLTFLoader();
-        gltfLoader.load('dragon.glb', 
-            () => { document.getElementById('s4').innerHTML = "✅ ЗАГРУЖЕН"; document.getElementById('s4').className="ok"; },
-            (xhr) => { 
-                if (xhr.total > 0) {
-                    document.getElementById('s4').innerHTML = "Загрузка: " + Math.round(xhr.loaded/xhr.total*100) + "%";
-                } else {
-                    document.getElementById('s4').innerHTML = "Загрузка... (" + (xhr.loaded/1024/1024).toFixed(1) + " MB)";
-                }
-            },
-            () => { document.getElementById('s4').innerHTML = "❌ ОШИБКА ФАЙЛА"; document.getElementById('s4').className="err"; }
-        );
+            // 2. ЗОЛОТОЙ ПРОЦЕДУРНЫЙ ДРАКОН (ИЗ СФЕР)
+            const dragonGroup = new THREE.Group();
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.1, emissive: 0x554400 });
+            
+            for(let i = 0; i < 40; i++) {
+                const segGeo = new THREE.SphereGeometry(0.5 - (i*0.01), 12, 12);
+                const seg = new THREE.Mesh(segGeo, goldMat);
+                dragonParts.push(seg);
+                dragonGroup.add(seg);
+            }
+            scene.add(dragonGroup);
 
-        // Тестовый куб
-        const cube = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshBasicMaterial({color: 0x00ff00}));
-        scene.add(cube);
-        camera.position.z = 5;
+            // 3. ХАОТИЧНЫЕ МЕТЕОРИТЫ
+            for(let i = 0; i < 30; i++) {
+                const sGeo = new THREE.DodecahedronGeometry(Math.random() * 0.8, 0);
+                const stone = new THREE.Mesh(sGeo, goldMat);
+                stone.position.set((Math.random()-0.5)*50, (Math.random()-0.5)*40, (Math.random()-0.5)*30);
+                stone.userData.speed = Math.random() * 0.01;
+                scene.add(stone);
+                stones.push(stone);
+            }
+
+            const light = new THREE.PointLight(0xffffff, 2, 100);
+            light.position.set(0, 0, 10);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x444444));
+
+            animate();
+        }
 
         function animate() {
             requestAnimationFrame(animate);
-            cube.rotation.y += 0.01;
+            let t = clock.getElapsedTime();
+            
+            eye.material.uniforms.time.value = t;
+
+            // Движение дракона
+            dragonParts.forEach((p, i) => {
+                let wave = Math.sin(t * 2 - i * 0.2);
+                let cosWave = Math.cos(t * 1.5 - i * 0.2);
+                
+                if (!isLooking) {
+                    // Извивается в полете
+                    p.position.set(Math.sin(t)*10 + wave, Math.cos(t*0.5)*5 + cosWave, 10 - i*0.8);
+                } else {
+                    // Замирает и плавно покачивается перед камерой
+                    p.position.set(wave * 0.2, cosWave * 0.2 + 2, 15 - i*0.8);
+                    p.lookAt(camera.position);
+                }
+            });
+
+            // Метеориты
+            stones.forEach(s => {
+                s.rotation.x += 0.01;
+                s.position.y += Math.sin(t + s.position.x) * 0.005;
+            });
+
             renderer.render(scene, camera);
         }
-        animate();
+
+        function startAnim() {
+            isLooking = !isLooking;
+            const btn = document.querySelector('.btn');
+            btn.innerText = isLooking ? "В движении" : "Замереть";
+        }
+
+        init();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
