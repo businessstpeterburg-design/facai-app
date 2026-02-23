@@ -2,137 +2,151 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>TON Temple • Pure Code Universe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TON Temple • Cinematic 7D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; }
-        #ui { position: absolute; bottom: 20px; width: 100%; text-align: center; font-family: sans-serif; }
-        .btn { padding: 15px 40px; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #ffec8b; border-radius: 30px; cursor: pointer; backdrop-filter: blur(5px); text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
-        .btn:hover { background: rgba(212,175,55,0.5); box-shadow: 0 0 20px #d4af37; }
+        body { margin: 0; background-color: #000; overflow: hidden; }
+        #ui { position: absolute; bottom: 10%; width: 100%; text-align: center; z-index: 100; }
+        .btn { 
+            padding: 20px 60px; background: rgba(212, 175, 55, 0.1); 
+            border: 1px solid #d4af37; border-radius: 60px; color: #ffec8b;
+            font-weight: 300; font-size: 14px; text-transform: uppercase; letter-spacing: 4px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); cursor: pointer; backdrop-filter: blur(5px);
+        }
     </style>
 </head>
 <body>
-    <div id="ui"><button class="btn" onclick="startAnim()">Активировать Вселенную</button></div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+    <div id="ui"><button class="btn" onclick="startAudio()">Войти в поток</button></div>
+    <audio id="music" loop><source src="music.mp3" type="audio/mpeg"></audio>
+
     <script>
-        let scene, camera, renderer, eye, dragonParts = [], stones = [];
-        let clock = new THREE.Clock();
-        let isLooking = false;
+        let scene, camera, renderer, dragon, bgGroup;
+        let stones = [];
+        const stoneCount = 15; // Меньше, но каждый - произведение искусства
 
         function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 30;
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 20;
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.outputEncoding = THREE.sRGBEncoding;
             document.body.appendChild(renderer.domElement);
 
-            // 1. ПРОЦЕДУРНЫЙ ГЛАЗ (ШЕЙДЕРНЫЙ ФОН)
-            const eyeGeo = new THREE.PlaneGeometry(100, 100);
-            const eyeMat = new THREE.ShaderMaterial({
-                uniforms: { time: { value: 0 } },
-                vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-                fragmentShader: `
-                    varying vec2 vUv;
-                    uniform float time;
-                    void main() {
-                        vec2 uv = vUv - 0.5;
-                        float dist = length(uv);
-                        // Создаем радужку
-                        float iris = smoothstep(0.4, 0.1, dist) * smoothstep(0.05, 0.15, dist);
-                        vec3 color = vec3(0.1, 0.4, 0.8) * iris; // Синий
-                        color += vec3(0.8, 0.5, 0.1) * (1.0 - smoothstep(0.1, 0.4, dist)) * 0.3; // Золотой отблеск
-                        // Пульсация зрачка
-                        float pupil = smoothstep(0.08 + sin(time*2.0)*0.01, 0.07, dist);
-                        color = mix(color, vec3(0.0), pupil);
-                        // Звездная пыль
-                        float stars = pow(fract(sin(dot(uv, vec2(12.9898,78.233))) * 43758.5453), 20.0);
-                        gl_FragColor = vec4(color + stars * iris, 1.0);
-                    }
-                `,
-                transparent: true
+            // --- 1. ВЕЛИЧЕСТВЕННЫЙ ФОН ---
+            bgGroup = new THREE.Group();
+            const loader = new THREE.TextureLoader();
+            loader.load('background.jpg', (tex) => {
+                const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.7 });
+                const mesh = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), material);
+                mesh.position.z = -100;
+                bgGroup.add(mesh);
             });
-            const bg = new THREE.Mesh(eyeGeo, eyeMat);
-            bg.position.z = -10;
-            scene.add(bg);
-            eye = bg;
+            scene.add(bgGroup);
 
-            // 2. ЗОЛОТОЙ ПРОЦЕДУРНЫЙ ДРАКОН (ИЗ СФЕР)
-            const dragonGroup = new THREE.Group();
-            const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.1, emissive: 0x554400 });
-            
-            for(let i = 0; i < 40; i++) {
-                const segGeo = new THREE.SphereGeometry(0.5 - (i*0.01), 12, 12);
-                const seg = new THREE.Mesh(segGeo, goldMat);
-                dragonParts.push(seg);
-                dragonGroup.add(seg);
-            }
-            scene.add(dragonGroup);
+            // --- 2. ЮВЕЛИРНЫЕ МЕТЕОРИТЫ ---
+            const goldMat = new THREE.MeshStandardMaterial({
+                color: 0xffd700,
+                metalness: 0.9,
+                roughness: 0.3, // Чтобы кратеры были матовыми, а грани блестели
+                flatShading: true // Подчеркивает "рубленую" форму камня
+            });
 
-            // 3. ХАОТИЧНЫЕ МЕТЕОРИТЫ
-            for(let i = 0; i < 30; i++) {
-                const sGeo = new THREE.DodecahedronGeometry(Math.random() * 0.8, 0);
-                const stone = new THREE.Mesh(sGeo, goldMat);
-                stone.position.set((Math.random()-0.5)*50, (Math.random()-0.5)*40, (Math.random()-0.5)*30);
-                stone.userData.speed = Math.random() * 0.01;
+            for(let i = 0; i < stoneCount; i++) {
+                // Создаем детальную 3D форму (7D эффект)
+                const geo = new THREE.IcosahedronGeometry(Math.random() * 0.5 + 0.3, 2); 
+                const pos = geo.attributes.position;
+                for(let j=0; j<pos.count; j++) {
+                    const noise = 0.85 + Math.random() * 0.3;
+                    pos.setXYZ(j, pos.getX(j)*noise, pos.getY(j)*noise, pos.getZ(j)*noise);
+                }
+                
+                const stone = new THREE.Mesh(geo, goldMat);
+                resetStone(stone);
+                // Начинаем их в разброс по глубине, чтобы они плыли медленно
+                stone.position.z = Math.random() * -100; 
                 scene.add(stone);
                 stones.push(stone);
             }
 
-            const light = new THREE.PointLight(0xffffff, 2, 100);
-            light.position.set(0, 0, 10);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0x444444));
+            // --- 3. ДРАКОН (СИМВОЛ СУДЬБЫ) ---
+            new THREE.GLTFLoader().load('dragon.glb', (gltf) => {
+                dragon = gltf.scene;
+                dragon.traverse(n => {
+                    if(n.isMesh) n.material = goldMat;
+                });
+                dragon.scale.set(6, 6, 6);
+                dragon.position.set(0, -3, 5);
+                scene.add(dragon);
+            });
 
+            // --- 4. ОСВЕЩЕНИЕ (КАК В КИНО) ---
+            const mainLight = new THREE.SpotLight(0xffffff, 4);
+            mainLight.position.set(10, 20, 20);
+            scene.add(mainLight);
+
+            const rimLight = new THREE.PointLight(0xffd700, 2);
+            rimLight.position.set(-10, -10, -10);
+            scene.add(rimLight);
+
+            scene.add(new THREE.AmbientLight(0x404040, 1));
+
+            window.addEventListener('resize', onResize);
             animate();
+        }
+
+        function resetStone(s) {
+            s.position.x = (Math.random() - 0.5) * 40;
+            s.position.y = (Math.random() - 0.5) * 25;
+            s.position.z = -120; // Уходят далеко вглубь
+            s.userData.speed = 0.02 + Math.random() * 0.04; // ОЧЕНЬ медленно
+            s.userData.rotSpeed = (Math.random() - 0.5) * 0.005; // Едва заметное вращение
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            let t = clock.getElapsedTime();
-            
-            eye.material.uniforms.time.value = t;
+            const time = Date.now() * 0.0005;
 
-            // Движение дракона
-            dragonParts.forEach((p, i) => {
-                let wave = Math.sin(t * 2 - i * 0.2);
-                let cosWave = Math.cos(t * 1.5 - i * 0.2);
-                
-                if (!isLooking) {
-                    // Извивается в полете
-                    p.position.set(Math.sin(t)*10 + wave, Math.cos(t*0.5)*5 + cosWave, 10 - i*0.8);
-                } else {
-                    // Замирает и плавно покачивается перед камерой
-                    p.position.set(wave * 0.2, cosWave * 0.2 + 2, 15 - i*0.8);
-                    p.lookAt(camera.position);
-                }
-            });
-
-            // Метеориты
+            // Плавный дрейф метеоритов
             stones.forEach(s => {
-                s.rotation.x += 0.01;
-                s.position.y += Math.sin(t + s.position.x) * 0.005;
+                s.position.z += s.userData.speed;
+                s.rotation.y += s.userData.rotSpeed;
+                s.rotation.z += s.userData.rotSpeed;
+                if(s.position.z > 25) resetStone(s);
             });
+
+            // Величественное дыхание Ока Бога
+            if(bgGroup) {
+                bgGroup.scale.set(1 + Math.sin(time*0.2)*0.05, 1 + Math.sin(time*0.2)*0.05, 1);
+                bgGroup.rotation.z = Math.sin(time * 0.1) * 0.02;
+            }
+
+            // Золотой дракон
+            if(dragon) {
+                dragon.rotation.y = Math.sin(time * 0.3) * 0.2;
+                dragon.position.y = -3 + Math.cos(time * 0.5) * 0.4;
+            }
 
             renderer.render(scene, camera);
         }
 
-        function startAnim() {
-            isLooking = !isLooking;
-            const btn = document.querySelector('.btn');
-            btn.innerText = isLooking ? "В движении" : "Замереть";
-        }
-
-        init();
-
-        window.addEventListener('resize', () => {
+        function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }
+
+        window.startAudio = function() {
+            document.getElementById('music').play();
+            document.getElementById('ui').style.opacity = '0.3';
+        }
+
+        init();
     </script>
 </body>
 </html>
