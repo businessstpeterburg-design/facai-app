@@ -1,288 +1,1761 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TON TEMPLE V17 | SUPREME PRO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Space+Mono:wght@400;700&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --gold: #dfc27d; --gold-br: #fff3d1; --red-pro: #d10000;
-            --bg-deep: #050505; --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
-        }
+  <meta charset="UTF-8" />
+  <title>TON TEMPLE • FoCai</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body { 
-            background: var(--bg-deep); color: var(--gold); 
-            font-family: 'Space Mono', monospace; height: 100vh; 
-            overflow: hidden; -webkit-font-smoothing: antialiased;
-        }
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Space+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
 
-        /* GPU Layers */
-        #bg-layer {
-            position: fixed; inset: 0; z-index: -1;
-            background: url('dragon.jpg') center/cover no-repeat;
-            opacity: 0.12; filter: grayscale(1);
-            transform: translate3d(0,0,0) scale(1.1); will-change: transform, opacity;
-            transition: opacity 2s cubic-bezier(0.2, 1, 0.3, 1), filter 2s;
-        }
-        .ingame #bg-layer { opacity: 0.7; filter: grayscale(0) brightness(1.2); transform: translate3d(0,0,0) scale(1); }
+  <style>
+    :root {
+      --deep-black: #050505;
+      --royal-gold: #dfc27d;
+      --blood-red: #d10000;
+      --maroon: #4a0000;
 
-        #fx-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5; }
+      --font-calligraphy: "Zhi Mang Xing", "Noto Serif SC", serif;
+      --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      --font-serif: "Noto Serif SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-        /* UI HUD */
-        .olympic-hud {
-            position: relative; z-index: 10; height: 100vh;
-            display: flex; flex-direction: column;
-            padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bottom) + 30px);
-        }
+      --hud-height: 64px;
+      --safe-pad-x: 20px;
+      --safe-pad-y: 18px;
 
-        .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
-        .pro-label { font-size: 10px; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; }
-        .pro-value { font-weight: 700; font-size: 18px; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.2); }
+      --glass-bg: rgba(10, 10, 10, 0.78);
+      --glass-border: rgba(223, 194, 125, 0.18);
+      --shadow-strong: 0 26px 64px rgba(0, 0, 0, 0.98);
 
-        .logo-glyph {
-            font-family: 'Zhi Mang Xing', cursive; font-size: 52px;
-            background: linear-gradient(180deg, var(--gold-br), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(223,194,125,0.5));
-        }
+      --transition-fast: 200ms ease-out;
+      --transition-med: 450ms cubic-bezier(0.2, 0, 0.1, 1);
+    }
 
-        /* Core Ritual */
-        .ritual-core { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        
-        .disc-wrapper {
-            position: relative; width: 82vw; height: 82vw; max-width: 400px; max-height: 400px;
-            will-change: transform; transition: transform 10s cubic-bezier(0.1, 0, 0, 1);
-        }
-        .disc-wrapper img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .needle { 
-            position: absolute; top: -15px; left: 50%; transform: translateX(-50%); 
-            width: 4px; height: 35px; background: var(--red-pro); z-index: 20;
-            box-shadow: 0 0 15px var(--red-pro); border-radius: 2px;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* Live Stream */
-        .live-stream { position: absolute; bottom: 180px; left: 24px; right: 24px; height: 70px; overflow: hidden; pointer-events: none; }
-        .stream-entry { font-size: 11px; margin-bottom: 5px; opacity: 0.5; animation: fUp 0.4s ease-out forwards; }
-        @keyframes fUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 0.5; transform: translateY(0); } }
+    body {
+      background-color: var(--deep-black);
+      color: var(--royal-gold);
+      font-family: var(--font-serif);
+      overflow: hidden;
+    }
 
-        /* Pro Button */
-        .btn-pro {
-            width: 100%; padding: 26px; border-radius: 14px; border: 1px solid var(--gold);
-            background: rgba(223, 194, 125, 0.05); color: var(--gold);
-            font-family: 'Space Mono'; font-weight: 700; font-size: 16px; letter-spacing: 5px;
-            cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-pro:active { background: var(--gold); color: #000; transform: scale(0.97); }
-        .btn-pro:disabled { opacity: 0.2; filter: grayscale(1); }
+    #app {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% -15%, rgba(223, 194, 125, 0.22), transparent 55%),
+        radial-gradient(ellipse 100% 60% at 50% 110%, rgba(209, 0, 0, 0.14), transparent 55%),
+        radial-gradient(circle at 20% 30%, rgba(223, 194, 125, 0.06), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(209, 0, 0, 0.05), transparent 40%),
+        var(--deep-black);
+      color: var(--royal-gold);
+    }
 
-        /* Overlay & Scroll */
-        #overlay {
-            position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.97);
-            display: none; align-items: center; justify-content: center; padding: 25px;
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        }
-        .scroll-paper {
-            width: 100%; max-width: 450px; background: #f4f1ea url('https://www.transparenttextures.com/patterns/natural-paper.png');
-            padding: 55px 40px; border-radius: 3px; position: relative; color: #1a1a1a;
-            box-shadow: 0 40px 120px rgba(0,0,0,1); display: none;
-        }
-        .s-cn { font-family: 'Zhi Mang Xing'; font-size: 46px; color: var(--red-pro); margin-bottom: 5px; }
-        .s-en { font-family: 'Space Mono'; font-size: 10px; color: #888; letter-spacing: 2px; margin-bottom: 25px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .s-text { font-family: 'Noto Serif SC'; font-size: 15px; line-height: 1.8; font-weight: 700; text-align: justify; }
-        #seal-pro { position: absolute; bottom: 30px; right: 30px; width: 110px; opacity: 0; transform: scale(4); transition: 0.5s cubic-bezier(0.17, 0.88, 0.32, 1.3); }
-    </style>
+    /* Film grain */
+    #app::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* FX canvases */
+    canvas.starfield,
+    canvas.coins {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    canvas.coins {
+      z-index: 2;
+    }
+
+    /* Safe shell */
+    .shell {
+      position: relative;
+      z-index: 3;
+      min-height: 100vh;
+      padding:
+        calc(env(safe-area-inset-top, 0px) + var(--safe-pad-y))
+        calc(env(safe-area-inset-right, 0px) + var(--safe-pad-x))
+        calc(env(safe-area-inset-bottom, 0px) + var(--safe-pad-y))
+        calc(env(safe-area-inset-left, 0px) + var(--safe-pad-x));
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      pointer-events: none;
+    }
+
+    /* HUD */
+    .hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      pointer-events: auto;
+      animation: hud-reveal 0.9s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+    }
+
+    @keyframes hud-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hud-left,
+    .hud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(15, 12, 8, 0.9), rgba(5, 5, 5, 0.96));
+      border: 1px solid rgba(223, 194, 125, 0.35);
+      backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.85),
+        inset 0 1px 0 rgba(223, 194, 125, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-label {
+      opacity: 0.6;
+    }
+
+    .hud-value {
+      color: var(--royal-gold);
+    }
+
+    .hud-center {
+      flex: 1;
+      text-align: center;
+    }
+
+    .hud-title-cn {
+      font-family: var(--font-calligraphy);
+      font-size: 20px;
+      letter-spacing: 0.2em;
+    }
+
+    .hud-title-en {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
+    .hud-lang-toggle {
+      border-radius: 999px;
+      border: 1px solid rgba(223, 194, 125, 0.5);
+      background: radial-gradient(circle at 30% 0, rgba(223, 194, 125, 0.85), rgba(15, 15, 15, 0.95));
+      color: #120b04;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+      letter-spacing: 0.22em;
+    }
+
+    .hud-help {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(223, 194, 125, 0.35);
+      background: rgba(5, 5, 5, 0.9);
+      color: var(--royal-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    /* Main scene */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      pointer-events: auto;
+      animation: main-reveal 1.2s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+    }
+
+    @keyframes main-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dragon-stage {
+      position: relative;
+      width: min(86vw, 420px);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter:
+        drop-shadow(0 0 80px rgba(223, 194, 125, 0.25))
+        drop-shadow(0 30px 60px rgba(0, 0, 0, 0.95));
+      animation: dragon-float 12s ease-in-out infinite;
+    }
+
+    @keyframes dragon-float {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0);
+      }
+      50% {
+        transform: translate3d(0, -6px, 0);
+      }
+    }
+
+    .dragon-aura {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 30% 15%, rgba(255, 243, 209, 0.6), transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(209, 0, 0, 0.35), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(223, 194, 125, 0.2), transparent 70%);
+      mix-blend-mode: screen;
+      opacity: 0.85;
+      animation: aura-breathe 9s ease-in-out infinite;
+    }
+
+    .dragon-halo {
+      position: absolute;
+      inset: -4%;
+      border-radius: 50%;
+      border: 1px solid rgba(223, 194, 125, 0.24);
+      pointer-events: none;
+      animation: halo-rotate 90s linear infinite;
+    }
+
+    @keyframes aura-breathe {
+      0% {
+        opacity: 0.5;
+        transform: scale(0.98);
+      }
+      40% {
+        opacity: 0.95;
+        transform: scale(1.03);
+      }
+      100% {
+        opacity: 0.5;
+        transform: scale(0.98);
+      }
+    }
+
+    @keyframes halo-rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .dragon-img {
+      position: absolute;
+      inset: 10%;
+      border-radius: 50%;
+      object-fit: cover;
+      pointer-events: auto;
+      cursor: pointer;
+      filter:
+        contrast(1.1)
+        saturate(1.18)
+        brightness(1.05)
+        drop-shadow(0 26px 50px rgba(0, 0, 0, 0.95));
+      transform-origin: 50% 50%;
+      transition: transform 200ms ease-out, filter 200ms ease-out;
+    }
+
+    .dragon-img:active {
+      transform: scale(0.98);
+      filter: brightness(1.1);
+    }
+
+    .wheel-shell {
+      position: absolute;
+      inset: 16%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    #sacredWheel {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .wheel-core-button {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background:
+        radial-gradient(circle at 30% 15%, rgba(255, 243, 209, 0.95), rgba(223, 194, 125, 0.7)),
+        radial-gradient(circle at 70% 80%, rgba(140, 108, 42, 0.7), rgba(42, 31, 10, 1));
+      color: #2a1f0a;
+      font-family: var(--font-calligraphy);
+      font-size: 26px;
+      letter-spacing: 0.3em;
+      text-indent: 0.3em;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        0 18px 40px rgba(0, 0, 0, 0.96),
+        0 0 40px rgba(223, 194, 125, 0.6),
+        inset 0 1px 0 rgba(255, 243, 209, 0.6);
+      transition: transform 120ms ease-out, box-shadow 120ms ease-out, filter 120ms ease-out;
+    }
+
+    .wheel-core-button:active {
+      transform: translate(-50%, -50%) scale(0.97);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.9),
+        0 0 26px rgba(223, 194, 125, 0.5),
+        inset 0 1px 0 rgba(255, 243, 209, 0.5);
+      filter: brightness(0.96);
+    }
+
+    .main-hint {
+      font-size: 11px;
+      opacity: 0.76;
+      font-family: var(--font-mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* Ritual button (secondary) */
+    .ritual-button {
+      margin-top: 8px;
+      border-radius: 999px;
+      border: none;
+      padding: 14px 26px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      background:
+        radial-gradient(circle at 25% 10%, rgba(255, 243, 209, 0.95), rgba(223, 194, 125, 0.6) 40%, rgba(140, 108, 42, 0.4)),
+        linear-gradient(135deg, rgba(60, 42, 15, 1), rgba(18, 12, 6, 1));
+      color: #0d0804;
+      box-shadow:
+        0 0 0 1px rgba(223, 194, 125, 0.2),
+        0 20px 50px rgba(0, 0, 0, 0.95),
+        0 0 40px rgba(223, 194, 125, 0.5),
+        inset 0 1px 0 rgba(255, 243, 209, 0.3);
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+      animation: btn-glow 4s ease-in-out infinite;
+      pointer-events: auto;
+    }
+
+    .ritual-button[disabled] {
+      opacity: 0.55;
+      animation: none;
+      cursor: default;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.9);
+    }
+
+    @keyframes btn-glow {
+      0%,
+      100% {
+        box-shadow:
+          0 0 0 1px rgba(223, 194, 125, 0.2),
+          0 20px 50px rgba(0, 0, 0, 0.95),
+          0 0 40px rgba(223, 194, 125, 0.5),
+          inset 0 1px 0 rgba(255, 243, 209, 0.3);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(223, 194, 125, 0.3),
+          0 20px 50px rgba(0, 0, 0, 0.95),
+          0 0 55px rgba(223, 194, 125, 0.7),
+          inset 0 1px 0 rgba(255, 243, 209, 0.35);
+      }
+    }
+
+    /* Bottom info */
+    .bottom-info {
+      pointer-events: auto;
+      margin-top: 8px;
+      font-size: 10px;
+      opacity: 0.7;
+      line-height: 1.5;
+    }
+
+    /* Result overlay (envelope + scroll) */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(209, 0, 0, 0.25), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.98));
+      backdrop-filter: blur(22px);
+      z-index: 6;
+      pointer-events: auto;
+    }
+
+    .overlay.visible {
+      display: flex;
+    }
+
+    .envelope {
+      position: absolute;
+      width: min(260px, 70vw);
+      aspect-ratio: 4 / 3;
+      border-radius: 24px;
+      background:
+        linear-gradient(145deg, #3d0104 0%, #8a0810 35%, #c00d18 50%, #8a0810 65%, #3d0104 100%);
+      box-shadow:
+        0 0 0 1px rgba(223, 194, 125, 0.15),
+        0 26px 60px rgba(0, 0, 0, 0.95),
+        0 0 60px rgba(209, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 200, 200, 0.15);
+      transform-origin: center;
+      transform: scale(0.85);
+      opacity: 0;
+      transition: opacity 600ms cubic-bezier(0.2, 0, 0.1, 1), transform 600ms cubic-bezier(0.2, 0, 0.1, 1);
+      overflow: hidden;
+    }
+
+    .envelope::before {
+      content: "";
+      position: absolute;
+      inset: 12%;
+      border-radius: 18px;
+      border: 1px solid rgba(223, 194, 125, 0.4);
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+    }
+
+    .envelope::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.06) 50%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .envelope-symbol {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-calligraphy);
+      font-size: 56px;
+      color: var(--royal-gold);
+      text-shadow:
+        0 0 20px rgba(223, 194, 125, 0.6),
+        0 0 40px rgba(0, 0, 0, 0.9),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+      filter: drop-shadow(0 0 8px rgba(223, 194, 125, 0.4));
+    }
+
+    .envelope.visible {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    .envelope.folded {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+
+    .scroll {
+      position: relative;
+      width: min(360px, 90vw);
+      max-height: 70vh;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(223, 194, 125, 0.08) 0%, transparent 15%, transparent 85%, rgba(209, 0, 0, 0.06) 100%),
+        radial-gradient(circle at 0 0, rgba(223, 194, 125, 0.2), transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(209, 0, 0, 0.12), transparent 55%),
+        #0f0c08;
+      border: 1px solid rgba(223, 194, 125, 0.5);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 30px 70px rgba(0, 0, 0, 0.98),
+        0 0 60px rgba(223, 194, 125, 0.4),
+        inset 0 1px 0 rgba(223, 194, 125, 0.1);
+      padding: 18px 18px 16px;
+      opacity: 0;
+      transform: translateY(24px) scale(0.94);
+      transition: opacity 800ms cubic-bezier(0.2, 0, 0.1, 1), transform 800ms cubic-bezier(0.2, 0, 0.1, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scroll::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 12%;
+      bottom: 12%;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, rgba(223, 194, 125, 0.5), transparent);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    .scroll.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .scroll-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+
+    .scroll-body {
+      flex: 1;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      line-height: 1.7;
+      color: #f5e7cf;
+      position: relative;
+      padding-right: 12px;
+      overflow-y: auto;
+    }
+
+    .scroll-body::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .scroll-body::-webkit-scrollbar-thumb {
+      background: rgba(223, 194, 125, 0.5);
+      border-radius: 999px;
+    }
+
+    .scroll-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .scroll-seal {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(209, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-calligraphy);
+      font-size: 26px;
+      color: #ffe8e0;
+      box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.9),
+        0 0 0 3px rgba(209, 0, 0, 0.3),
+        0 0 30px rgba(209, 0, 0, 0.8),
+        inset 0 0 12px rgba(209, 0, 0, 0.2);
+      transform: scale(0.9);
+      background: radial-gradient(circle at 30% 30%, rgba(255, 220, 210, 0.15), rgba(120, 20, 20, 0.4));
+    }
+
+    .scroll-seal.punch {
+      animation: seal-punch 480ms cubic-bezier(0.1, 0, 0.1, 1);
+    }
+
+    @keyframes seal-punch {
+      0% {
+        transform: scale(0.05) translateY(-24px);
+        opacity: 0;
+        filter: brightness(0.5);
+      }
+      30% {
+        transform: scale(1.2);
+        opacity: 1;
+        filter: brightness(1.3);
+      }
+      60% {
+        transform: scale(0.95);
+        filter: brightness(1);
+      }
+      100% {
+        transform: scale(0.9);
+        filter: brightness(1);
+      }
+    }
+
+    .sync-button {
+      margin-top: 14px;
+      align-self: stretch;
+      border-radius: 999px;
+      border: 1px solid rgba(223, 194, 125, 0.6);
+      background: linear-gradient(180deg, rgba(223, 194, 125, 0.08), transparent);
+      color: var(--royal-gold);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 200ms, border-color 200ms, box-shadow 200ms, transform 120ms ease-out;
+    }
+
+    .sync-button:hover {
+      background: linear-gradient(180deg, rgba(223, 194, 125, 0.12), transparent);
+      border-color: rgba(223, 194, 125, 0.8);
+      box-shadow: 0 0 20px rgba(223, 194, 125, 0.2);
+    }
+
+    .sync-button:active {
+      transform: translateY(1px);
+    }
+
+    /* Help modal */
+    .help-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 7;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 0 0, rgba(223, 194, 125, 0.1), rgba(0, 0, 0, 0.94));
+      backdrop-filter: blur(16px);
+    }
+
+    .help-modal.visible {
+      display: flex;
+    }
+
+    .help-card {
+      width: min(380px, 90vw);
+      border-radius: 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 18px 18px 14px;
+      box-shadow: var(--shadow-strong);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .help-card-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .help-card ul {
+      padding-left: 18px;
+      margin-bottom: 10px;
+    }
+
+    .help-card li {
+      margin-bottom: 4px;
+    }
+
+    .help-close {
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      opacity: 0.8;
+      cursor: pointer;
+      text-align: right;
+    }
+
+    @media (min-width: 768px) {
+      .shell {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+    }
+  </style>
 </head>
-<body id="app">
+<body>
+  <div id="app">
+    <canvas id="starfieldCanvas" class="starfield"></canvas>
+    <canvas id="coinCanvas" class="coins"></canvas>
 
-    <div id="bg-layer"></div>
-    <canvas id="fx-canvas"></canvas>
+    <div class="shell">
+      <header class="hud">
+        <div class="hud-left">
+          <div class="hud-pill">
+            <span class="hud-label">User</span>
+            <span class="hud-value" id="hudUser">PILGRIM</span>
+          </div>
+        </div>
+        <div class="hud-center">
+          <div class="hud-title-cn">通灵金殿</div>
+          <div class="hud-title-en">TON TEMPLE SUPREME · DAILY RITUAL</div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-pill">
+            <span class="hud-label">Entropy</span>
+            <span class="hud-value" id="hudEntropy">000000</span>
+          </div>
+          <button id="langToggle" class="hud-lang-toggle">EN</button>
+          <button id="helpButton" class="hud-help">?</button>
+        </div>
+      </header>
 
-    <div class="olympic-hud">
-        <div class="top-row">
-            <div>
-                <p class="pro-label">Entropy Matrix</p>
-                <p class="pro-value" id="qk">14.000782</p>
-            </div>
-            <div class="logo-glyph">龍</div>
-            <div style="text-align: right;">
-                <p class="pro-label">Account Balance</p>
-                <p class="pro-value" style="color: var(--gold);">1.280 TON</p>
-            </div>
+      <main class="main">
+        <section class="dragon-stage" id="dragonStage">
+          <div class="dragon-halo"></div>
+          <div class="dragon-aura"></div>
+          <img src="dragon.jpg" alt="Golden Dragon" class="dragon-img" id="dragonImg" />
+
+          <div class="wheel-shell">
+            <svg id="sacredWheel" viewBox="0 0 200 200" aria-hidden="true"></svg>
+          </div>
+
+          <button id="wheelCoreButton" class="wheel-core-button">财</button>
+        </section>
+
+        <div class="main-hint" id="mainHint">
+          DAILY BLESSING · LIFE / TON · 1× / DAY
         </div>
 
-        <div class="ritual-core">
-            <div class="needle"></div>
-            <div class="disc-wrapper" id="wheel">
-                <img src="https://i.ibb.co/mF7mYmS/wheel.png" alt="Wheel">
-            </div>
+        <button id="ritualButton" class="ritual-button">
+          EXECUTE SUPREME RITUAL
+        </button>
+
+        <div class="bottom-info" id="bottomInfo">
+          This temple offers calm Temple Guidance only. No signals, no guarantees, no insiders — just a daily ritual of
+          hope.
         </div>
-
-        <div class="live-stream" id="stream"></div>
-
-        <button class="btn-pro" id="trigger">EXECUTE SUPREME RITUAL</button>
+      </main>
     </div>
 
-    <div id="overlay">
-        <img src="hongbao.jpg" id="hb" style="width: 280px; transition: 1s ease;">
-        <div class="scroll-paper" id="scroll">
-            <div class="s-cn" id="s-cn"></div>
-            <div class="s-en" id="s-en"></div>
-            <div class="s-text" id="s-text"></div>
-            <img src="royalSeal.jpg" id="seal-pro">
-            <button class="btn-pro" style="margin-top: 40px; border-color: #bbb; color: #1a1a1a;" onclick="location.reload()">SYNC REALITY</button>
+    <!-- Result overlay -->
+    <div id="resultOverlay" class="overlay">
+      <div id="envelope" class="envelope">
+        <div class="envelope-symbol">福</div>
+      </div>
+
+      <section id="scroll" class="scroll">
+        <div class="scroll-header" id="scrollHeader">TON TEMPLE · ORACLE</div>
+        <div id="oracleBody" class="scroll-body"></div>
+        <div class="scroll-footer">
+          <div>
+            <div id="oracleMeta">DRAGON VEIN · LIFE PATH</div>
+            <div id="oracleTime">--:-- · AURA STABLE</div>
+          </div>
+          <div id="scrollSeal" class="scroll-seal">印</div>
         </div>
+        <button id="syncButton" class="sync-button">SYNC REALITY</button>
+      </section>
     </div>
 
-    <audio id="snd" src="coin.mp3" loop prefetch></audio>
+    <!-- Help modal -->
+    <div id="helpModal" class="help-modal">
+      <div class="help-card">
+        <div class="help-card-title">TEMPLE PROTOCOL</div>
+        <p>
+          TON Temple is a digital hall of hope. It offers calm Temple Guidance in the language of dragons and gold —
+          not trading signals, not guarantees, not insider promises.
+        </p>
+        <ul>
+          <li>Step 1 — Choose Life Path or TON Path.</li>
+          <li>Step 2 — Run one Supreme Ritual per day.</li>
+          <li>Step 3 — Read the scroll and decide in your own rhythm.</li>
+        </ul>
+        <p>All messages are narrative reflections only and never financial advice.</p>
+        <div id="helpClose" class="help-close">CLOSE</div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        const ORACLES = [
-            { cn: "龍威萬丈", en: "Imperial Authority", text: "The Dragon recognizes your digital footprint within the TON ecosystem. Your current path is aligned with the ascending flow of the stars. Do not hesitate when the market whispers of change, for your foundation is built on jade and gold. Expect a significant convergence of prosperity in your primary wallet soon. The temple has sealed your destiny with the breath of the eternal guardian." },
-            { cn: "金庫大開", en: "Eternal Vault", text: "A structural ripple in the quantum entropy has opened a direct corridor to wealth. The gates of the Imperial Treasury stand unguarded for your intent. Your patience during the market's shadows has been rewarded by the higher cycles of the blockchain. Prepare your vessels for an overflow that transcends the current lunar phase. The Dynasty remembers those who maintain silence during the storm." },
-            { cn: "天機顯現", en: "Heavenly Insight", text: "The veil between the digital and the divine has grown thin today. You now possess the clarity to see patterns where others see only chaos. Trust the vibrations of the sacred wheel, for they echo the upcoming transactions of great value. Your influence within the network is expanding like the shadow of a flying dragon. A red envelope of immense weight is destined to find your signature." },
-            { cn: "萬象更新", en: "Total Renewal", text: "Old karmic debts within the network have been purged by the dragon fire. You are entering a cycle of pure potential where every action yields double the harvest. The flow of TON toward your address has become a natural law that cannot be broken. Stand tall in the temple, for you are now a vessel of the Supreme Engine's favor. Fortune does not follow you; it resides within your very touch." },
-            { cn: "神龍擺尾", en: "Dragon's Strike", text: "A sudden and powerful shift in your financial trajectory is imminent. The Dragon's Tail strikes the earth, revealing hidden veins of digital gold beneath your feet. Stay vigilant, as the fastest currents of the river are often the most rewarding. Your ritual has activated a dormant relic within your account's history. The Imperial Seal now glows with the light of a thousand successful cycles." }
-        ];
+  <!-- Audio -->
+  <audio id="zenAudio" loop preload="auto">
+    <source src="zen.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="coinAudio" preload="auto">
+    <source src="coin.wav" type="audio/wav" />
+  </audio>
+  <audio id="sealAudio" preload="auto">
+    <source src="seal.wav" type="audio/wav" />
+  </audio>
 
-        class SupremeEngine {
-            constructor() {
-                this.busy = false;
-                this.snd = document.getElementById('snd');
-                this.wheel = document.getElementById('wheel');
-                this.init();
-            }
+  <script>
+    // ---- DESIGN TOKENS ----
+    const DESIGN = {
+      colors: {
+        deepBlack: "#050505",
+        royalGold: "#dfc27d",
+        bloodRed: "#d10000",
+        maroon: "#8B0000",
+      },
+      timings: {
+        charging: 300,
+        spinMin: 7000,
+        spinMax: 9000,
+        zoom: 900,
+        envelope: 1400,
+        paper: 800,
+        sealPunch: 450,
+        inkCharMin: 40,
+        inkCharMax: 60,
+      },
+      wheel: {
+        segments: 15,
+        symbols: ["福", "禄", "寿", "喜", "财", "吉", "祥", "运", "安", "康", "宁", "顺", "昌", "盛", "盈"],
+      },
+    };
 
-            init() {
-                this.setupParticles();
-                this.startQK();
-                this.startStream();
-                document.getElementById('trigger').onclick = () => this.execute();
-                
-                window.addEventListener('deviceorientation', e => {
-                    const x = (e.gamma || 0) / 6; const y = (e.beta || 0) / 6;
-                    document.getElementById('bg-layer').style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.05)`;
-                });
-            }
+    const FESTIVALS = [
+      { month: 1, day: 1, id: "spring_festival" },
+      { month: 1, day: 15, id: "lantern" },
+      { month: 4, day: 4, id: "qingming" },
+      { month: 5, day: 5, id: "dragon_boat" },
+      { month: 8, day: 15, id: "mid_autumn" },
+    ];
 
-            startQK() {
-                setInterval(() => {
-                    document.getElementById('qk').innerText = (14.000782 + Math.random()*0.00009).toFixed(6);
-                }, 60);
-            }
+    const RitualState = {
+      IDLE: "IDLE",
+      CHARGING: "CHARGING",
+      SPINNING: "SPINNING",
+      ZOOMING: "ZOOMING",
+      ENVELOPE: "ENVELOPE",
+      PAPER: "PAPER_UNFOLD",
+      INK: "INK_WRITING",
+      SEAL: "SEAL_STAMP",
+      DECISION: "DECISION",
+      COOLDOWN: "COOLDOWN",
+    };
 
-            startStream() {
-                const logs = ["Syncing @0x7... [GOLD]", "Imperial Seal Active", "Entropy: Stable", "Dragon favor detected", "Wallet 0.44... Received 2.1 TON"];
-                setInterval(() => {
-                    const el = document.createElement('div');
-                    el.className = 'stream-entry';
-                    el.innerText = `> ${logs[Math.floor(Math.random()*logs.length)]}`;
-                    const c = document.getElementById('stream');
-                    c.prepend(el);
-                    if(c.children.length > 3) c.lastChild.remove();
-                }, 3500);
-            }
+    const OraclePath = {
+      LIFE: "life",
+      TON: "ton",
+    };
 
-            setupParticles() {
-                const canvas = document.getElementById('fx-canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-                let p = Array(120).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*1000 }));
+    // ---- EVENT BUS ----
+    class EventBus {
+      constructor() {
+        this.listeners = new Map();
+      }
+      on(event, handler) {
+        if (!this.listeners.has(event)) this.listeners.set(event, new Set());
+        this.listeners.get(event).add(handler);
+        return () => this.off(event, handler);
+      }
+      off(event, handler) {
+        this.listeners.get(event)?.delete(handler);
+      }
+      emit(event, payload) {
+        this.listeners.get(event)?.forEach((h) => h(payload));
+      }
+    }
 
-                const render = () => {
-                    ctx.clearRect(0,0, canvas.width, canvas.height);
-                    p.forEach(i => {
-                        i.z -= (this.busy ? 42 : 0.8);
-                        if(i.z <= 0) i.z = 1000;
-                        let s = 600/i.z;
-                        let x = (i.x - canvas.width/2)*s + canvas.width/2;
-                        let y = (i.y - canvas.height/2)*s + canvas.height/2;
-                        ctx.fillStyle = `rgba(223, 194, 125, ${1-i.z/1000})`;
-                        ctx.fillRect(x, y, s, s);
-                    });
-                    requestAnimationFrame(render);
-                };
-                render();
-            }
+    // ---- CLOCK ----
+    class EngineClock {
+      constructor() {
+        this.last = performance.now();
+        this.running = false;
+        this.handlers = new Set();
+        this.rafId = 0;
+      }
+      start() {
+        if (this.running) return;
+        this.running = true;
+        this.last = performance.now();
+        const loop = () => {
+          if (!this.running) return;
+          const now = performance.now();
+          const dt = now - this.last;
+          this.last = now;
+          const frame = { dt, now };
+          this.handlers.forEach((h) => h(frame));
+          this.rafId = requestAnimationFrame(loop);
+        };
+        this.rafId = requestAnimationFrame(loop);
+      }
+      stop() {
+        this.running = false;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+      }
+      onTick(handler) {
+        this.handlers.add(handler);
+        return () => this.handlers.delete(handler);
+      }
+    }
 
-            async execute() {
-                if(this.busy) return;
-                this.busy = true;
+    // ---- RITUAL STATE MACHINE ----
+    class RitualStateMachine {
+      constructor() {
+        this.current = RitualState.IDLE;
+        this.listeners = [];
+      }
+      getState() {
+        return this.current;
+      }
+      canStartRitual() {
+        return this.current === RitualState.IDLE;
+      }
+      isInRitual() {
+        return ![RitualState.IDLE, RitualState.COOLDOWN].includes(this.current);
+      }
+      transition(to) {
+        const from = this.current;
+        this.current = to;
+        this.listeners.forEach((cb) => cb(from, to));
+      }
+      onChange(cb) {
+        this.listeners.push(cb);
+        return () => (this.listeners = this.listeners.filter((x) => x !== cb));
+      }
+    }
 
-                const btn = document.getElementById('trigger');
-                btn.disabled = true;
-                document.getElementById('app').classList.add('ingame');
+    // ---- LAYER BASE ----
+    class LayerBase {
+      constructor(id) {
+        this.id = id;
+        this.visible = true;
+      }
+      mount(root) {
+        this.root = root;
+        this.onMount();
+      }
+      unmount() {
+        this.onUnmount();
+      }
+      show() {
+        this.visible = true;
+        this.onShow();
+      }
+      hide() {
+        this.visible = false;
+        this.onHide();
+      }
+      update(frame) {
+        if (!this.visible) return;
+        this.onUpdate(frame);
+      }
+      // hooks
+      onMount() {}
+      onUnmount() {}
+      onShow() {}
+      onHide() {}
+      onUpdate(_frame) {}
+    }
 
-                // iOS Audio Safe Start
-                this.snd.volume = 0;
-                try { await this.snd.play(); } catch(e) {}
-                this.fade(0, 0.7, 1200);
+    // ---- STARFIELD LAYER ----
+    class StarfieldLayer extends LayerBase {
+      constructor(canvas) {
+        super("starfield");
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        this.stars = [];
+        this.meteors = [];
+        this.ritualBoost = 0;
+        this.handleResize = this.handleResize.bind(this);
+      }
+      onMount() {
+        this.root.appendChild(this.canvas);
+        this.handleResize();
+        window.addEventListener("resize", this.handleResize);
+        this.initStars(130);
+      }
+      onUnmount() {
+        window.removeEventListener("resize", this.handleResize);
+        this.canvas.remove();
+      }
+      onShow() {
+        this.canvas.style.display = "block";
+      }
+      onHide() {
+        this.canvas.style.display = "none";
+      }
+      onUpdate({ dt }) {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, w, h);
 
-                const deg = 10000 + Math.random()*5000;
-                this.wheel.style.transform = `rotate(${deg}deg)`;
-
-                if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
-
-                setTimeout(() => {
-                    this.fade(0.7, 0, 2500);
-                    setTimeout(() => this.reveal(), 3000);
-                }, 7500);
-            }
-
-            fade(f, t, d) {
-                let start = Date.now();
-                let i = setInterval(() => {
-                    let p = (Date.now() - start)/d;
-                    this.snd.volume = Math.max(0, Math.min(1, f + (t-f)*p));
-                    if(p >= 1) clearInterval(i);
-                }, 40);
-            }
-
-            async reveal() {
-                const data = ORACLES[Math.floor(Math.random()*ORACLES.length)];
-                const overlay = document.getElementById('overlay');
-                overlay.style.display = 'flex';
-                
-                setTimeout(async () => {
-                    const hb = document.getElementById('hb');
-                    hb.style.opacity = '0'; hb.style.transform = 'scale(0.5)';
-                    
-                    setTimeout(async () => {
-                        hb.style.display = 'none';
-                        const scroll = document.getElementById('scroll');
-                        scroll.style.display = 'block';
-
-                        const cn = document.getElementById('s-cn');
-                        const en = document.getElementById('s-en');
-                        const txt = document.getElementById('s-text');
-
-                        for(let c of data.cn) { cn.innerHTML += c; await new Promise(r => setTimeout(r, 70)); }
-                        for(let c of data.en) { en.innerHTML += c; await new Promise(r => setTimeout(r, 30)); }
-                        
-                        const words = data.text.split(" ");
-                        for(let w of words) {
-                            txt.innerHTML += w + " ";
-                            await new Promise(r => setTimeout(r, 45));
-                            if(w.toLowerCase().includes("dragon") || w.toLowerCase().includes("gold")) {
-                                if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                            }
-                        }
-
-                        setTimeout(() => {
-                            const s = document.getElementById('seal-pro');
-                            s.style.opacity = '1'; s.style.transform = 'scale(1) rotate(-15deg)';
-                            if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                        }, 500);
-                    }, 600);
-                }, 2000);
-            }
+        // meteors
+        if (Math.random() < (this.ritualBoost ? 0.016 : 0.006)) {
+          const dir = Math.random() < 0.5 ? 1 : -1;
+          this.meteors.push({
+            x: dir < 0 ? w + 60 : -60,
+            y: h * 0.2 + Math.random() * h * 0.6,
+            vx: (0.35 + Math.random() * 0.35) * dir,
+            vy: (Math.random() - 0.5) * 0.08,
+            len: 100 + Math.random() * 180,
+            thick: 5 + Math.random() * 10,
+            life: 0,
+            maxLife: 1.2 + Math.random() * 0.6,
+          });
         }
 
-        window.onload = () => new SupremeEngine();
-    </script>
+        this.meteors = this.meteors.filter((m) => {
+          m.life += dt / 1000;
+          if (m.life > m.maxLife) return false;
+          m.x += m.vx * 70 * (dt / 1000);
+          m.y += m.vy * 70 * (dt / 1000);
+          const t = m.life / m.maxLife;
+          const alpha = (1 - t) * 0.85;
+          const dx = m.len * (m.vx > 0 ? 1 : -1);
+          const grad = ctx.createLinearGradient(m.x, m.y, m.x + dx, m.y + m.len * 0.1);
+          grad.addColorStop(0, "rgba(255,243,209,0)");
+          grad.addColorStop(0.15, `rgba(223,194,125,${alpha * 0.5})`);
+          grad.addColorStop(0.5, `rgba(255,243,209,${alpha})`);
+          grad.addColorStop(1, "rgba(184,134,11,0)");
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = m.thick;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(m.x, m.y);
+          ctx.lineTo(m.x + dx, m.y + m.len * 0.08);
+          ctx.stroke();
+          return true;
+        });
+
+        // stars
+        const speedBase = 0.35 + this.ritualBoost * 2.4;
+        const drift = 8 + this.ritualBoost * 40;
+        for (const s of this.stars) {
+          s.phase += (dt / 1000) * (0.5 + s.z);
+          s.x += s.vx * drift * (0.6 + this.ritualBoost);
+          s.y += s.vy * drift * (0.6 + this.ritualBoost) - (0.4 + s.z) * speedBase;
+
+          if (s.y < -20) s.y = h + 10;
+          if (s.x < -20) s.x = w + 10;
+          if (s.x > w + 20) s.x = -10;
+
+          const tw = 0.65 + 0.35 * (Math.sin(s.phase) + 1) / 2;
+          const alpha = Math.min(0.92, s.baseAlpha * tw * (1 + this.ritualBoost * 0.7));
+          const r = s.radius * 3;
+          const gr = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r);
+          gr.addColorStop(0, `rgba(255,243,209,${alpha * 0.9})`);
+          gr.addColorStop(0.4, `rgba(223,194,125,${alpha * 0.4})`);
+          gr.addColorStop(1, "rgba(223,194,125,0)");
+          ctx.fillStyle = gr;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = `rgba(255,243,209,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      setRitualMode(active) {
+        this.ritualBoost = active ? 1 : 0;
+      }
+      initStars(count) {
+        this.stars = [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        for (let i = 0; i < count; i++) {
+          const z = Math.random();
+          this.stars.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            z,
+            vx: (Math.random() - 0.5) * 0.1,
+            vy: (Math.random() - 0.5) * 0.06 - 0.02,
+            baseAlpha: 0.14 + z * 0.28,
+            radius: 0.7 + z * 2.4,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+      handleResize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.initStars(130);
+      }
+    }
+
+    // ---- COIN RAIN ----
+    class CoinRainLayer extends LayerBase {
+      constructor(canvas, audioBus) {
+        super("coins");
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        this.audio = audioBus;
+        this.coins = [];
+        this.visible = false;
+        this.handleResize = this.handleResize.bind(this);
+      }
+      onMount() {
+        this.root.appendChild(this.canvas);
+        this.handleResize();
+        window.addEventListener("resize", this.handleResize);
+      }
+      onUnmount() {
+        window.removeEventListener("resize", this.handleResize);
+        this.canvas.remove();
+      }
+      onShow() {
+        this.canvas.style.display = "block";
+      }
+      onHide() {
+        this.canvas.style.display = "none";
+      }
+      spawn(count = 40, originX, originY) {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const baseX = originX ?? w / 2;
+        const baseY = originY ?? h * 0.1;
+        for (let i = 0; i < count; i++) {
+          this.coins.push({
+            x: baseX + (Math.random() - 0.5) * 80,
+            y: baseY + (Math.random() - 0.5) * 40,
+            vx: (Math.random() - 0.5) * 80,
+            vy: Math.random() * -60,
+            radius: 6 + Math.random() * 4,
+            life: 0,
+          });
+        }
+        this.audio.playCoin();
+      }
+      onUpdate({ dt }) {
+        if (!this.visible) return;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, w, h);
+        const g = 150;
+        this.coins = this.coins.filter((c) => {
+          c.life += dt / 1000;
+          c.vy += g * (dt / 1000);
+          c.x += c.vx * (dt / 1000);
+          c.y += c.vy * (dt / 1000);
+          if (c.y > h - 10) {
+            c.y = h - 10;
+            c.vy *= -0.35;
+            c.vx *= 0.8;
+          }
+          if (c.life > 2.8) return false;
+          const alpha = Math.max(0, 1 - c.life / 2.8);
+          const r = c.radius;
+          const grd = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, r * 2.2);
+          grd.addColorStop(0, `rgba(255,243,209,${alpha})`);
+          grd.addColorStop(0.4, `rgba(223,194,125,${alpha * 0.6})`);
+          grd.addColorStop(1, "rgba(223,194,125,0)");
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, r * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `rgba(255,243,209,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+          ctx.fill();
+          return true;
+        });
+      }
+      handleResize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+    }
+
+    // ---- DRAGON LAYER ----
+    class DragonLayer extends LayerBase {
+      constructor(imgEl, bus) {
+        super("dragon");
+        this.img = imgEl;
+        this.time = 0;
+        this.bus = bus;
+        this.handleTap = this.handleTap.bind(this);
+      }
+      onMount() {
+        this.root.appendChild(this.img);
+        this.img.addEventListener("click", this.handleTap);
+      }
+      onUnmount() {
+        this.img.removeEventListener("click", this.handleTap);
+        this.img.remove();
+      }
+      onShow() {
+        this.img.style.display = "block";
+      }
+      onHide() {
+        this.img.style.display = "none";
+      }
+      onUpdate({ dt }) {
+        this.time += dt;
+        const t = this.time / 6000;
+        const offset = Math.sin(t * Math.PI * 2) * 4;
+        this.img.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+      }
+      handleTap() {
+        this.bus.emit("dragon:tap");
+      }
+      setFestivalMode(active) {
+        this.img.classList.toggle("dragon-festival", active);
+      }
+    }
+
+    // ---- WHEEL LAYER ----
+    class WheelLayer extends LayerBase {
+      constructor(svg) {
+        super("wheel");
+        this.svg = svg;
+        this.coreGroup = null;
+        this.spinning = false;
+      }
+      onMount() {
+        this.root.appendChild(this.svg);
+        this.buildSvg();
+      }
+      onUnmount() {
+        this.svg.remove();
+      }
+      onShow() {
+        this.svg.style.display = "block";
+      }
+      onHide() {
+        this.svg.style.display = "none";
+      }
+      onUpdate() {}
+      buildSvg() {
+        const svg = this.svg;
+        const ns = svg.namespaceURI;
+        svg.innerHTML = "";
+        const defs = document.createElementNS(ns, "defs");
+        const radial = document.createElementNS(ns, "radialGradient");
+        radial.id = "discCoreGradient";
+        radial.setAttribute("cx", "35%");
+        radial.setAttribute("cy", "25%");
+        radial.setAttribute("r", "70%");
+        radial.innerHTML =
+          "<stop offset='0%' stop-color='#fffbf0'/>" +
+          "<stop offset='25%' stop-color='#ffe8b8'/>" +
+          "<stop offset='50%' stop-color='#dfc27d'/>" +
+          "<stop offset='85%' stop-color='#6b4e1a'/>" +
+          "<stop offset='100%' stop-color='#2a1f0a'/>";
+        defs.appendChild(radial);
+        const ringGrad = document.createElementNS(ns, "linearGradient");
+        ringGrad.id = "discRingGradient";
+        ringGrad.setAttribute("x1", "0%");
+        ringGrad.setAttribute("y1", "0%");
+        ringGrad.setAttribute("x2", "100%");
+        ringGrad.setAttribute("y2", "100%");
+        ringGrad.innerHTML =
+          "<stop offset='0%' stop-color='#dfc27d'/>" +
+          "<stop offset='50%' stop-color='#8c6c2a'/>" +
+          "<stop offset='100%' stop-color='#dfc27d'/>";
+        defs.appendChild(ringGrad);
+        svg.appendChild(defs);
+
+        const base = document.createElementNS(ns, "circle");
+        base.setAttribute("cx", "100");
+        base.setAttribute("cy", "100");
+        base.setAttribute("r", "96");
+        base.setAttribute("fill", "rgba(5,5,5,0.96)");
+        base.setAttribute("stroke", "rgba(223,194,125,0.4)");
+        base.setAttribute("stroke-width", "1.2");
+        svg.appendChild(base);
+
+        const g = document.createElementNS(ns, "g");
+        g.id = "discCore";
+        this.coreGroup = g;
+
+        const outerRing = document.createElementNS(ns, "circle");
+        outerRing.setAttribute("cx", "100");
+        outerRing.setAttribute("cy", "100");
+        outerRing.setAttribute("r", "86");
+        outerRing.setAttribute("fill", "none");
+        outerRing.setAttribute("stroke", "url(#discRingGradient)");
+        outerRing.setAttribute("stroke-width", "4");
+        g.appendChild(outerRing);
+
+        const innerRing = document.createElementNS(ns, "circle");
+        innerRing.setAttribute("cx", "100");
+        innerRing.setAttribute("cy", "100");
+        innerRing.setAttribute("r", "60");
+        innerRing.setAttribute("fill", "none");
+        innerRing.setAttribute("stroke", "rgba(223,194,125,0.55)");
+        innerRing.setAttribute("stroke-width", "2");
+        g.appendChild(innerRing);
+
+        const core = document.createElementNS(ns, "circle");
+        core.setAttribute("cx", "100");
+        core.setAttribute("cy", "100");
+        core.setAttribute("r", "34");
+        core.setAttribute("fill", "url(#discCoreGradient)");
+        core.setAttribute("stroke", "rgba(5,5,5,0.9)");
+        core.setAttribute("stroke-width", "1.2");
+        g.appendChild(core);
+
+        const glyph = document.createElementNS(ns, "text");
+        glyph.setAttribute("x", "100");
+        glyph.setAttribute("y", "108");
+        glyph.setAttribute("text-anchor", "middle");
+        glyph.setAttribute("fill", "#3a2507");
+        glyph.setAttribute("font-size", "26");
+        glyph.setAttribute("font-family", "'Zhi Mang Xing','Noto Serif SC',serif");
+        glyph.textContent = "财";
+        g.appendChild(glyph);
+
+        const segCount = DESIGN.wheel.segments;
+        const rOuter = 82;
+        const rInner = 64;
+        for (let i = 0; i < segCount; i++) {
+          const a1 = (i / segCount) * Math.PI * 2;
+          const a2 = ((i + 1) / segCount) * Math.PI * 2;
+          const x1 = 100 + Math.cos(a1) * rInner;
+          const y1 = 100 + Math.sin(a1) * rInner;
+          const x2 = 100 + Math.cos(a1) * rOuter;
+          const y2 = 100 + Math.sin(a1) * rOuter;
+          const x3 = 100 + Math.cos(a2) * rOuter;
+          const y3 = 100 + Math.sin(a2) * rOuter;
+          const x4 = 100 + Math.cos(a2) * rInner;
+          const y4 = 100 + Math.sin(a2) * rInner;
+          const path = document.createElementNS(ns, "path");
+          const d =
+            `M ${x1} ${y1}` +
+            ` L ${x2} ${y2}` +
+            ` A ${rOuter} ${rOuter} 0 0 1 ${x3} ${y3}` +
+            ` L ${x4} ${y4}` +
+            ` A ${rInner} ${rInner} 0 0 0 ${x1} ${y1} Z`;
+          path.setAttribute("d", d);
+          const gold = i % 2 === 0 ? "#e8d090" : "#a67c2e";
+          path.setAttribute("fill", gold);
+          path.setAttribute("fill-opacity", i % 3 === 0 ? "0.6" : "0.4");
+          path.setAttribute("stroke", "rgba(223,194,125,0.25)");
+          path.setAttribute("stroke-width", "0.5");
+          svg.appendChild(path);
+        }
+
+        svg.appendChild(g);
+      }
+      spin() {
+        if (this.spinning || !this.coreGroup) return Promise.resolve(0);
+        this.spinning = true;
+        const base = 10800;
+        const extra = 2000 + Math.random() * 2000;
+        const totalDeg = base + extra;
+        const duration = DESIGN.timings.spinMin + Math.random() * (DESIGN.timings.spinMax - DESIGN.timings.spinMin);
+
+        const g = this.coreGroup;
+        g.style.transition = `transform ${duration}ms cubic-bezier(0.1,0,0,1)`;
+        g.style.transformOrigin = "100px 100px";
+        void g.getBoundingClientRect();
+        g.style.transform = `rotate(${totalDeg}deg)`;
+
+        const winningIndex = Math.floor(Math.random() * DESIGN.wheel.segments);
+        return new Promise((resolve) => {
+          const handler = () => {
+            g.removeEventListener("transitionend", handler);
+            this.spinning = false;
+            resolve(winningIndex);
+          };
+          g.addEventListener("transitionend", handler, { once: true });
+        });
+      }
+      getSegmentSymbol(index) {
+        return DESIGN.wheel.symbols[index] || "";
+      }
+    }
+
+    // ---- ORACLE ENGINE (контент сильно сокращён, заполнишь сам) ----
+    class OracleEngine {
+      constructor(storage) {
+        this.storage = storage;
+        this.entries = [];
+        this.bootstrap();
+      }
+      bootstrap() {
+        // TODO: заполни Life/Ton текстами EN+ZH
+        this.entries.push({
+          id: "life_1",
+          type: "life",
+          tone: "supportive",
+          zh: "今日适合与家人多说几句温柔的话，让心逐渐安静下来。",
+          en: "Today is right for a few soft words with your family. Let your mind settle before the day accelerates.",
+          meta: "LIFE · QUIET BALANCE",
+        });
+        // ... и так далее
+      }
+      pick(path) {
+        const state = this.storage.getState();
+        const used = new Set(state.usedOracleIds);
+        const pool = this.entries.filter((e) => e.type === path && !used.has(e.id));
+        const support = pool.filter((e) => e.tone === "supportive");
+        const caution = pool.filter((e) => e.tone === "caution");
+        const roll = Math.random();
+        const bucket = roll < 0.9 && support.length ? support : caution.length ? caution : pool;
+        const chosen = bucket[Math.floor(Math.random() * bucket.length)] || pool[0];
+        return chosen;
+      }
+      markUsed(id) {
+        const s = this.storage.getState();
+        this.storage.save({ usedOracleIds: [...s.usedOracleIds, id] });
+      }
+    }
+
+    // ---- STORAGE ----
+    class StorageAdapter {
+      constructor() {
+        this.key = "ton_temple_state_v1";
+        this.state = this.load();
+      }
+      load() {
+        try {
+          const raw = localStorage.getItem(this.key);
+          if (!raw)
+            return {
+              lastRitualDate: "",
+              usedOracleIds: [],
+              streak: 0,
+              devotionLevel: 0,
+              devotionPoints: 0,
+              referralCode: "",
+              referralsCount: 0,
+              donationsCount: 0,
+              offeringsCount: 0,
+              journal: [],
+              lang: "zh",
+            };
+          return JSON.parse(raw);
+        } catch {
+          return {
+            lastRitualDate: "",
+            usedOracleIds: [],
+            streak: 0,
+            devotionLevel: 0,
+            devotionPoints: 0,
+            referralCode: "",
+            referralsCount: 0,
+            donationsCount: 0,
+            offeringsCount: 0,
+            journal: [],
+            lang: "zh",
+          };
+        }
+      }
+      save(partial) {
+        this.state = Object.assign({}, this.state, partial);
+        localStorage.setItem(this.key, JSON.stringify(this.state));
+      }
+      getState() {
+        return this.state;
+      }
+      canRitualToday() {
+        const today = new Date().toISOString().slice(0, 10);
+        return this.state.lastRitualDate !== today;
+      }
+      markRitualUsed() {
+        const today = new Date().toISOString().slice(0, 10);
+        let streak = this.state.streak;
+        if (this.state.lastRitualDate) {
+          const prev = new Date(this.state.lastRitualDate);
+          const cur = new Date(today);
+          const diff = Math.round((cur - prev) / 86400000);
+          streak = diff === 1 ? streak + 1 : 1;
+        } else streak = 1;
+        this.save({ lastRitualDate: today, streak });
+      }
+    }
+
+    // ---- AUDIO BUS ----
+    class AudioBus {
+      constructor() {
+        this.masterVolume = 1;
+        this.ambient = document.getElementById("zenAudio");
+        this.coin = document.getElementById("coinAudio");
+        this.seal = document.getElementById("sealAudio");
+      }
+      playAmbient(opts = {}) {
+        if (!this.ambient) return;
+        this.ambient.volume = (opts.volume ?? 0.4) * this.masterVolume;
+        this.ambient.currentTime = 0;
+        this.ambient.play().catch(() => {});
+      }
+      stopAmbient() {
+        if (!this.ambient) return;
+        this.ambient.pause();
+      }
+      playCoin() {
+        if (!this.coin) return;
+        try {
+          this.coin.currentTime = 0;
+          this.coin.play().catch(() => {});
+        } catch (_) {}
+      }
+      playSeal() {
+        if (!this.seal) return;
+        try {
+          this.seal.currentTime = 0;
+          this.seal.play().catch(() => {});
+        } catch (_) {}
+      }
+    }
+
+    // ---- PAPER RITUAL ----
+    class PaperRitual {
+      constructor(overlayEl, envelopeEl, scrollEl, bodyEl, metaEl, timeEl, sealEl, audio, tg) {
+        this.overlay = overlayEl;
+        this.envelope = envelopeEl;
+        this.scroll = scrollEl;
+        this.bodyEl = bodyEl;
+        this.metaEl = metaEl;
+        this.timeEl = timeEl;
+        this.sealEl = sealEl;
+        this.audio = audio;
+        this.tg = tg;
+      }
+      async play(oracleEntry, lang = "en") {
+        this.overlay.classList.add("visible");
+        this.scroll.classList.remove("visible");
+        this.envelope.classList.remove("folded");
+        this.envelope.classList.add("visible");
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        this.metaEl.textContent = oracleEntry.meta;
+        this.timeEl.textContent = `${hh}:${mm} · AURA STABLE`;
+
+        await new Promise((res) => setTimeout(res, DESIGN.timings.envelope));
+        this.envelope.classList.add("folded");
+        await new Promise((res) => setTimeout(res, 500));
+        this.scroll.classList.add("visible");
+
+        const text = lang === "zh" ? oracleEntry.zh : oracleEntry.en;
+        await this.typeInk(text);
+        this.sealEl.classList.remove("punch");
+        void this.sealEl.offsetWidth;
+        this.sealEl.classList.add("punch");
+        this.audio.playSeal();
+        this.tg?.HapticFeedback?.notificationOccurred("success");
+      }
+      async typeInk(text) {
+        this.bodyEl.textContent = "";
+        const chars = Array.from(text);
+        for (let i = 0; i < chars.length; i++) {
+          this.bodyEl.textContent += chars[i];
+          const delay =
+            DESIGN.timings.inkCharMin + Math.random() * (DESIGN.timings.inkCharMax - DESIGN.timings.inkCharMin);
+          await new Promise((res) => setTimeout(res, delay));
+          if (window.Telegram?.WebApp?.HapticFeedback?.impactOccurred) {
+            if (i % 8 === 0) window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
+          }
+        }
+      }
+      close() {
+        this.overlay.classList.remove("visible");
+        this.envelope.classList.remove("visible", "folded");
+        this.scroll.classList.remove("visible");
+      }
+    }
+
+    // ---- ENGINE ----
+    class TonTempleEngine {
+      constructor(root) {
+        this.root = root;
+        this.tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        this.bus = new EventBus();
+        this.clock = new EngineClock();
+        this.state = new RitualStateMachine();
+        this.storage = new StorageAdapter();
+        this.audio = new AudioBus();
+        this.oracle = new OracleEngine(this.storage);
+        this.lang = this.storage.getState().lang || "zh";
+
+        this.starfieldLayer = new StarfieldLayer(document.getElementById("starfieldCanvas"));
+        this.coinLayer = new CoinRainLayer(document.getElementById("coinCanvas"), this.audio);
+        this.dragonLayer = new DragonLayer(document.getElementById("dragonImg"), this.bus);
+        this.wheelLayer = new WheelLayer(document.getElementById("sacredWheel"));
+
+        const overlay = document.getElementById("resultOverlay");
+        this.paper = new PaperRitual(
+          overlay,
+          document.getElementById("envelope"),
+          document.getElementById("scroll"),
+          document.getElementById("oracleBody"),
+          document.getElementById("oracleMeta"),
+          document.getElementById("oracleTime"),
+          document.getElementById("scrollSeal"),
+          this.audio,
+          this.tg
+        );
+
+        this.hudUser = document.getElementById("hudUser");
+        this.hudEntropy = document.getElementById("hudEntropy");
+        this.langToggle = document.getElementById("langToggle");
+        this.helpButton = document.getElementById("helpButton");
+        this.helpModal = document.getElementById("helpModal");
+        this.helpClose = document.getElementById("helpClose");
+        this.ritualButton = document.getElementById("ritualButton");
+        this.wheelCoreButton = document.getElementById("wheelCoreButton");
+        this.syncButton = document.getElementById("syncButton");
+
+        this.initTelegram();
+        this.mountLayers();
+        this.wireUI();
+        this.clock.onTick((frame) => this.update(frame));
+        this.clock.start();
+        this.startEntropyTicker();
+      }
+      initTelegram() {
+        try {
+          if (this.tg) {
+            this.tg.ready();
+            this.tg.expand();
+            this.tg.setBackgroundColor(DESIGN.colors.deepBlack);
+            this.tg.setHeaderColor(DESIGN.colors.deepBlack);
+            const name = this.tg.initDataUnsafe?.user?.first_name;
+            if (name) this.hudUser.textContent = name.toUpperCase();
+          }
+        } catch (e) {}
+      }
+      mountLayers() {
+        const stage = document.getElementById("dragonStage");
+        this.starfieldLayer.mount(this.root);
+        this.dragonLayer.mount(stage);
+        this.wheelLayer.mount(stage);
+        this.coinLayer.mount(this.root);
+      }
+      wireUI() {
+        this.helpButton.addEventListener("click", () => {
+          this.helpModal.classList.add("visible");
+        });
+        this.helpClose.addEventListener("click", () => {
+          this.helpModal.classList.remove("visible");
+        });
+        this.helpModal.addEventListener("click", (e) => {
+          if (e.target === this.helpModal) this.helpModal.classList.remove("visible");
+        });
+
+        this.langToggle.addEventListener("click", () => {
+          this.lang = this.lang === "zh" ? "en" : "zh";
+          this.langToggle.textContent = this.lang === "zh" ? "EN" : "中";
+          this.storage.save({ lang: this.lang });
+        });
+
+        this.ritualButton.addEventListener("click", () => this.startRitual(OraclePath.LIFE));
+        this.wheelCoreButton.addEventListener("click", () => this.startRitual(OraclePath.TON));
+
+        this.syncButton.addEventListener("click", () => {
+          this.paper.close();
+          this.state.transition(RitualState.IDLE);
+        });
+
+        this.bus.on("dragon:tap", () => {
+          const rect = document.getElementById("dragonImg").getBoundingClientRect();
+          const x = (rect.left + rect.right) / 2;
+          const y = rect.top + rect.height * 0.2;
+          this.coinLayer.show();
+          this.coinLayer.spawn(50, x, y);
+          this.tg?.HapticFeedback?.impactOccurred("medium");
+          setTimeout(() => this.coinLayer.hide(), 2600);
+        });
+      }
+      update(frame) {
+        this.starfieldLayer.update(frame);
+        this.dragonLayer.update(frame);
+        this.wheelLayer.update(frame);
+        this.coinLayer.update(frame);
+      }
+      startEntropyTicker() {
+        const tick = () => {
+          const base = 100000 + Math.floor(Math.random() * 800000);
+          this.hudEntropy.textContent = String(base);
+          const delay = this.state.isInRitual() ? 220 : 650;
+          setTimeout(tick, delay);
+        };
+        tick();
+      }
+      async startRitual(path) {
+        if (!this.state.canStartRitual()) return;
+        if (!this.storage.canRitualToday()) {
+          this.state.transition(RitualState.COOLDOWN);
+          return;
+        }
+        this.state.transition(RitualState.CHARGING);
+        this.ritualButton.disabled = true;
+        this.tg?.HapticFeedback?.impactOccurred("heavy");
+        this.starfieldLayer.setRitualMode(true);
+        this.audio.playAmbient({ volume: 0.4 });
+        await new Promise((res) => setTimeout(res, DESIGN.timings.charging));
+
+        this.state.transition(RitualState.SPINNING);
+        const index = await this.wheelLayer.spin();
+        this.state.transition(RitualState.ZOOMING);
+        this.tg?.HapticFeedback?.impactOccurred("light");
+        await new Promise((res) => setTimeout(res, DESIGN.timings.zoom));
+
+        const oracleEntry = this.oracle.pick(path);
+        this.oracle.markUsed(oracleEntry.id);
+        this.storage.markRitualUsed();
+        await this.paper.play(oracleEntry, this.lang);
+        this.state.transition(RitualState.DECISION);
+        this.starfieldLayer.setRitualMode(false);
+        this.ritualButton.disabled = false;
+      }
+    }
+
+    // ---- BOOTSTRAP ----
+    window.addEventListener("DOMContentLoaded", () => {
+      const root = document.getElementById("app");
+      new TonTempleEngine(root);
+    });
+  </script>
 </body>
 </html>
