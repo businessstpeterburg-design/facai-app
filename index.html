@@ -1,1484 +1,2094 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏯 TON TEMPLE · LEGENDARY EDITION · 龍之寺</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root { 
-            --gold: #ffd700; 
-            --ton-blue: #0088cc; 
-            --bg: #0a0c14;
-            --dark-red: #8B0000;
-        }
-        
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        
-        body { 
-            background: #000; 
-            min-height: 100vh; 
-            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; 
-            overflow: hidden; 
-            color: #e4d5b9; 
-            display: flex; 
-            justify-content: center; 
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TON Temple — Ritual App (Single-File)</title>
 
-        /* Атмосферный фон с параллаксом */
-        #universe {
-            position: fixed; 
-            inset: 0; 
-            z-index: 0;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
-            background-image: url('background.jpg'); 
-            background-size: cover;
-            transition: transform 0.2s ease-out; 
-            opacity: 0.8;
-        }
+  <!-- TonConnect UI (no passwords; wallet confirmation only) -->
+  <script src="https://unpkg.com/@tonconnect/ui@0.2.6/dist/tonconnect-ui.min.js"></script>
 
-        /* Фоновые частицы (звездное небо) */
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1;
-        }
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#0a0b12;
+      --gold:#f2d06b;
+      --gold2:#ffefb2;
+      --ui:#e7e2d3;
+      --uiDim:#b8b2a4;
+      --ink:#1c1a14;
+      --ok:#35ffb1;
+      --danger:#ff4d4d;
+      --safePad: 16px;
 
-        /* 7D Дракон (поверх всего) */
-        #dragonCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: auto;
-            z-index: 2;
-            cursor: pointer;
-        }
+      --envelopeW: min(78vw, 430px);
+      --envelopeH: calc(var(--envelopeW) * 0.66);
 
-        /* Основной интерфейс */
-        #app {
-            position: relative; 
-            z-index: 3; 
-            width: 100%; 
-            max-width: 430px; 
-            height: 100vh;
-            background: linear-gradient(180deg, rgba(10,12,20,0.5) 0%, rgba(10,12,20,0.95) 100%);
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px);
-            border-left: 1px solid rgba(255,215,0,0.15);
-            border-right: 1px solid rgba(255,215,0,0.15);
-            display: flex; 
-            flex-direction: column;
-            margin: 0 auto;
-        }
+      --scrollW: min(88vw, 580px);
+      --scrollH: min(66vh, 540px);
 
-        /* Language Toggle */
-        .lang-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid var(--gold);
-            border-radius: 30px;
-            padding: 6px 12px;
-            color: var(--gold);
-            font-size: 14px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
+      --sealSize: clamp(96px, 18vw, 148px);
+    }
 
-        /* Header & Progress */
-        .header { 
-            padding: 60px 20px 10px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        
-        .rank-badge { 
-            background: rgba(255,215,0,0.1); 
-            border: 1px solid var(--gold); 
-            padding: 5px 15px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            color: var(--gold); 
-            text-shadow: 0 0 10px var(--gold);
-        }
-        
-        .streak-counter {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 40px;
-            padding: 6px 15px;
-            border: 1px solid rgba(255,215,0,0.3);
-            backdrop-filter: blur(5px);
-        }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 50% 40%, #111433 0%, #070812 45%, #04050a 100%);
+      color: var(--ui);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow:hidden;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action: manipulation;
+    }
 
-        .streak-flame {
-            width: 24px;
-            height: 24px;
-            background: radial-gradient(circle at 30% 30%, #ffaa00, #ff5500);
-            border-radius: 50%;
-            filter: blur(2px);
-            animation: flamePulse 2s infinite;
-        }
+    .scene{
+      position:fixed;
+      inset:0;
+      overflow:hidden;
+      background:
+        radial-gradient(1000px 680px at 50% 25%, rgba(90,110,255,.16) 0%, rgba(0,0,0,0) 60%),
+        radial-gradient(1200px 900px at 50% 65%, rgba(150,90,255,.10) 0%, rgba(0,0,0,0) 58%),
+        linear-gradient(180deg, #050612 0%, #04050a 60%, #030409 100%);
+    }
 
-        @keyframes flamePulse {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
+    .stars{
+      position:absolute; inset:-15%;
+      background-image:
+        radial-gradient(1px 1px at 12% 20%, rgba(255,255,255,.30) 50%, rgba(255,255,255,0) 51%),
+        radial-gradient(1px 1px at 45% 72%, rgba(255,255,255,.22) 50%, rgba(255,255,255,0) 51%),
+        radial-gradient(1px 1px at 70% 35%, rgba(255,255,255,.18) 50%, rgba(255,255,255,0) 51%),
+        radial-gradient(1px 1px at 88% 54%, rgba(255,255,255,.16) 50%, rgba(255,255,255,0) 51%);
+      background-size: 220px 220px, 280px 280px, 340px 340px, 420px 420px;
+      opacity:.55;
+      filter: blur(.2px);
+      animation: drift 22s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      0%{ transform: translate3d(0,0,0); }
+      100%{ transform: translate3d(-3%, 2%, 0); }
+    }
 
-        .xp-container { 
-            padding: 0 20px; 
-            margin-bottom: 20px; 
-        }
-        
-        .xp-bar { 
-            width: 100%; 
-            height: 4px; 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 2px; 
-            margin-top: 5px; 
-            overflow: hidden; 
-        }
-        
-        #xpFill { 
-            width: 0%; 
-            height: 100%; 
-            background: var(--gold); 
-            transition: width 0.5s; 
-        }
+    .veil{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(900px 700px at 50% 45%, rgba(0,0,0,.0) 0%, rgba(0,0,0,.32) 60%, rgba(0,0,0,.58) 100%);
+      pointer-events:none;
+    }
 
-        /* Табы Пути */
-        .path-selector { 
-            display: flex; 
-            gap: 10px; 
-            padding: 0 20px; 
-            margin-bottom: 20px; 
-        }
-        
-        .path-btn { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05); 
-            color: #888; 
-            text-align: center; 
-            font-size: 14px;
-            font-weight: bold; 
-            transition: 0.3s; 
-            cursor: pointer;
-        }
-        
-        .path-btn.active { 
-            border-color: var(--gold); 
-            color: var(--gold); 
-            background: rgba(255,215,0,0.1); 
-        }
+    /* Procedural "dragon" silhouette (SVG) */
+    .dragon{
+      position:absolute;
+      top: calc(env(safe-area-inset-top) + 8px);
+      left:50%;
+      transform: translateX(-50%);
+      width: min(84vw, 560px);
+      height: auto;
+      opacity:.92;
+      filter: saturate(1.05) contrast(1.05) brightness(1.02) drop-shadow(0 18px 40px rgba(0,0,0,.55));
+      pointer-events:none;
+    }
 
-        /* Колесо фортуны */
-        .wheel-box { 
-            flex: 1; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-        }
-        
-        #sacredWheel { 
-            width: 80vw; 
-            max-width: 320px; 
-            height: 80vw; 
-            max-height: 320px; 
-            filter: drop-shadow(0 0 40px rgba(255,215,0,0.5));
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-        
-        #sacredWheel:active {
-            transform: scale(0.98);
-        }
+    .app{
+      position:fixed;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;
+      padding: calc(env(safe-area-inset-top) + var(--safePad)) var(--safePad) calc(env(safe-area-inset-bottom) + var(--safePad));
+      gap: 14px;
+    }
 
-        .center-trigger {
-            position: absolute; 
-            width: 80px; 
-            height: 80px; 
-            background: radial-gradient(circle, var(--gold), #b8860b);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 50%; 
-            z-index: 10; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            text-align: center; 
-            font-size: 10px; 
-            font-weight: bold; 
-            cursor: pointer;
-            box-shadow: 0 0 40px var(--gold); 
-            transition: transform 0.1s;
-            color: #0a0c14;
-        }
+    .hud{
+      position:absolute;
+      top: calc(env(safe-area-inset-top) + 10px);
+      left: 10px;
+      right: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      pointer-events:auto;
+      flex-wrap:wrap;
+    }
 
-        .center-trigger:active {
-            transform: scale(0.95);
-        }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(10,12,20,.45);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-size: 12px;
+      color: var(--uiDim);
+      box-shadow: 0 8px 26px rgba(0,0,0,.35);
+      flex-wrap: wrap;
+      max-width: min(92vw, 980px);
+    }
+    .chip strong{ color: var(--ui); font-weight:600; }
+    .chip .ok{ color: rgba(53,255,177,.90); font-weight:600; }
+    .chip .warn{ color: rgba(255,77,77,.90); font-weight:600; }
 
-        /* Altar Section */
-        .altar-section {
-            padding: 20px;
-            background: linear-gradient(to top, #0a0c14, transparent);
-            border-top: 1px solid rgba(255,215,0,0.2);
-            position: relative;
-            z-index: 4;
-        }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(10,12,20,.48);
+      color: var(--ui);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      letter-spacing:.2px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor:pointer;
+      white-space: nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
 
-        .offering-button {
-            background: linear-gradient(145deg, #2a2e3a, #1e212a);
-            border: 1px solid var(--gold);
-            border-radius: 60px;
-            padding: 16px;
-            width: 100%;
-            color: var(--gold);
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 12px;
-            backdrop-filter: blur(5px);
-        }
+    .btn .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.08);
+    }
+    .btn.on .dot{
+      background: var(--ok);
+      box-shadow: 0 0 0 2px rgba(53,255,177,.18), 0 0 18px rgba(53,255,177,.25);
+    }
+    .btn.off .dot{
+      background: rgba(255,77,77,.75);
+      box-shadow: 0 0 0 2px rgba(255,77,77,.18), 0 0 18px rgba(255,77,77,.18);
+    }
 
-        .offering-button:active {
-            transform: scale(0.98);
-            background: linear-gradient(145deg, #323644, #262a36);
-        }
+    .stage{
+      width: 100%;
+      max-width: 760px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      min-height: min(66vh, 560px);
+    }
 
-        .journal-preview {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 10px 0;
-            scrollbar-width: none;
-        }
+    /* Wheel */
+    .wheel-wrap{
+      position:absolute;
+      left:50%;
+      top: 56%;
+      transform: translate(-50%,-50%);
+      width: min(78vw, 480px);
+      height: min(78vw, 480px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity: 1;
+      transition: opacity .45s ease;
+      pointer-events:none;
+      will-change: transform, opacity;
+    }
+    .wheel{
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), rgba(255,255,255,0) 55%),
+        conic-gradient(from 0deg,
+          rgba(242,208,107,.22) 0 12.5%,
+          rgba(255,255,255,.04) 12.5% 25%,
+          rgba(242,208,107,.16) 25% 37.5%,
+          rgba(255,255,255,.04) 37.5% 50%,
+          rgba(242,208,107,.20) 50% 62.5%,
+          rgba(255,255,255,.04) 62.5% 75%,
+          rgba(242,208,107,.14) 75% 87.5%,
+          rgba(255,255,255,.04) 87.5% 100%
+        );
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow:
+        0 24px 70px rgba(0,0,0,.55),
+        inset 0 0 0 10px rgba(0,0,0,.20),
+        inset 0 0 36px rgba(0,0,0,.25);
+      position:relative;
+      overflow:hidden;
+      transform: rotate(0deg);
+      filter: saturate(1.03) contrast(1.02);
+      will-change: transform;
+    }
+    .wheel::after{
+      content:"";
+      position:absolute;inset:18px;
+      border-radius:999px;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 0 26px rgba(0,0,0,.25);
+    }
+    .wheel-center{
+      position:absolute;
+      width: 92px;height:92px;
+      border-radius:999px;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.10), rgba(255,255,255,0) 55%),
+                  radial-gradient(circle at 50% 70%, rgba(0,0,0,.22), rgba(0,0,0,.0) 55%),
+                  linear-gradient(180deg, rgba(242,208,107,.22), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35), inset 0 0 20px rgba(0,0,0,.25);
+      left:50%; top:50%;
+      transform: translate(-50%,-50%);
+    }
+    .pointer{
+      position:absolute;
+      top: -12px;
+      width: 0;height:0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 22px solid rgba(242,208,107,.9);
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.55));
+    }
 
-        .journal-card {
-            min-width: 100px;
-            background: rgba(30, 34, 42, 0.8);
-            border: 1px solid #3a3e4a;
-            border-radius: 15px;
-            padding: 12px;
-            font-size: 12px;
-            backdrop-filter: blur(5px);
-            text-align: center;
-        }
+    /* Envelope (procedural SVG) */
+    .envelope{
+      position:absolute;
+      left:50%;
+      top: 46%;
+      transform: translate(-50%,-50%) scale(.98);
+      width: var(--envelopeW);
+      height: var(--envelopeH);
+      opacity:0;
+      pointer-events:none;
+      filter: drop-shadow(0 22px 50px rgba(0,0,0,.55)) drop-shadow(0 0 22px rgba(242,208,107,.12));
+      will-change: transform, opacity;
+    }
 
-        /* Revelation Area */
-        .overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.98); 
-            backdrop-filter: blur(30px);
-            z-index: 100; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            padding: 20px;
-        }
+    /* Scroll */
+    .scroll{
+      position:absolute;
+      left:50%;
+      top: 52%;
+      transform: translate(-50%,-50%) scale(.98);
+      width: var(--scrollW);
+      height: var(--scrollH);
+      opacity:0;
+      pointer-events:none;
+      will-change: transform, opacity;
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow:
+        0 24px 80px rgba(0,0,0,.62),
+        inset 0 0 0 1px rgba(255,255,255,.10);
+    }
+    .scroll .paper{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(900px 520px at 40% 20%, rgba(255,255,255,.16), rgba(255,255,255,0) 55%),
+        radial-gradient(1100px 700px at 50% 80%, rgba(0,0,0,.18), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.10)),
+        rgba(216,200,164,.16);
+      filter: saturate(1.02) contrast(1.02);
+    }
+    .scroll .grain{
+      position:absolute; inset:-20%;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(0,0,0,.07) 50%, rgba(0,0,0,0) 51%),
+        radial-gradient(1px 1px at 42% 74%, rgba(0,0,0,.06) 50%, rgba(0,0,0,0) 51%),
+        radial-gradient(1px 1px at 74% 36%, rgba(0,0,0,.05) 50%, rgba(0,0,0,0) 51%),
+        radial-gradient(1px 1px at 88% 54%, rgba(255,255,255,.03) 50%, rgba(255,255,255,0) 51%);
+      background-size: 140px 140px, 180px 180px, 240px 240px, 320px 320px;
+      opacity:.55;
+      filter: blur(.35px);
+      transform: rotate(2deg);
+      pointer-events:none;
+      mix-blend-mode: multiply;
+    }
 
-        .hongbao {
-            width: 280px;
-            height: 360px;
-            background-image: url('hongbao.jpg');
-            background-size: cover;
-            background-position: center;
-            border-radius: 20px;
-            position: relative;
-            cursor: pointer;
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.8);
-            border: 2px solid var(--gold);
-            margin-bottom: 20px;
-        }
+    /* Brush text */
+    .ink-layer{
+      position:absolute;
+      inset: 0;
+      padding: 26px 26px 40px 26px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      pointer-events:none;
+    }
+    .ink-line{
+      position:relative;
+      min-height: 18px;
+      font-size: 15px;
+      line-height: 1.35;
+      color: rgba(28,26,20,.92);
+      letter-spacing: .1px;
+      text-shadow: 0 1px 0 rgba(255,255,255,.10);
+      filter: saturate(1.03);
+      white-space: pre-wrap;
+    }
+    .ink-line .mask{
+      position:absolute; inset:0;
+      overflow:hidden;
+      width: 0%;
+      will-change: width;
+    }
+    .ink-line .mask .txt{
+      position:relative;
+      display:block;
+      transform: translateZ(0);
+      filter: drop-shadow(0 0 .4px rgba(0,0,0,.25));
+    }
+    .ink-line .grain2{
+      position:absolute; inset:-10%;
+      background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(0,0,0,.12) 50%, rgba(0,0,0,0) 51%),
+        radial-gradient(1px 1px at 56% 58%, rgba(0,0,0,.10) 50%, rgba(0,0,0,0) 51%),
+        radial-gradient(1px 1px at 80% 28%, rgba(0,0,0,.10) 50%, rgba(0,0,0,0) 51%);
+      background-size: 140px 140px, 170px 170px, 210px 210px;
+      opacity: .18;
+      mix-blend-mode: multiply;
+      pointer-events:none;
+    }
 
-        .hongbao.opened {
-            transform: rotateY(180deg);
-        }
+    /* Seal */
+    .seal{
+      position:absolute;
+      width: var(--sealSize);
+      height: var(--sealSize);
+      right: 34px;
+      bottom: 26px;
+      opacity:0;
+      transform: rotate(-2deg) scale(.98);
+      pointer-events:none;
+      will-change: transform, opacity, filter;
+      filter: drop-shadow(0 14px 22px rgba(0,0,0,.34));
+    }
 
-        .scroll-card { 
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #f4e4c1;
-            background-image: url('scroll-texture.jpg');
-            background-size: cover;
-            border-radius: 15px;
-            padding: 30px;
-            color: #2c1810;
-            font-size: 18px;
-            line-height: 2;
-            backface-visibility: hidden;
-            transform: rotateY(180deg);
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
-            overflow-y: auto;
-            font-family: 'KaiTi', '楷体', 'STKaiti', serif;
-            text-align: justify;
-        }
+    .seal-effects{
+      position:absolute;
+      inset:-12px;
+      pointer-events:none;
+      opacity:0;
+      will-change: opacity, transform;
+    }
+    .soak-ring{
+      position:absolute;
+      inset: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(28,26,20,.10);
+      box-shadow:
+        0 0 0 1px rgba(28,26,20,.06),
+        inset 0 0 18px rgba(28,26,20,.08);
+      opacity:0;
+      transform: scale(.96);
+      filter: blur(.2px);
+      will-change: opacity, transform;
+      mix-blend-mode:multiply;
+    }
+    .emboss{
+      position:absolute;
+      inset: 14px;
+      border-radius:999px;
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.10),
+        inset 0 -2px 3px rgba(0,0,0,.10);
+      opacity:0;
+      will-change: opacity;
+    }
+    .edge-sparkle{
+      position:absolute;
+      inset: 10px;
+      border-radius:999px;
+      background:
+        conic-gradient(from 10deg,
+          rgba(255,255,255,0) 0 12%,
+          rgba(255,239,178,.22) 14% 16%,
+          rgba(255,255,255,0) 18% 34%,
+          rgba(255,239,178,.18) 35% 36%,
+          rgba(255,255,255,0) 37% 62%,
+          rgba(255,239,178,.16) 63% 64%,
+          rgba(255,255,255,0) 65% 100%
+        );
+      opacity:0;
+      filter: blur(.6px);
+      will-change: opacity;
+      mix-blend-mode: screen;
+    }
 
-        .golden-dust {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.2) 0%, transparent 60%);
-            animation: dustParticles 2s infinite;
-        }
+    .dust{
+      position:absolute; inset:0;
+      pointer-events:none;
+      overflow:visible;
+      opacity:0;
+      will-change: opacity;
+    }
+    .dust i{
+      position:absolute;
+      width:2px;height:2px;border-radius:999px;
+      background: rgba(242,208,107,.9);
+      box-shadow: 0 0 8px rgba(242,208,107,.28);
+      opacity:0;
+      will-change: transform, opacity;
+    }
 
-        @keyframes dustParticles {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
+    /* CTA */
+    .cta{
+      width: 100%;
+      max-width: 760px;
+      display:flex;
+      gap: 10px;
+      justify-content:center;
+      pointer-events:auto;
+      flex-wrap: wrap;
+    }
+    .cta .big{
+      flex:1;
+      min-width: min(44vw, 300px);
+      padding: 14px 14px;
+      border-radius: 18px;
+      background:
+        radial-gradient(700px 260px at 40% 0%, rgba(242,208,107,.18), rgba(242,208,107,0) 55%),
+        rgba(10,12,20,.58);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--ui);
+      font-size: 14px;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.48);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor:pointer;
+    }
+    .cta .big:active{ transform: translateY(1px); }
+    .cta .big.disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      filter: grayscale(.1);
+    }
 
-        .seal-stamp {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 80px;
-            height: 80px;
-            background-image: url('royalSeal.jpg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5));
-        }
+    .subrow{
+      width:100%;
+      max-width: 760px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      pointer-events:auto;
+      flex-wrap: wrap;
+    }
+    .select{
+      flex:1;
+      min-width: min(44vw, 300px);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(10,12,20,.40);
+      box-shadow: 0 12px 36px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--uiDim);
+      font-size: 12px;
+    }
+    .select .seg{ display:flex; gap:8px; }
+    .pill{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      color: var(--ui);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    .pill.on{
+      border-color: rgba(242,208,107,.35);
+      box-shadow: 0 0 0 2px rgba(242,208,107,.12), 0 0 22px rgba(242,208,107,.12);
+      background: rgba(242,208,107,.08);
+    }
 
-        .seal-stamp.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .brush-text { 
-            font-family: "Georgia", "KaiTi", serif; 
-            font-size: 1.2rem; 
-            line-height: 1.8; 
-            font-style: italic; 
-        }
-
-        .brush-char {
-            display: inline-block;
-            opacity: 0;
-            transform: scale(0.8);
-            animation: brushAppear 0.3s forwards;
-        }
-
-        @keyframes brushAppear {
-            0% {
-                opacity: 0;
-                transform: scale(0.8) translateY(10px);
-                filter: blur(2px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-                filter: blur(0);
-            }
-        }
-
-        #rarityLabel {
-            margin-top: 15px; 
-            font-weight: bold; 
-            font-size: 12px; 
-            letter-spacing: 2px;
-        }
-
-        /* NFT Canvas */
-        #nftCanvas { 
-            width: 280px; 
-            height: 380px; 
-            border-radius: 10px; 
-            border: 4px solid var(--gold); 
-            margin-bottom: 20px; 
-            background: #111;
-        }
-
-        /* Action Buttons */
-        .action-btn { 
-            width: 100%; 
-            max-width: 280px; 
-            padding: 16px; 
-            border-radius: 30px; 
-            border: none;
-            background: var(--gold); 
-            color: #000; 
-            font-weight: bold; 
-            font-size: 16px;
-            margin-top: 10px; 
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .action-btn:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-
-        .action-btn.secondary {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-        }
-
-        /* Leaderboard */
-        .leader-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            width: 100%; 
-        }
-
-        #leaderList {
-            width: 100%;
-            max-width: 300px;
-            margin-bottom: 20px;
-        }
-
-        #leaderboardOverlay h2 {
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        /* Coins Container */
-        .coins-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-        }
-
-        .coin { 
-            position: absolute; 
-            width: 40px; 
-            height: 40px; 
-            background: url('coin.png') center/contain no-repeat; 
-            pointer-events: none;
-            filter: drop-shadow(0 0 10px gold);
-            animation: coinFall linear forwards;
-        }
-
-        @keyframes coinFall {
-            0% {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-                opacity: 0;
-            }
-        }
-
-        .revelation-footer {
-            margin-top: 30px;
-            color: var(--gold);
-            font-size: 14px;
-            display: flex;
-            gap: 20px;
-        }
-    </style>
+    /* Debug */
+    .debug{
+      position:fixed;
+      left: 10px;
+      bottom: calc(env(safe-area-inset-bottom) + 10px);
+      width: min(92vw, 560px);
+      max-height: 46vh;
+      overflow:auto;
+      padding: 10px 10px;
+      border-radius: 16px;
+      background: rgba(8,10,16,.72);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      display:none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size: 11px;
+      color: rgba(231,226,211,.92);
+      line-height: 1.35;
+      white-space: pre-wrap;
+      pointer-events:auto;
+    }
+    .debug .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:8px;
+      color: rgba(231,226,211,.8);
+    }
+    .debug code{ color: rgba(53,255,177,.85); }
+  </style>
 </head>
+
 <body>
+  <div class="scene" id="scene">
+    <div class="stars"></div>
 
-    <div id="universe"></div>
-    <canvas id="particleCanvas"></canvas>
-    <canvas id="dragonCanvas"></canvas>
-    
-    <div class="coins-container" id="coinsContainer"></div>
+    <!-- Dragon SVG (procedural) -->
+    <svg class="dragon" viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="rgba(242,208,107,.18)"/>
+          <stop offset=".45" stop-color="rgba(160,120,255,.12)"/>
+          <stop offset="1" stop-color="rgba(255,255,255,.04)"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur stdDeviation="2.2" result="b"/>
+          <feColorMatrix in="b" type="matrix" values="
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            0 0 0 .85 0" result="a"/>
+          <feMerge>
+            <feMergeNode in="a"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
 
-    <div class="lang-toggle" id="langToggle" onclick="app.toggleLanguage()">EN / 中文</div>
+      <path filter="url(#soft)" d="M95,250
+        C180,155 260,120 350,150
+        C430,90 520,70 610,105
+        C690,60 780,55 870,95
+        C980,80 1080,120 1125,200
+        C1080,160 1030,170 990,205
+        C1040,245 1075,295 1030,330
+        C945,395 860,360 790,320
+        C740,350 660,360 600,340
+        C520,385 430,380 360,330
+        C280,360 190,345 130,295
+        C110,278 100,265 95,250 Z"
+        fill="url(#dg)" stroke="rgba(255,255,255,.06)" stroke-width="2"/>
 
-    <div id="app">
-        <div class="header">
-            <div class="rank-badge" id="rankDisplay">PILGRIM</div>
-            <div class="streak-counter">
-                <div class="streak-flame"></div>
-                <span id="streakDisplay">0</span>
-            </div>
-            <div id="balanceDisplay" style="color:var(--gold)">0 💎</div>
-        </div>
+      <path d="M520,160 C560,125 600,125 640,160 C600,150 560,150 520,160 Z"
+        fill="rgba(242,208,107,.12)"/>
+      <path d="M860,155 C900,122 940,124 975,160 C935,148 895,148 860,155 Z"
+        fill="rgba(242,208,107,.10)"/>
+    </svg>
 
-        <div class="xp-container">
-            <div style="font-size: 10px; display:flex; justify-content:space-between; margin-bottom: 4px;">
-                <span id="xpLabel">ПРОСВЕТЛЕНИЕ</span>
-                <span id="xpText">0/100 XP</span>
-            </div>
-            <div class="xp-bar"><div id="xpFill"></div></div>
-        </div>
+    <div class="veil"></div>
+  </div>
 
-        <div class="path-selector">
-            <div class="path-btn active" id="btn-life" onclick="app.setPath('life')">🌿 ДУХ</div>
-            <div class="path-btn" id="btn-ton" onclick="app.setPath('ton')">⚡ TON</div>
-            <div class="path-btn" onclick="app.showLeaderboard()">🏆 ТОП</div>
-        </div>
+  <div class="app" id="app">
+    <div class="hud">
+      <div class="chip" id="userChip">
+        User: <strong id="userName">guest</strong> ·
+        Lang: <strong id="langChip">EN</strong> ·
+        Mode: <strong id="modeChip">LIFE</strong> ·
+        FreeToday: <strong id="freeChip">?</strong> ·
+        PaidCredits: <strong id="paidChip">?</strong> ·
+        Wallet: <strong id="walletChip" class="warn">OFF</strong>
+      </div>
 
-        <div class="wheel-box">
-            <svg id="sacredWheel" viewBox="0 0 400 400"></svg>
-            <div class="center-trigger" id="wheelCenter" onclick="app.startRitual()">РИТУАЛ<br>УДАЧИ</div>
-        </div>
-
-        <div class="altar-section">
-            <div class="offering-button" id="offeringButton" onclick="app.makeOffering()">
-                <span>🏯</span>
-                <span id="offeringText">Очистить ауру · 1 TON</span>
-            </div>
-            
-            <div class="journal-preview" id="journalPreview"></div>
-        </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+        <button class="btn" id="walletBtn" type="button"><span class="dot"></span> Wallet</button>
+        <button class="btn on" id="soundBtn" type="button"><span class="dot"></span> Sound</button>
+        <button class="btn" id="debugBtn" type="button"><span class="dot"></span> Debug</button>
+      </div>
     </div>
 
-    <!-- Oracle Overlay -->
-    <div class="overlay" id="oracleOverlay">
-        <div class="hongbao" id="hongbao" onclick="app.openHongbao()">
-            <div class="scroll-card" id="scrollContent">
-                <div class="golden-dust"></div>
-            </div>
+    <div class="stage" id="stage">
+      <div class="wheel-wrap" id="wheelWrap">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+          <div class="wheel-center"></div>
         </div>
-        <div class="revelation-footer">
-            <span id="sealDate"></span>
-            <span id="pathIndicator"></span>
+      </div>
+
+      <!-- Envelope SVG -->
+      <div class="envelope" id="envelope" aria-hidden="true">
+        <svg viewBox="0 0 800 520" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="eg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="rgba(255,255,255,.10)"/>
+              <stop offset=".45" stop-color="rgba(242,208,107,.10)"/>
+              <stop offset="1" stop-color="rgba(0,0,0,.12)"/>
+            </linearGradient>
+            <filter id="eShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="rgba(0,0,0,.55)"/>
+            </filter>
+          </defs>
+
+          <rect x="70" y="110" width="660" height="320" rx="22" fill="rgba(160,20,30,.38)" stroke="rgba(255,255,255,.10)" stroke-width="2" filter="url(#eShadow)"/>
+          <path d="M90 140 L400 305 L710 140" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+          <path d="M90 410 L400 260 L710 410" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="2"/>
+
+          <path d="M70 110 L400 305 L730 110 L730 430 L70 430 Z"
+                fill="url(#eg)" opacity=".55"/>
+
+          <circle cx="400" cy="310" r="52" fill="rgba(242,208,107,.14)" stroke="rgba(255,239,178,.18)" stroke-width="2"/>
+          <circle cx="400" cy="310" r="28" fill="rgba(0,0,0,.10)" />
+        </svg>
+      </div>
+
+      <!-- Scroll -->
+      <div class="scroll" id="scroll">
+        <div class="paper"></div>
+        <div class="grain"></div>
+        <div class="ink-layer" id="inkLayer"></div>
+
+        <!-- Seal -->
+        <div class="seal" id="seal" aria-hidden="true">
+          <svg viewBox="0 0 300 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="sg" cx="35%" cy="30%" r="70%">
+                <stop offset="0" stop-color="rgba(255,255,255,.14)"/>
+                <stop offset=".35" stop-color="rgba(242,208,107,.18)"/>
+                <stop offset="1" stop-color="rgba(0,0,0,.14)"/>
+              </radialGradient>
+              <linearGradient id="sr" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="rgba(242,208,107,.20)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,.06)"/>
+              </linearGradient>
+            </defs>
+            <circle cx="150" cy="150" r="132" fill="rgba(120,20,22,.46)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+            <circle cx="150" cy="150" r="118" fill="url(#sg)" stroke="rgba(255,239,178,.16)" stroke-width="2"/>
+            <path d="M90 170 C120 120 180 120 210 170 C195 205 170 220 150 220 C130 220 105 205 90 170 Z"
+                  fill="rgba(28,26,20,.18)"/>
+            <path d="M110 165 C130 140 170 140 190 165 C178 190 165 200 150 200 C135 200 122 190 110 165 Z"
+                  fill="url(#sr)" opacity=".75"/>
+          </svg>
+
+          <div class="seal-effects" id="sealFx">
+            <div class="soak-ring" id="soakRing"></div>
+            <div class="emboss" id="emboss"></div>
+            <div class="edge-sparkle" id="edgeSparkle"></div>
+          </div>
+          <div class="dust" id="dust"></div>
         </div>
-        <button class="action-btn" onclick="app.prepareNFT()">МИНИТЬ NFT</button>
-        <button class="action-btn secondary" onclick="app.closeOverlays()">ЗАКРЫТЬ</button>
+      </div>
     </div>
 
-    <!-- NFT Overlay -->
-    <div class="overlay" id="nftOverlay">
-        <canvas id="nftCanvas"></canvas>
-        <button class="action-btn" onclick="app.mintFinal()">ПОДТВЕРДИТЬ В TON</button>
-        <button class="action-btn secondary" onclick="app.closeOverlays()">ОТМЕНА</button>
+    <div class="subrow">
+      <div class="select">
+        <div>Language</div>
+        <div class="seg">
+          <div class="pill on" id="langEN">EN</div>
+          <div class="pill" id="langCN">CN</div>
+        </div>
+      </div>
+
+      <div class="select">
+        <div>Mode</div>
+        <div class="seg">
+          <div class="pill on" id="modeLife">LIFE</div>
+          <div class="pill" id="modeTrade">TRADE</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Leaderboard Overlay -->
-    <div class="overlay" id="leaderboardOverlay">
-        <h2>ТОП ПАЛОМНИКОВ</h2>
-        <div id="leaderList"></div>
-        <button class="action-btn secondary" onclick="app.closeOverlays()">НАЗАД</button>
+    <div class="cta">
+      <button class="big" id="btnStart" type="button">Spin the Wheel</button>
+      <button class="big" id="btnAgain" type="button">Get another prediction</button>
+      <button class="big" id="btnDonate" type="button">Donate 1 TON → +1 prediction</button>
     </div>
+  </div>
 
-    <!-- Audio Elements -->
-    <audio id="musicPlayer" loop preload="auto">
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-    
-    <audio id="coinSound" preload="auto">
-        <source src="coin.mp3" type="audio/mpeg">
-    </audio>
+  <div class="debug" id="debugPanel"></div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+  <script>
+    /********************************************************************
+     * TON Temple — Single-file, максимально "готово" (без внешних ассетов)
+     * - Deterministic FSM + guards + onceKey + runId
+     * - Wheel -> Envelope(show/hold/dissolve) -> Scroll -> Brush text -> Seal(place/hit/soak)
+     * - Anti-repeat predictions (bag) + mode weighting + state-aware + username personalization
+     * - Monetization V1:
+     *     1 free prediction/day (local)
+     *     1 TON donate = +1 credit (TonConnect; wallet confirmation; no passwords)
+     ********************************************************************/
 
-        class TonTempleLegendary {
-            constructor() {
-                // Core State
-                this.xp = parseInt(localStorage.getItem('xp')) || 0;
-                this.balance = parseInt(localStorage.getItem('balance')) || 0;
-                this.streak = parseInt(localStorage.getItem('streak')) || 0;
-                this.path = 'life';
-                this.language = 'ru';
-                this.dailyRitualsUsed = 0;
-                this.maxDailyRituals = 1;
-                this.userId = tg.initDataUnsafe?.user?.id || 'local';
-                
-                // Ritual State
-                this.isSpinning = false;
-                this.rotation = 0;
-                this.spinVelocity = 0;
-                this.lastTimestamp = 0;
-                this.selectedSegment = 0;
-                
-                // Data
-                this.wheelSymbols = [
-                    { zh: '福', en: 'Fortune', ru: 'Удача' },
-                    { zh: '禄', en: 'Prosperity', ru: 'Процветание' },
-                    { zh: '寿', en: 'Longevity', ru: 'Долголетие' },
-                    { zh: '喜', en: 'Joy', ru: 'Радость' },
-                    { zh: '财', en: 'Wealth', ru: 'Богатство' },
-                    { zh: '吉', en: 'Luck', ru: 'Успех' },
-                    { zh: '祥', en: 'Auspicious', ru: 'Благодать' },
-                    { zh: '瑞', en: 'Good Omen', ru: 'Знак' },
-                    { zh: '龙', en: 'Dragon', ru: 'Дракон' },
-                    { zh: '凤', en: 'Phoenix', ru: 'Феникс' },
-                    { zh: '安', en: 'Peace', ru: 'Мир' },
-                    { zh: '康', en: 'Health', ru: 'Здоровье' },
-                    { zh: '顺', en: 'Smooth', ru: 'Гармония' },
-                    { zh: '发', en: 'Wealth', ru: 'Изобилие' },
-                    { zh: '旺', en: 'Prosperous', ru: 'Расцвет' },
-                    { zh: '盛', en: 'Flourishing', ru: 'Процветание' }
-                ];
+    /********************************************************************
+     * 0) TON CONFIG (LOCKED)
+     ********************************************************************/
+    const TON = {
+      MANIFEST_URL: "https://businessstpeterburg-design.github.io/facai-app/tonconnect-manifest.json",
+      DONATION_ADDRESS: "UQC2AbaVh84D4w3I58nRRAiZL9ToJfsVwBavDUqwjT_8TIhx",
+      DONATION_AMOUNT_NANO: "1000000000" // 1 TON
+    };
 
-                this.oracles = {
-                    life: {
-                        ru: [
-                            "Твое терпение — мост к величию. Сегодня тишина скажет больше слов.",
-                            "Удача любит тех, кто благодарен. Твоя энергия притягивает возможности.",
-                            "Дракон на востоке охраняет твой путь. Действуй с уверенностью.",
-                            "Твоя аура сегодня подобна чистому золоту. Сохраняй спокойствие.",
-                            "Мудрость приходит к тем, кто слушает свое сердце. Прими этот дар."
-                        ],
-                        en: [
-                            "Your patience is a bridge to greatness. Today silence speaks louder than words.",
-                            "Fortune favors the grateful. Your energy attracts opportunities.",
-                            "The Dragon in the east guards your path. Move with confidence.",
-                            "Your aura today is like pure gold. Remain calm and centered.",
-                            "Wisdom comes to those who listen to their heart. Accept this gift."
-                        ],
-                        zh: [
-                            "你的耐心是通往伟大的桥梁。今天，寂静胜千言。",
-                            "幸运眷顾感恩者。你的能量吸引机遇。",
-                            "东方之龙守护你的道路。自信前行。",
-                            "今日你的气场如纯金般闪耀。保持平静。",
-                            "智慧降临于倾听内心之人。接受这份礼物。"
-                        ]
-                    },
-                    ton: {
-                        ru: [
-                            "График рисует путь, но сердце знает цель. Доверяй интуиции.",
-                            "Кит спит — альты растут. Будь готов к движению.",
-                            "Твой кошелек станет тяжелее сегодня. Действуй мудро.",
-                            "Волны рынка несут удачу тем, кто сохраняет спокойствие.",
-                            "Блокчейн шепчет о возможностях. Прислушайся."
-                        ],
-                        en: [
-                            "The chart draws the path, but the heart knows the goal. Trust your intuition.",
-                            "While whales sleep, altcoins grow. Be ready for movement.",
-                            "Your wallet will grow heavier today. Act wisely.",
-                            "Market waves bring fortune to those who remain calm.",
-                            "The blockchain whispers of opportunities. Listen closely."
-                        ],
-                        zh: [
-                            "图表描绘路径，但心灵知晓目标。相信直觉。",
-                            "鲸鱼沉睡时，小币生长。准备行动。",
-                            "今日你的钱包将更充实。明智行动。",
-                            "市场浪潮眷顾保持平静之人。",
-                            "区块链低语机遇。仔细聆听。"
-                        ]
-                    }
-                };
+    /********************************************************************
+     * 1) TELEGRAM USER
+     ********************************************************************/
+    function getTelegramUser() {
+      try {
+        if (window.Telegram && window.Telegram.WebApp) {
+          const u = window.Telegram.WebApp.initDataUnsafe?.user;
+          if (u) {
+            const name = u.username || (u.first_name ? (u.first_name + (u.last_name ? (" " + u.last_name) : "")) : "tg_user");
+            return { id: u.id ?? "tg", username: name, isTelegram: true };
+          }
+        }
+      } catch(e){}
+      return { id:"guest", username:"guest", isTelegram:false };
+    }
+    const TG_USER = getTelegramUser();
 
-                this.init();
-                this.updateUI();
-            }
+    /********************************************************************
+     * 2) PREDICTIONS (50 EN + 50 CN)
+     ********************************************************************/
+    const PREDICTIONS_EN = [
+      "Today your signal is clean but your execution may lag, so reduce the number of decisions you make. Pick one priority and ship it before you look for the next opportunity. If you feel urgency, translate it into a checklist instead of speed. Keep your money and your attention in separate boxes. End the day by writing one rule you will follow tomorrow.",
+      "A quiet advantage is forming, but only if you stop reacting to every small movement. Choose a window of time where you will not check updates, then do your most valuable work there. Your best result comes from fewer inputs, not more. If you must take action, make it smaller than your ego wants. Sleep on any decision that feels emotional.",
+      "You’re being tested on discipline, not luck, and the test is subtle. If you chase quick wins, you will pay with wasted energy. Instead, set a limit for attempts and respect it no matter what. A strong day is one where you exit cleanly. Keep your promises small and keep them perfectly. Your confidence will rebuild from consistency.",
+      "Your next step is not bigger effort; it’s better structure. Create a simple routine and protect it like a ritual. If someone pulls you into noise, delay your answer. The best time to act is when you feel calm, not excited. Put one piece of your life back in order today. That repair becomes momentum.",
+      "You’ll see an opening that looks obvious, but the real opportunity is behind it. Ask: what would make this fail, and can I accept that? If you can’t accept the downside, don’t touch it. If you can, set a clear target and a clear stop. Keep your communications short and your plan even shorter. Finish with a small reward for yourself.",
+      "Your intuition is accurate, but your timing needs patience. Do not force a result; let it come to the schedule you set. Focus on improving your process by one step, not changing everything. A calm boundary will protect your energy. Say no to one distraction today. You’ll feel lighter immediately.",
+      "A new connection can help you, but only if you speak plainly and directly. Avoid over-explaining; one clear message is stronger. If you need help, ask for it with a specific request. If you offer help, set limits. Keep your standards high and your expectations realistic. The relationship grows through clarity, not intensity.",
+      "You are entering a phase where small errors become expensive, so slow down before you commit. Double-check the details that feel boring. If something is unclear, write it down rather than guessing. Your future self will thank you for being strict today. The reward is stability. That stability becomes freedom.",
+      "Your mind wants novelty, but your results want repetition. Repeat what already works, even if it feels dull. The win is hidden in routine. When uncertainty appears, choose the simplest path. Keep your schedule clean and your sleep protected. One week of consistency changes everything.",
+      "You may feel pressure to prove something, but proving is a trap. Instead, build quietly and let outcomes speak. Choose one metric to improve and ignore the rest for now. Don’t argue with people who won’t listen. Protect your attention like cash. That alone raises your level.",
+      "A cycle is ending and a clearer one is starting, but you must close old tabs first. Finish unfinished tasks or consciously delete them. Your energy returns when your mind stops carrying leftovers. If you want a new beginning, create physical order too. Clean one space. You’ll notice immediate relief.",
+      "Your luck improves when your rules are sharp. Create a simple rule: when X happens, I do Y. This removes emotion from action. You don’t need more information; you need more commitment. Take one controlled risk, not five uncontrolled ones. If you win, scale later.",
+      "You are being watched more than you think, so behave like a professional even in private. Keep your tone calm and your decisions consistent. When someone tests your boundary, hold it with respect. This increases your authority. The day ends with quiet confidence. That’s the real upgrade.",
+      "A strong result is close, but only if you stop switching contexts. Choose a block of time and go deep. If anxiety appears, use it as a signal to simplify. Do one thing well. Your speed will increase after your clarity increases. This is how you level up.",
+      "You are meant to learn restraint right now. Not every chance is yours to take. The best move can be doing nothing and saving strength. If you act, make the action reversible. Keep notes on what you felt and why. This data makes you smarter than emotion.",
+      "Your next insight will come when you stop forcing it. Go for a walk, change your environment, then return. You will see a pattern you missed. Capture it in one sentence. Then build a small plan around that sentence. This is the path to real progress.",
+      "Your environment is shaping you more than your motivation. Remove one negative trigger today. Replace it with a simple tool or habit. Do not wait for inspiration. The ritual is the engine. You’ll feel momentum after the second repetition, not the first.",
+      "Your best decision today is to protect your time. Say no to something that drains you. If you can’t say no, reduce the scope. Boundaries are not rude; they are respectful to your future. You will get more done with less drama. That is the win.",
+      "Something you dismissed earlier has value, but only if you return with a clearer plan. Revisit it for 15 minutes. If it still doesn’t fit, let it go without guilt. If it does fit, schedule it properly. Your calendar is your truth. Treat it like a contract.",
+      "Your confidence will rise when you complete a small set of promises. Pick three tasks and finish them fully. Avoid half-finished work. Half-finished work creates mental debt. Full completion creates peace. Peace becomes power.",
+      "A small misunderstanding can grow if you ignore it, so communicate early. Keep it simple and kind. Do not accuse; describe. Ask one clear question. If the other person is unclear, restate your boundary. This prevents unnecessary chaos.",
+      "You are getting a sign to narrow your focus. One good project beats five average ones. Choose the one that creates long-term leverage. Remove one extra commitment. You don’t need to be everywhere. You need to be excellent somewhere.",
+      "Your next win is tied to your physical energy. Eat and sleep like it matters. If your body is low, your judgment will be noisy. Protect your baseline. Then your intuition becomes sharper. This is practical magic.",
+      "You will be tempted to chase validation, but it will cost you speed. Instead, chase proof: one completed result. Keep your plans private until they are real. Move quietly. The outcome will speak for you. That’s how serious people operate.",
+      "A day of patience saves a week of repair. Don’t rush into a conversation when you’re irritated. Wait until your tone is calm. Then speak in short sentences. You’ll be heard. Your relationships improve from this alone.",
+      "You are ready to upgrade a system, not just an outcome. Fix a workflow that keeps breaking. Write steps down. Remove a pointless step. Add a simple guardrail. This is how you build reliability. Reliability builds money.",
+      "Your attention is leaking; plug the leaks. Turn off one notification. Put your phone away for a set block. If you must check, check at fixed times. You’ll feel a strong return of focus. That focus creates results fast.",
+      "A new idea is good, but it must earn its place. Ask what it replaces. If it replaces nothing, it’s just noise. Keep a backlog, not a chaos list. Schedule the idea for later. Today is for execution, not shopping for dreams.",
+      "You are entering a period where reputation matters more than words. Do what you said you’d do. If you can’t, update people early. Clean communication builds trust. Trust is leverage. Leverage makes life easier.",
+      "A small risk with clear limits will teach you more than endless thinking. Choose a controlled experiment. Set a stop point. Observe without ego. Then adjust. This is how you move fast without breaking.",
+      "Someone will test your patience; treat it as training. Don’t react instantly. Breathe, then choose your response. If you answer with calm, you win twice. You keep your energy and you keep your dignity. That’s real strength.",
+      "Your growth today comes from subtraction. Remove one habit that wastes time. Replace it with a ritual that takes five minutes. Five minutes daily compounds. You don’t need a dramatic change. You need a consistent one.",
+      "A hidden opportunity appears when you finish what you started. Close one open loop. Send one message you’ve delayed. Complete one task you avoid. The relief will create space for new ideas. Momentum returns quickly.",
+      "You may be overthinking a decision that needs a simple rule. If it doesn’t improve your life in three months, skip it. If it might harm your peace, skip it. Your peace is expensive. Protect it like an asset.",
+      "Your next move should reduce stress, not increase it. Choose the path that simplifies your schedule. Don’t take on extra obligations today. One clean day is worth more than three messy ones. Clean days create long-term success.",
+      "You’re not lacking talent; you’re lacking a clear sequence. Write the next three steps only. Forget the rest. Execute step one now. The fog clears when you move. Clarity follows action.",
+      "A powerful habit is to review your day briefly. What worked? What didn’t? Make one adjustment for tomorrow. This keeps you learning. Learning keeps you sharp. Sharpness keeps you ahead.",
+      "Someone’s opinion is louder than your plan; lower the volume. Stop seeking permission. If you need feedback, ask someone who has done what you want. Otherwise, trust your process. Quiet execution beats noisy debate.",
+      "A strong result wants strong boundaries. Protect your mornings or your nights. Your best work needs protected time. If you allow interruptions, you lose momentum. Momentum is rare. Guard it.",
+      "You’re being invited to choose quality over speed. Do fewer things, but do them cleanly. Polish one output. Remove one defect. This is how you reach premium level. Premium level attracts premium outcomes.",
+      "Your next breakthrough comes from writing things down. Ideas vanish when you don’t capture them. Keep a note ready. Turn one idea into a plan. Turn the plan into a schedule. This is how dreams become projects.",
+      "A small act of courage will change your day. Speak the truth politely. Ask for what you need. Decline what doesn’t fit. You will feel stronger immediately. Strength becomes your new normal.",
+      "You will gain advantage by being early and calm. Start one task before the world wakes. Then the day feels easier. Use the quiet to build. Use the noisy hours to communicate. This separation improves everything.",
+      "A calm routine is your lucky charm. Return to basics: water, food, sleep, movement. Then do one meaningful task. Do not chase ten tasks. One meaningful task beats ten anxious ones. This is the path.",
+      "Your mind is trying to predict everything; it doesn’t need to. Build a simple plan with clear stops and starts. Let the rest be unknown. You will feel relief. Relief unlocks better thinking. Better thinking creates better outcomes.",
+      "You are closer than you think, but your finish needs care. Don’t rush the last 10%. The last 10% is your reputation. Make it clean. Then release it. Clean releases create momentum.",
+      "Your luck improves when you keep your promises to yourself. Make one promise today and keep it. It can be small. Small kept promises rebuild trust with yourself. That trust is power. Power changes your trajectory.",
+      "You may feel pulled in two directions; choose the one that aligns with your values. If you choose against your values, you pay later. If you choose with your values, you feel peace now. Peace is a strong signal. Follow it.",
+      "A new phase is approaching, but it requires a cleaner foundation. Organize one system: your files, your desk, your calendar. Small order creates big clarity. Big clarity creates decisive action. Decisive action creates wins.",
+      "You are being guided to act with humility and precision. Do not overpromise. Underpromise and overdeliver. This builds trust quickly. Trust brings opportunities. Opportunities bring growth."
+    ];
 
-            init() {
-                this.drawWheel();
-                this.initDragon();
-                this.initParticles();
-                this.initParallax();
-                this.initAudio();
-                this.loadUserData();
-                this.setupEventListeners();
-                this.startAnimation();
-            }
+    const PREDICTIONS_CN = [
+      "今天的盘面信号不差，但你的执行容易被情绪带节奏。先把决策数量减半，只做一个核心动作。别追涨杀跌，先把规则写清楚再动手。注意力=本金，别把注意力当免费。晚上复盘一句话：今天我遵守了什么纪律。",
+      "你现在最值钱的是冷静，不是冲动。给自己一个不看消息的时间窗，专注做最重要的事。信息越多不等于更聪明，规则越少越好用。要出手就小仓位、可撤回。把“想赢”换成“先别输”。",
+      "今天考的不是运气，是克制。你越想快速证明自己，越容易犯低级错。设定次数上限：尝试几次就停，不管输赢。能干净退出的人，才有下一次机会。把承诺做小，但一定做到。稳就是你的护身符。",
+      "不是你不努力，是你的结构太松。把流程固定成仪式：先检查、再执行、最后复盘。有人来拉你进噪音，先延迟回复。最好的行动时机是心平，不是兴奋。今天把一个小系统修好，明天你就更顺。",
+      "你会看到一个看似很香的机会，但真正的坑也藏在后面。先问：最坏会怎样？你扛得住吗？扛不住就别碰。扛得住就设目标和止损，按表走。沟通要短，计划要更短。做完给自己一个小奖励。",
+      "你的直觉是准的，但今天的节奏需要耐心。别硬拉结果，让它按你设定的时间表发生。只优化一个步骤，不要推倒重来。边界要温和但坚定，能省你很多能量。今天拒绝一个干扰，你会立刻轻松。",
+      "今天适合用“直球沟通”换来助力。别解释太多，一句话说清你要什么。需要帮忙就给出具体请求，不要丢情绪。你提供帮助也要设限，否则会被消耗。关系靠清晰成长，不靠热度。",
+      "你进入了一个“小错很贵”的阶段，所以慢一点反而更快。把无聊的细节再核一遍。看不懂就记下来，别靠猜。今天严格一点，未来少返工。稳定=自由。自由=高级。",
+      "你的脑子想要新鲜感，但你的结果需要重复。重复有效动作，即使无聊。胜利藏在例行里。遇到不确定就选最简单的路线。睡眠别崩，节奏别乱。一周稳定，你就会脱胎换骨。",
+      "别急着证明，证明会让你掉进“表演模式”。你要做的是悄悄产出，用结果说话。选一个指标提升，其他先放掉。别跟不愿听的人辩论。注意力像现金一样要保管好。你会明显变强。",
+      "一个周期要结束了，新周期会更清晰，但你得先清理旧页面。没完成的事要么做完，要么删掉。心里不背欠账，能量就回来了。想重启，先做物理秩序：整理一个角落。你会立刻舒服很多。",
+      "运气会跟着规则走。写一个简单规则：当X发生，我做Y。这样情绪就插不进来。你不缺信息，你缺承诺。今天只做一个可控实验，不要同时开五个。赢了再放大，别提前膨胀。",
+      "今天你被看得比你想象的多，所以要像专业选手一样行事。语气要稳，动作要一致。有人试探你边界，就礼貌地守住。你的权威会自然上升。一天结束时你会更有底气。底气就是升级。",
+      "你离一个好结果很近，但前提是不切换频繁。给自己一段深度时间。焦虑出现就当信号：需要简化。把一件事做漂亮。清晰先来，速度自然跟上。这就是高手路径。",
+      "现在你该学的是“收手”。不是每个机会都属于你。最好的动作可能是先不动，保存火力。要动就选择可撤回的动作。把当下感受记下来，这会变成你的数据。数据比情绪更聪明。",
+      "灵感不是硬挤出来的。换个环境走一走，你会看到遗漏的模式。用一句话把它写下来。然后围绕这句话做一个小计划。小计划比大幻想更有效。今天就能推进。",
+      "你的环境正在塑造你，比你的意志更强。删掉一个负面触发点。用一个5分钟的习惯替换它。别等动力，仪式才是引擎。第二次重复你就会有感觉，不是第一次。",
+      "今天最好的决定是保护时间。拒绝一件消耗你的事。实在拒绝不了就缩小范围。边界不是冷漠，是对未来的尊重。你会更少戏剧，更快产出。这就是胜利。",
+      "你之前否掉的一个点，其实还有价值，但要带着更清晰的计划回来。给它15分钟复查。还是不合适就放下，不要内耗。合适就正式排进日程。日程表才是真相。把它当合同。",
+      "你的自信来自“兑现”。今天选三件小事，全部做完。别做半成品，半成品会产生精神负债。做完会带来平静。平静会带来力量。力量就是你的资本。",
+      "小误会如果不处理，会变成大麻烦。今天适合提前沟通。用描述代替指责，用问题代替情绪。只问一个清晰问题。对方不清楚就复述你的边界。这样可以避免很多无意义的混乱。",
+      "今天的提示是“收窄焦点”。一个强项目胜过五个普通项目。选那个能带来长期杠杆的。砍掉一个额外承诺。你不需要到处出现，你需要在一个地方做到极致。",
+      "今天的赢面和你的体能绑定。吃、睡、动，别糊弄。身体低能量时判断会很吵。先把底盘稳住，直觉就更准。这个叫实用的玄学。你会立刻看到差别。",
+      "别去追认可，追认可会让你慢。追“证据”：一个完成的结果。计划先别对外讲，等它成型。安静地做，结果会替你发声。真正厉害的人都这样。",
+      "耐心一天，能省下一周返修。情绪上头别马上开聊。等语气稳下来再说。句子越短越有力量。你会被听见。关系也会因你变得更好。",
+      "你要升级的是系统，不是一次性的结果。找一个总是崩的流程，把它写成步骤。删掉一个没用步骤，再加一个护栏。稳定来自护栏。稳定会带来钱。钱来自可靠。",
+      "注意力在漏，先堵漏。关掉一个通知。设定固定查看时间。不是不能看，是按时看。专注回来的那一刻，你会很爽。然后产出会很快。快来自少分心。",
+      "新想法不错，但它必须“付房租”。问它要替换什么。替换不了就先放进待办库，不要进主线。今天的主线是执行，不是逛街。梦想需要排期，不需要堆叠。",
+      "你正在进入“名声大于口号”的阶段。说到做到。做不到就提前更新信息。清晰沟通=信任。信任=杠杆。杠杆让生活更轻。轻才能走远。",
+      "想太多不如做一个小实验。设好止损和截止点。观察，不要带 ego。然后微调。这样你可以快，但不会碎。高手就是这样跑的。",
+      "今天会有人试你的耐心，当作训练。别秒回，先呼吸。用冷静回应，你赢两次。你省能量，也保尊严。尊严是硬实力。硬实力才长久。",
+      "今天的成长来自“减法”。删掉一个浪费时间的习惯。换成一个5分钟仪式。每天5分钟会复利。你不需要戏剧性变化，需要持续性变化。持续就是魔法。",
+      "机会会在你“收尾”时出现。关掉一个未完成环。发出那条你拖了很久的消息。把你躲的任务做完。压力会立刻下降。空间出来了，新思路就进来了。",
+      "你可能在纠结一个需要简单规则的决定。它三个月后不能明显改善你生活，就跳过。它会破坏你的平静，就跳过。平静很贵，别随便卖。把平静当资产。",
+      "今天的下一步应该减少压力，而不是增加。选能简化日程的路线。别接更多义务。一个干净的日子胜过三个乱的日子。干净会积累成成功。",
+      "你不缺能力，你缺顺序。只写接下来三步，其他全删。立刻做第一步。迷雾会在行动中散开。清晰跟着动作走，不跟着焦虑走。",
+      "每天做一次微复盘：什么有效？什么无效？明天只改一个点。这样你会持续进化。进化让你锋利。锋利让你领先。领先来自小调整。",
+      "别让别人的声音盖过你的计划。别到处求许可。要反馈就找做成过的人。否则就信你的流程。安静执行胜过吵闹争论。你会更快。",
+      "强结果需要强边界。守住你的早晨或夜晚。最好的工作需要保护时间。允许打断就会丢动量。动量很稀缺。稀缺就要守。",
+      "今天更适合选质量，不选速度。做少点，但做干净。打磨一个输出。修掉一个缺陷。这样你会进入高端层级。高端层级会吸引高端结果。",
+      "突破来自记录。想法不记就会蒸发。随手记一句。把一句变成计划。把计划变成日程。这样梦想会落地。落地才有钱途。",
+      "一个小勇气会改变今天。礼貌地说真话。开口要你需要的。拒绝不适合的。你会立刻变强。强会变成新常态。常态决定命运。",
+      "优势来自“早一点、稳一点”。在世界醒来前做一件任务。白天就轻松。安静时间用来建造，吵闹时间用来沟通。分工越清楚，效率越高。",
+      "稳定的日常就是你的护符。回归基础：水、睡、动。然后做一件有价值的事。不要十件焦虑事，一件价值事就够。这样你会走得很远。",
+      "别试图预测一切。做一个简单计划：何时开始、何时停止。其余留白。你会松一口气。松下来思考更好。思考更好结果更好。",
+      "你其实很接近，但最后10%要耐心。别赶工最后一段。最后10%是你的名片。做干净再发布。干净发布会带来动量。动量会带你起飞。",
+      "运气会跟着你对自己的承诺走。今天立一个小承诺并兑现。小承诺兑现会重建自信。自信来自可信。可信就是力量。力量会改变轨迹。",
+      "你被两股力量拉扯时，选更符合价值观的。违背价值观会后付费，符合会立刻平静。平静是强信号。跟着平静走，你不会错太多。",
+      "新阶段要来，但需要更干净的地基。整理一个系统：文件、桌面、日程都行。小秩序带来大清晰。大清晰带来决断。决断带来胜利。",
+      "今天的指引是谦逊与精准。别夸大承诺。少承诺，多交付。信任会快速累积。信任带机会。机会带增长。增长来自可靠。"
+    ];
 
-            drawWheel() {
-                const svg = document.getElementById('sacredWheel');
-                svg.innerHTML = '';
-                
-                const segments = 16;
-                const r = 180;
-                const cx = 200, cy = 200;
-                
-                for(let i = 0; i < segments; i++) {
-                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    
-                    const startAngle = (i * 360 / segments - 90) * Math.PI / 180;
-                    const endAngle = ((i + 1) * 360 / segments - 90) * Math.PI / 180;
-                    
-                    const x1 = cx + r * Math.cos(startAngle);
-                    const y1 = cy + r * Math.sin(startAngle);
-                    const x2 = cx + r * Math.cos(endAngle);
-                    const y2 = cy + r * Math.sin(endAngle);
-                    
-                    path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
-                    
-                    // Dark red velvet background with gradient
-                    const gradientId = `grad${i}`;
-                    const gradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
-                    gradient.setAttribute("id", gradientId);
-                    gradient.setAttribute("cx", "30%");
-                    gradient.setAttribute("cy", "30%");
-                    gradient.setAttribute("r", "70%");
-                    
-                    const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-                    stop1.setAttribute("offset", "0%");
-                    stop1.setAttribute("stop-color", "#B22222");
-                    
-                    const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-                    stop2.setAttribute("offset", "100%");
-                    stop2.setAttribute("stop-color", "#8B0000");
-                    
-                    gradient.appendChild(stop1);
-                    gradient.appendChild(stop2);
-                    svg.appendChild(gradient);
-                    
-                    path.setAttribute("fill", `url(#${gradientId})`);
-                    path.setAttribute("stroke", "#4A0404");
-                    path.setAttribute("stroke-width", "1.5");
-                    svg.appendChild(path);
-                    
-                    // Golden symbol
-                    const textX = cx + 100 * Math.cos(startAngle + (endAngle - startAngle) / 2);
-                    const textY = cy + 100 * Math.sin(startAngle + (endAngle - startAngle) / 2);
-                    
-                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    text.setAttribute("x", textX);
-                    text.setAttribute("y", textY);
-                    text.setAttribute("text-anchor", "middle");
-                    text.setAttribute("dominant-baseline", "middle");
-                    text.setAttribute("fill", "#FFD700");
-                    text.setAttribute("font-size", "24");
-                    text.setAttribute("font-weight", "bold");
-                    text.setAttribute("filter", "drop-shadow(0 0 5px #FFD700)");
-                    text.textContent = this.wheelSymbols[i].zh;
-                    
-                    svg.appendChild(text);
-                }
-                
-                // Center circle
-                const center = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                center.setAttribute("cx", cx);
-                center.setAttribute("cy", cy);
-                center.setAttribute("r", "45");
-                center.setAttribute("fill", "#2a1e0e");
-                center.setAttribute("stroke", "#FFD700");
-                center.setAttribute("stroke-width", "3");
-                svg.appendChild(center);
-            }
+    /********************************************************************
+     * 3) MODES/LANGS
+     ********************************************************************/
+    const MODES = { LIFE: "life", TRADE: "trade" };
+    const LANGS = { EN: "en", CN: "cn" };
+    const TONE = {
+      life: { strict: 0.25, soften: 0.55 },
+      trade:{ strict: 0.60, soften: 0.20 }
+    };
 
-            initDragon() {
-                const canvas = document.getElementById('dragonCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                
-                this.dragonImage = new Image();
-                this.dragonImage.src = 'dragon.jpg';
-                
-                this.dragon = {
-                    x: canvas.width * 0.7,
-                    y: canvas.height * 0.3,
-                    scale: 0.8,
-                    rotation: 0,
-                    wingPhase: 0,
-                    glowIntensity: 0.5,
-                    time: 0
-                };
-                
-                this.dragonImage.onload = () => {
-                    this.animateDragon();
-                };
-                
-                canvas.addEventListener('click', (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const dragonX = this.dragon.x;
-                    const dragonY = this.dragon.y;
-                    const distance = Math.sqrt(
-                        Math.pow(x - dragonX, 2) + 
-                        Math.pow(y - dragonY, 2)
-                    );
-                    
-                    if (distance < 150) {
-                        this.createGoldenRain(x, y);
-                    }
-                });
-            }
+    /********************************************************************
+     * 4) STORAGE (Anti-repeat + Monetization)
+     ********************************************************************/
+    const STORAGE_KEY = "TON_TEMPLE_SINGLEFILE_V1";
 
-            animateDragon() {
-                const canvas = document.getElementById('dragonCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                if (this.dragonImage.complete) {
-                    this.dragon.time += 0.02;
-                    
-                    // 7D effects: levitation, rotation, glow
-                    this.dragon.y = canvas.height * 0.3 + Math.sin(this.dragon.time * 1.5) * 30;
-                    this.dragon.rotation = Math.sin(this.dragon.time * 0.8) * 0.05;
-                    this.dragon.wingPhase = Math.sin(this.dragon.time * 3) * 0.1;
-                    this.dragon.glowIntensity = 0.5 + Math.sin(this.dragon.time * 2) * 0.3;
-                    
-                    ctx.save();
-                    
-                    // Apply transformations for 7D effect
-                    ctx.translate(this.dragon.x, this.dragon.y);
-                    ctx.rotate(this.dragon.rotation);
-                    
-                    // Multiple layers for depth
-                    ctx.shadowColor = `rgba(255, 215, 0, ${this.dragon.glowIntensity})`;
-                    ctx.shadowBlur = 40;
-                    ctx.shadowOffsetX = Math.sin(this.dragon.time) * 5;
-                    ctx.shadowOffsetY = Math.cos(this.dragon.time) * 5;
-                    
-                    ctx.globalAlpha = 0.9;
-                    ctx.drawImage(
-                        this.dragonImage,
-                        -150 * this.dragon.scale,
-                        -100 * this.dragon.scale,
-                        300 * this.dragon.scale * (1 + this.dragon.wingPhase * 0.2),
-                        200 * this.dragon.scale
-                    );
-                    
-                    // Second layer for ghosting effect
-                    ctx.globalAlpha = 0.3;
-                    ctx.shadowBlur = 60;
-                    ctx.shadowOffsetX = Math.sin(this.dragon.time + 2) * 8;
-                    ctx.shadowOffsetY = Math.cos(this.dragon.time + 2) * 8;
-                    
-                    ctx.drawImage(
-                        this.dragonImage,
-                        -150 * this.dragon.scale,
-                        -100 * this.dragon.scale,
-                        300 * this.dragon.scale,
-                        200 * this.dragon.scale
-                    );
-                    
-                    ctx.restore();
-                }
-                
-                requestAnimationFrame(() => this.animateDragon());
-            }
+    function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")||{}; }catch(e){ return {}; } }
+    function saveStore(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){} }
+    function userKey(){ return String(TG_USER.id || "guest"); }
 
-            initParticles() {
-                const canvas = document.getElementById('particleCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                
-                this.particles = [];
-                
-                for (let i = 0; i < 150; i++) {
-                    this.particles.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        radius: Math.random() * 3 + 1,
-                        speed: Math.random() * 0.8 + 0.2,
-                        opacity: Math.random() * 0.6 + 0.2,
-                        drift: (Math.random() - 0.5) * 0.3,
-                        color: `hsl(${40 + Math.random() * 20}, 80%, ${50 + Math.random() * 30}%)`
-                    });
-                }
-                
-                const animateParticles = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    this.particles.forEach(p => {
-                        p.y -= p.speed;
-                        p.x += p.drift;
-                        
-                        if (p.y < 0) {
-                            p.y = canvas.height;
-                            p.x = Math.random() * canvas.width;
-                        }
-                        
-                        if (p.x < 0 || p.x > canvas.width) {
-                            p.x = Math.random() * canvas.width;
-                        }
-                        
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = p.color;
-                        ctx.shadowColor = '#ffd966';
-                        ctx.shadowBlur = 8;
-                        ctx.fill();
-                    });
-                    
-                    requestAnimationFrame(animateParticles);
-                };
-                
-                animateParticles();
-            }
+    function todayKey(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
 
-            initAudio() {
-                this.musicPlayer = document.getElementById('musicPlayer');
-                this.coinSound = document.getElementById('coinSound');
-                
-                // Music starts on first interaction
-                document.addEventListener('click', () => {
-                    if (this.musicPlayer.paused) {
-                        this.musicPlayer.volume = 0.3;
-                        this.musicPlayer.play().catch(e => console.log('Audio play failed:', e));
-                    }
-                }, { once: true });
-                
-                this.musicPlayer.volume = 0.3;
-                this.coinSound.volume = 0.5;
-            }
+    function ensureUser(store, uid){
+      store[uid] ||= {};
+      store[uid].mon ||= { day:null, freeUsed:false, paid:0, lastDonateAt:null };
+      store[uid].pred ||= {};
+      return store[uid];
+    }
 
-            initParallax() {
-                window.addEventListener('mousemove', (e) => {
-                    const x = (e.clientX / window.innerWidth - 0.5) * 20;
-                    const y = (e.clientY / window.innerHeight - 0.5) * 20;
-                    document.getElementById('universe').style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
-                });
-            }
+    function getBucket(store, uid, lang, mode){
+      const u = ensureUser(store, uid);
+      u.pred[lang] ||= {};
+      u.pred[lang][mode] ||= { used:[], bag:[], lastId:null, stats:{total:0} };
+      return u.pred[lang][mode];
+    }
 
-            setupEventListeners() {
-                window.addEventListener('resize', () => {
-                    const canvas = document.getElementById('dragonCanvas');
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                });
-            }
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = (Math.random()*(i+1))|0;
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+    function refillBag(bucket, n){ bucket.bag = shuffle([...Array(n)].map((_,i)=>i)); }
 
-            createGoldenRain(x, y) {
-                // Play coin sound
-                this.coinSound.currentTime = 0;
-                this.coinSound.play().catch(e => console.log('Coin sound failed:', e));
-                
-                // Create coins
-                const container = document.getElementById('coinsContainer');
-                const count = 20;
-                
-                for (let i = 0; i < count; i++) {
-                    setTimeout(() => {
-                        const coin = document.createElement('div');
-                        coin.className = 'coin';
-                        
-                        const offsetX = (Math.random() - 0.5) * 300;
-                        coin.style.left = (x + offsetX) + 'px';
-                        coin.style.top = y + 'px';
-                        
-                        const duration = 2 + Math.random() * 2;
-                        coin.style.animation = `coinFall ${duration}s linear forwards`;
-                        
-                        container.appendChild(coin);
-                        
-                        setTimeout(() => coin.remove(), duration * 1000);
-                    }, i * 50);
-                }
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            }
+    function hashString(s){
+      let h = 2166136261;
+      for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return (h>>>0);
+    }
 
-            setPath(p) {
-                this.path = p;
-                document.getElementById('btn-life').classList.toggle('active', p === 'life');
-                document.getElementById('btn-ton').classList.toggle('active', p === 'ton');
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            }
+    function clicksToDiscipline(c10){ return Math.min(1, Math.max(0, c10/10))*0.35; }
 
-            startRitual() {
-                if (this.isSpinning) return;
-                
-                if (this.dailyRitualsUsed >= this.maxDailyRituals) {
-                    this.showAltarMessage();
-                    return;
-                }
-                
-                this.isSpinning = true;
-                this.dailyRitualsUsed++;
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+    function stylePrediction(text, {lang, mode, c10, username}){
+      const name = (username && username !== "guest") ? username : null;
+      const disciplineBoost = clicksToDiscipline(c10);
+      const mt = TONE[mode];
+      const strictness = Math.min(0.95, mt.strict + disciplineBoost);
+      const soften = Math.max(0, mt.soften - disciplineBoost*0.5);
+      const h = hashString(name||"x") % 1000;
 
-                const wheel = document.getElementById('sacredWheel');
-                const spins = 5 + Math.floor(Math.random() * 3);
-                const deg = spins * 360 + Math.random() * 360;
-                this.rotation += deg;
-                
-                wheel.style.transition = 'transform 5s cubic-bezier(0.15, 0.8, 0.15, 1)';
-                wheel.style.transform = `rotate(${this.rotation}deg)`;
+      let prefix="", suffix="";
+      if(lang === LANGS.EN){
+        if(name && (h%3===0)) prefix = `${name}, `;
+        if(strictness > 0.65) suffix = " Keep it strict: follow your rules exactly.";
+        else if(soften > 0.45) suffix = " Be gentle with yourself, but stay consistent.";
+      } else {
+        if(name && (h%3===0)) prefix = `${name}，`;
+        if(strictness > 0.65) suffix = " 记住：按规则走，别让情绪插手。";
+        else if(soften > 0.45) suffix = " 温柔一点，但别松纪律。";
+      }
+      return (prefix + text).trim() + suffix;
+    }
 
-                setTimeout(() => this.showResult(), 5200);
-                
-                this.saveUserData();
-            }
+    function drawPrediction({lang, mode, c10, username}){
+      const store = loadStore();
+      const uid = userKey();
+      const bucket = getBucket(store, uid, lang, mode);
+      const pool = (lang===LANGS.CN) ? PREDICTIONS_CN : PREDICTIONS_EN;
 
-            showResult() {
-                this.isSpinning = false;
-                
-                // Determine which segment we landed on
-                const segmentSize = 360 / 16;
-                const normalizedRotation = (360 - (this.rotation % 360)) % 360;
-                this.selectedSegment = Math.floor(normalizedRotation / segmentSize);
-                
-                // Random rarity
-                const chance = Math.random();
-                this.lastRarity = chance > 0.9 ? 'LEGENDARY' : (chance > 0.7 ? 'RARE' : 'COMMON');
-                
-                // Select oracle text
-                const oracles = this.oracles[this.path][this.language] || this.oracles[this.path].ru;
-                this.lastText = oracles[Math.floor(Math.random() * oracles.length)];
-                
-                // Show revelation
-                this.showRevelation();
-                
-                // Add XP
-                this.addXP(20);
-                
-                // Spawn coins
-                this.spawnCoins();
-            }
+      if(bucket.bag.length===0) refillBag(bucket, pool.length);
 
-            showRevelation() {
-                const overlay = document.getElementById('oracleOverlay');
-                const scrollContent = document.getElementById('scrollContent');
-                
-                // Clear and prepare scroll
-                scrollContent.innerHTML = '<div class="golden-dust"></div>';
-                
-                // Set date
-                const now = new Date();
-                const dateStr = now.toLocaleDateString('ru-RU', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                
-                document.getElementById('sealDate').textContent = `🏮 ${dateStr}`;
-                document.getElementById('pathIndicator').textContent = 
-                    this.path === 'life' ? '🌿 ДУХ' : '⚡ TON';
-                
-                // Animate brush writing
-                this.animateBrushWriting(this.lastText);
-                
-                overlay.style.display = 'flex';
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                if (tg.BackButton) tg.BackButton.show();
-            }
+      let idx = bucket.bag.pop();
+      if(bucket.lastId !== null && idx === bucket.lastId && pool.length>1){
+        if(bucket.bag.length===0) refillBag(bucket, pool.length);
+        const idx2 = bucket.bag.pop();
+        bucket.bag.unshift(idx);
+        idx = idx2;
+      }
 
-            animateBrushWriting(text) {
-                const scrollContent = document.getElementById('scrollContent');
-                const goldenDust = scrollContent.querySelector('.golden-dust');
-                
-                let index = 0;
-                
-                const writeNextChar = () => {
-                    if (index < text.length) {
-                        const char = document.createElement('span');
-                        char.className = 'brush-char';
-                        char.textContent = text[index];
-                        char.style.animationDelay = `${index * 0.05}s`;
-                        
-                        scrollContent.insertBefore(char, goldenDust);
-                        index++;
-                        
-                        if (index % 3 === 0 && tg.HapticFeedback) {
-                            tg.HapticFeedback.impactOccurred('light');
-                        }
-                        
-                        setTimeout(writeNextChar, 100); // Human-like writing speed
-                    } else {
-                        setTimeout(() => this.applyRoyalSeal(), 300);
-                    }
-                };
-                
-                writeNextChar();
-            }
+      bucket.used.push(idx);
+      bucket.lastId = idx;
+      bucket.stats.total++;
 
-            applyRoyalSeal() {
-                const scrollContent = document.getElementById('scrollContent');
-                
-                const seal = document.createElement('div');
-                seal.className = 'seal-stamp';
-                scrollContent.appendChild(seal);
-                
-                setTimeout(() => {
-                    seal.classList.add('active');
-                    this.createGoldenDust();
-                    this.playSealSound();
-                    
-                    if (tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('heavy');
-                        tg.HapticFeedback.notificationOccurred('success');
-                    }
-                }, 50);
-            }
+      saveStore(store);
+      return { id: idx, text: stylePrediction(pool[idx], {lang, mode, c10, username}) };
+    }
 
-            createGoldenDust() {
-                const canvas = document.getElementById('particleCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                for (let i = 0; i < 30; i++) {
-                    setTimeout(() => {
-                        const particle = {
-                            x: canvas.width / 2 + (Math.random() - 0.5) * 300,
-                            y: canvas.height / 2 + (Math.random() - 0.5) * 300,
-                            radius: Math.random() * 5 + 2,
-                            opacity: 1,
-                            speedX: (Math.random() - 0.5) * 3,
-                            speedY: (Math.random() - 0.5) * 3 - 1
-                        };
-                        
-                        const animateParticle = () => {
-                            particle.x += particle.speedX;
-                            particle.y += particle.speedY;
-                            particle.opacity -= 0.02;
-                            particle.radius *= 0.98;
-                            
-                            ctx.beginPath();
-                            ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(255, 215, 0, ${particle.opacity})`;
-                            ctx.shadowBlur = 15;
-                            ctx.fill();
-                            
-                            if (particle.opacity > 0) {
-                                requestAnimationFrame(animateParticle);
-                            }
-                        };
-                        
-                        animateParticle();
-                    }, i * 30);
-                }
-            }
+    function monetizationSnapshot(){
+      const store = loadStore();
+      const uid = userKey();
+      const u = ensureUser(store, uid);
+      const m = u.mon;
 
-            playSealSound() {
-                if (!this.audioContext) {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                
-                const oscillator = this.audioContext.createOscillator();
-                const gainNode = this.audioContext.createGain();
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(150, this.audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + 0.3);
-                
-                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(this.audioContext.destination);
-                
-                oscillator.start();
-                oscillator.stop(this.audioContext.currentTime + 0.5);
-            }
+      const tk = todayKey();
+      if(m.day !== tk){
+        m.day = tk;
+        m.freeUsed = false;
+        saveStore(store);
+      }
+      return { freeAvail: !m.freeUsed, paid: (m.paid|0) };
+    }
 
-            openHongbao() {
-                const hongbao = document.getElementById('hongbao');
-                hongbao.classList.add('opened');
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            }
+    function consumeFree(){
+      const store = loadStore();
+      const uid = userKey();
+      const u = ensureUser(store, uid);
+      const m = u.mon;
 
-            prepareNFT() {
-                const canvas = document.getElementById('nftCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = 400;
-                canvas.height = 600;
-                
-                // Background
-                ctx.fillStyle = '#111';
-                ctx.fillRect(0, 0, 400, 600);
-                
-                // Border with rarity color
-                ctx.strokeStyle = this.lastRarity === 'LEGENDARY' ? '#ffd700' : 
-                                (this.lastRarity === 'RARE' ? '#c0c0c0' : '#8b4513');
-                ctx.lineWidth = 15;
-                ctx.strokeRect(10, 10, 380, 580);
-                
-                // Scroll texture
-                ctx.fillStyle = '#f2e6d0';
-                ctx.fillRect(20, 20, 360, 560);
-                
-                // Text
-                ctx.fillStyle = '#2c1810';
-                ctx.font = 'italic 20px Georgia, "KaiTi", serif';
-                ctx.textAlign = 'center';
-                this.wrapText(ctx, this.lastText, 200, 150, 300, 35);
-                
-                // Symbol
-                const symbol = this.wheelSymbols[this.selectedSegment]?.zh || '福';
-                ctx.font = 'bold 60px "KaiTi", serif';
-                ctx.fillStyle = '#8B0000';
-                ctx.fillText(symbol, 200, 350);
-                
-                // Rarity
-                ctx.font = 'bold 20px Arial';
-                ctx.fillStyle = this.lastRarity === 'LEGENDARY' ? '#ffd700' : '#666';
-                ctx.fillText(this.lastRarity, 200, 500);
-                
-                document.getElementById('oracleOverlay').style.display = 'none';
-                document.getElementById('nftOverlay').style.display = 'flex';
-            }
+      const tk = todayKey();
+      if(m.day !== tk){ m.day=tk; m.freeUsed=false; }
+      if(m.freeUsed) return false;
+      m.freeUsed = true;
+      saveStore(store);
+      return true;
+    }
 
-            wrapText(ctx, text, x, y, maxW, lineH) {
-                let words = text.split(' ');
-                let line = '';
-                
-                for (let n = 0; n < words.length; n++) {
-                    let test = line + words[n] + ' ';
-                    let metrics = ctx.measureText(test);
-                    
-                    if (metrics.width > maxW && n > 0) {
-                        ctx.fillText(line, x, y);
-                        line = words[n] + ' ';
-                        y += lineH;
-                    } else {
-                        line = test;
-                    }
-                }
-                ctx.fillText(line, x, y);
-            }
+    function consumePaid(){
+      const store = loadStore();
+      const uid = userKey();
+      const u = ensureUser(store, uid);
+      const m = u.mon;
 
-            addXP(v) {
-                this.xp += v;
-                
-                if (this.xp >= 100) {
-                    this.xp = 0;
-                    this.balance += 50;
-                    this.maxDailyRituals++;
-                    
-                    // Level up notification
-                    if (tg.showPopup) {
-                        tg.showPopup({
-                            title: '✨ ПРОСВЕТЛЕНИЕ',
-                            message: 'Вы достигли нового уровня! +50 💎',
-                            buttons: [{ type: 'close' }]
-                        });
-                    }
-                }
-                
-                this.updateUI();
-                this.saveUserData();
-            }
+      if((m.paid|0) <= 0) return false;
+      m.paid = (m.paid|0) - 1;
+      saveStore(store);
+      return true;
+    }
 
-            updateUI() {
-                document.getElementById('xpFill').style.width = this.xp + '%';
-                document.getElementById('xpText').innerText = `${this.xp}/100 XP`;
-                document.getElementById('balanceDisplay').innerText = `${this.balance} 💎`;
-                document.getElementById('streakDisplay').innerText = this.streak;
-                
-                // Rank based on balance
-                let rank = 'PILGRIM';
-                if (this.balance > 500) rank = 'SAGE';
-                else if (this.balance > 200) rank = 'PATRON';
-                else if (this.balance > 100) rank = 'GUARDIAN';
-                else if (this.balance > 50) rank = 'DISCIPLE';
-                
-                document.getElementById('rankDisplay').innerText = rank;
-            }
+    function grantPaid(n){
+      const store = loadStore();
+      const uid = userKey();
+      const u = ensureUser(store, uid);
+      const m = u.mon;
 
-            showLeaderboard() {
-                const list = document.getElementById('leaderList');
-                
-                // Mock leaderboard data
-                const players = [
-                    { name: "TonKing", xp: 2540 },
-                    { name: "LuckyDragon", xp: 1870 },
-                    { name: "CryptoWhale", xp: 1620 },
-                    { name: "You", xp: this.xp + this.balance * 10 },
-                    { name: "MoonWalker", xp: 890 }
-                ].sort((a, b) => b.xp - a.xp);
-                
-                list.innerHTML = players.map((p, i) => `
-                    <div class="leader-row">
-                        <span>${i+1}. ${p.name}</span>
-                        <span style="color:#ffd700">${p.xp} XP</span>
-                    </div>
-                `).join('');
-                
-                document.getElementById('leaderboardOverlay').style.display = 'flex';
-            }
+      m.paid = (m.paid|0) + (n|0);
+      m.lastDonateAt = Date.now();
+      saveStore(store);
+    }
 
-            makeOffering() {
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-                
-                this.createGoldenRain(window.innerWidth / 2, window.innerHeight / 4);
-                
-                this.maxDailyRituals++;
-                this.balance += 10;
-                this.updateUI();
-                
-                this.showNotification(
-                    '供奉已接受。寺庙感谢您的慷慨。'
-                );
-                
-                this.saveUserData();
-            }
+    /********************************************************************
+     * 5) TIMING (LOCKED)
+     ********************************************************************/
+    const TIMING = {
+      wheelSpin: { durMin: 1800, durMax: 2600, extraTurns: 5, segmentCount: 8 },
+      envelope:  { showMs: 520, holdMs: 720, dissolveMs: 520 },
+      scroll:    { appearMs: 520 },
+      text:      { linePauseMin: 250, linePauseMax: 400, lineDurMin: 900, lineDurMax: 1500 },
+      seal:      { placeMs: 420, hitMs: 220, soakMs: 900 },
+      bloom:     { spikeMs: 200, settleMs: 380 },
+      dust:      { burstMs: 260, fadeMs: 720 }
+    };
 
-            mintFinal() {
-                tg.showConfirm("Минтинг NFT стоит 0.1 TON. Продолжить?", (confirmed) => {
-                    if (confirmed) {
-                        this.showNotification('NFT успешно заминен!');
-                        this.closeOverlays();
-                    }
-                });
-            }
+    /********************************************************************
+     * 6) FSM (deterministic, resettable, guarded)
+     ********************************************************************/
+    const transitions = {
+      initial: "IDLE",
+      states: {
+        IDLE: { on: { START: "WHEEL_SPIN" } },
+        WHEEL_SPIN: { on: { WHEEL_STOPPED: "ENVELOPE_SHOW" } },
+        ENVELOPE_SHOW: { on: { ENVELOPE_SHOWN: "ENVELOPE_HOLD" } },
+        ENVELOPE_HOLD: { on: { ENVELOPE_HOLD_DONE: "ENVELOPE_DISSOLVE" } },
+        ENVELOPE_DISSOLVE: { on: { ENVELOPE_DISSOLVED: "SCROLL_APPEAR" } },
+        SCROLL_APPEAR: { on: { SCROLL_READY: "TEXT_WRITE" } },
+        TEXT_WRITE: { on: { TEXT_DONE: "SEAL_PLACE" } },
+        SEAL_PLACE: { on: { SEAL_PLACED: "SEAL_HIT" } },
+        SEAL_HIT: { on: { SEAL_HIT_DONE: "SEAL_SOAK" } },
+        SEAL_SOAK: { on: { SEAL_SOAK_DONE: "DONE" } },
+        DONE: { on: { AGAIN: "WHEEL_SPIN", RESET: "IDLE" } }
+      }
+    };
 
-            toggleLanguage() {
-                const languages = ['ru', 'en', 'zh'];
-                const currentIndex = languages.indexOf(this.language);
-                this.language = languages[(currentIndex + 1) % languages.length];
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-                
-                // Update UI text based on language
-                const offeringText = document.getElementById('offeringText');
-                const wheelCenter = document.getElementById('wheelCenter');
-                const xpLabel = document.getElementById('xpLabel');
-                
-                if (this.language === 'ru') {
-                    offeringText.innerText = 'Очистить ауру · 1 TON';
-                    wheelCenter.innerHTML = 'РИТУАЛ<br>УДАЧИ';
-                    xpLabel.innerText = 'ПРОСВЕТЛЕНИЕ';
-                } else if (this.language === 'en') {
-                    offeringText.innerText = 'Cleanse Aura · 1 TON';
-                    wheelCenter.innerHTML = 'EXECUTE<br>RITUAL';
-                    xpLabel.innerText = 'ENLIGHTENMENT';
-                } else {
-                    offeringText.innerText = '净化气场 · 1 TON';
-                    wheelCenter.innerHTML = '执 行<br>仪 式';
-                    xpLabel.innerText = '启迪';
-                }
-            }
+    function createMachine({transitions, guards, onTransition, log}){
+      let state = transitions.initial;
+      let stateEnterAt = performance.now();
+      const onceFlags = Object.create(null);
 
-            loadUserData() {
-                const saved = localStorage.getItem(`templeData_${this.userId}`);
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    this.xp = data.xp || 0;
-                    this.balance = data.balance || 0;
-                    this.streak = data.streak || 0;
-                    this.dailyRitualsUsed = data.ritualsUsed || 0;
-                    this.maxDailyRituals = data.maxRituals || 1;
-                }
-                
-                // Check streak
-                const lastVisit = localStorage.getItem(`lastVisit_${this.userId}`);
-                const today = new Date().toDateString();
-                
-                if (lastVisit !== today) {
-                    if (lastVisit === new Date(Date.now() - 86400000).toDateString()) {
-                        this.streak++;
-                    } else {
-                        this.streak = 1;
-                    }
-                    this.dailyRitualsUsed = 0;
-                    localStorage.setItem(`lastVisit_${this.userId}`, today);
-                }
-                
-                this.updateUI();
-            }
+      function getState(){ return state; }
+      function getStateEnterAt(){ return stateEnterAt; }
+      function resetOnce(){ for(const k of Object.keys(onceFlags)) delete onceFlags[k]; }
+      function flagOnce(key){ if(onceFlags[key]) return false; onceFlags[key]=true; return true; }
 
-            saveUserData() {
-                const data = {
-                    xp: this.xp,
-                    balance: this.balance,
-                    streak: this.streak,
-                    ritualsUsed: this.dailyRitualsUsed,
-                    maxRituals: this.maxDailyRituals
-                };
-                localStorage.setItem(`templeData_${this.userId}`, JSON.stringify(data));
-            }
+      function send(event, payload){
+        const cur = transitions.states[state];
+        if(!cur || !cur.on || !cur.on[event]){
+          log?.(`FSM: IGNORE ${event} in ${state}`);
+          return false;
+        }
+        const g = guards?.[state]?.[event];
+        if(g && !g({state, event, payload, onceFlags})){
+          log?.(`FSM: BLOCK ${event} in ${state}`);
+          return false;
+        }
+        const prev = state;
+        state = cur.on[event];
+        stateEnterAt = performance.now();
+        onTransition?.({prev, next: state, event, payload, onceFlags, stateEnterAt});
+        log?.(`FSM: ${prev} --(${event})-> ${state}`);
+        return true;
+      }
 
-            spawnCoins() {
-                this.createGoldenRain(window.innerWidth / 2, 100);
-            }
+      function forceState(nextState){
+        const prev = state;
+        state = nextState;
+        stateEnterAt = performance.now();
+        onTransition?.({prev, next: state, event: "FORCE", payload:null, onceFlags, stateEnterAt});
+        log?.(`FSM: FORCE ${prev} -> ${state}`);
+      }
 
-            showAltarMessage() {
-                tg.showPopup({
-                    title: 'Ежедневный ритуал завершен',
-                    message: 'Возвращайтесь завтра или посетите алтарь.',
-                    buttons: [{
-                        id: 'altar',
-                        type: 'default',
-                        text: 'Перейти к алтарю'
-                    }, {
-                        id: 'close',
-                        type: 'cancel',
-                        text: 'Закрыть'
-                    }]
-                }, (buttonId) => {
-                    if (buttonId === 'altar') {
-                        this.makeOffering();
-                    }
-                });
-            }
+      return { send, getState, getStateEnterAt, resetOnce, flagOnce, forceState, _onceFlags: onceFlags };
+    }
 
-            showNotification(message) {
-                tg.showPopup({
-                    title: '🏯 Храм',
-                    message: message,
-                    buttons: [{ type: 'close' }]
-                });
-            }
+    const guards = {
+      IDLE: { START: ()=>true },
+      WHEEL_SPIN: { WHEEL_STOPPED: ()=>true },
+      ENVELOPE_SHOW: { ENVELOPE_SHOWN: ()=>true },
+      ENVELOPE_HOLD: { ENVELOPE_HOLD_DONE: ()=>true },
+      ENVELOPE_DISSOLVE: { ENVELOPE_DISSOLVED: ()=>true },
+      SCROLL_APPEAR: { SCROLL_READY: ()=>true },
+      TEXT_WRITE: { TEXT_DONE: ()=>true },
+      SEAL_PLACE: { SEAL_PLACED: ()=>true },
+      SEAL_HIT: { SEAL_HIT_DONE: ()=>true },
+      SEAL_SOAK: { SEAL_SOAK_DONE: ()=>true },
+      DONE: { AGAIN: ()=>true, RESET: ()=>true }
+    };
 
-            closeOverlays() {
-                document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-                document.getElementById('hongbao')?.classList.remove('opened');
-                if (tg.BackButton) tg.BackButton.hide();
-                
-                // Add to journal
-                this.updateJournal();
-            }
+    /********************************************************************
+     * 7) DOM
+     ********************************************************************/
+    const el = (id)=>document.getElementById(id);
+    const dom = {
+      userName: el("userName"),
+      langChip: el("langChip"),
+      modeChip: el("modeChip"),
+      freeChip: el("freeChip"),
+      paidChip: el("paidChip"),
+      walletChip: el("walletChip"),
 
-            updateJournal() {
-                const journalPreview = document.getElementById('journalPreview');
-                const card = document.createElement('div');
-                card.className = 'journal-card';
-                
-                const now = new Date();
-                const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-                const symbol = this.wheelSymbols[this.selectedSegment]?.[this.language] || '福';
-                
-                card.innerHTML = `
-                    <div style="color: #ffd966; margin-bottom: 5px;">${dateStr}</div>
-                    <div style="font-size: 24px; color: #FFD700;">${symbol}</div>
-                    <div style="font-size: 10px; opacity: 0.7;">${this.path === 'life' ? '🌿' : '⚡'}</div>
-                `;
-                
-                journalPreview.insertBefore(card, journalPreview.firstChild);
-                if (journalPreview.children.length > 7) {
-                    journalPreview.removeChild(journalPreview.lastChild);
-                }
-            }
+      wheelWrap: el("wheelWrap"),
+      wheel: el("wheel"),
+      envelope: el("envelope"),
 
-            startAnimation() {
-                // Start animation loop for wheel physics if needed
-            }
+      scroll: el("scroll"),
+      inkLayer: el("inkLayer"),
+
+      seal: el("seal"),
+      sealFx: el("sealFx"),
+      soakRing: el("soakRing"),
+      emboss: el("emboss"),
+      edgeSparkle: el("edgeSparkle"),
+      dust: el("dust"),
+
+      btnStart: el("btnStart"),
+      btnAgain: el("btnAgain"),
+      btnDonate: el("btnDonate"),
+
+      walletBtn: el("walletBtn"),
+      soundBtn: el("soundBtn"),
+      debugBtn: el("debugBtn"),
+      debugPanel: el("debugPanel"),
+
+      langEN: el("langEN"),
+      langCN: el("langCN"),
+      modeLife: el("modeLife"),
+      modeTrade: el("modeTrade"),
+    };
+
+    dom.userName.textContent = TG_USER.username || "guest";
+
+    /********************************************************************
+     * 8) Runtime + Debug
+     ********************************************************************/
+    const RUNTIME = {
+      lang: LANGS.EN,
+      mode: MODES.LIFE,
+      prediction: null,
+      clickTimes: [],
+      debug: false,
+      runId: 0,
+      envelopePhase: "idle",
+      sealPhase: "idle",
+      muted: false,
+      audioStarted: false,
+
+      walletConnected: false,
+      walletAddress: null
+    };
+
+    const debugLog = [];
+    function log(msg){
+      console.log(msg);
+      debugLog.push(`[${(new Date()).toLocaleTimeString()}] ${msg}`);
+      if(debugLog.length > 260) debugLog.shift();
+      renderDebug();
+    }
+
+    function escapeHtml(str){
+      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    }
+
+    function now(){ return performance.now(); }
+
+    function recordClick(){
+      const t = now();
+      RUNTIME.clickTimes.push(t);
+      const cutoff = t - 10000;
+      while(RUNTIME.clickTimes.length && RUNTIME.clickTimes[0] < cutoff) RUNTIME.clickTimes.shift();
+    }
+    function clicksLast10s(){
+      const t = now();
+      const cutoff = t - 10000;
+      while(RUNTIME.clickTimes.length && RUNTIME.clickTimes[0] < cutoff) RUNTIME.clickTimes.shift();
+      return RUNTIME.clickTimes.length;
+    }
+
+    function updateChips(){
+      dom.langChip.textContent = RUNTIME.lang.toUpperCase();
+      dom.modeChip.textContent = RUNTIME.mode.toUpperCase();
+
+      const snap = monetizationSnapshot();
+      dom.freeChip.textContent = snap.freeAvail ? "YES" : "NO";
+      dom.paidChip.textContent = String(snap.paid);
+
+      if(RUNTIME.walletConnected){
+        dom.walletChip.textContent = "ON";
+        dom.walletChip.classList.remove("warn");
+        dom.walletChip.classList.add("ok");
+      } else {
+        dom.walletChip.textContent = "OFF";
+        dom.walletChip.classList.remove("ok");
+        dom.walletChip.classList.add("warn");
+      }
+
+      // UX: If no free and no paid, "Again" looks disabled when DONE
+      const st = machine.getState();
+      const can = monetizationSnapshot();
+      const noQuota = (!can.freeAvail && (can.paid|0) <= 0);
+      const shouldDisableAgain = (st === "DONE") ? noQuota : false;
+      dom.btnAgain.classList.toggle("disabled", shouldDisableAgain);
+      dom.btnAgain.disabled = shouldDisableAgain;
+    }
+
+    function renderDebug(){
+      if(!RUNTIME.debug) return;
+      const st = machine.getState();
+      const c10 = clicksLast10s();
+      const predId = (RUNTIME.prediction && RUNTIME.prediction.id !== null) ? RUNTIME.prediction.id : "none";
+      const enterAt = machine.getStateEnterAt();
+
+      const header =
+`STATE: ${st}
+runId: ${RUNTIME.runId}
+stateEnterAt(ms): ${Math.floor(enterAt)}
+LANG: ${RUNTIME.lang.toUpperCase()}    MODE: ${RUNTIME.mode.toUpperCase()}
+USER: ${TG_USER.username} (id=${TG_USER.id})
+clicksLast10s: ${c10}
+predictionId: ${predId}
+envelopePhase: ${RUNTIME.envelopePhase}
+sealPhase: ${RUNTIME.sealPhase}
+muted: ${RUNTIME.muted}   audioStarted: ${RUNTIME.audioStarted}
+walletConnected: ${RUNTIME.walletConnected}
+`;
+      dom.debugPanel.innerHTML =
+        `<div class="row"><span>Debug Panel</span><span><code>${escapeHtml(st)}</code></span></div>` +
+        `<div>${escapeHtml(header)}</div>` +
+        `<div style="margin-top:10px; opacity:.9;">${escapeHtml(debugLog.join("\n"))}</div>`;
+    }
+
+    /********************************************************************
+     * 9) Audio (procedural pad; no files)
+     ********************************************************************/
+    let audioCtx = null;
+    let masterGain = null;
+    let oscA=null, oscB=null, oscC=null;
+    let lfo=null, lfoGain=null;
+
+    async function ensureAudio(){
+      if(RUNTIME.audioStarted) return;
+      RUNTIME.audioStarted = true;
+      try{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.0001;
+
+        oscA = audioCtx.createOscillator();
+        oscB = audioCtx.createOscillator();
+        oscC = audioCtx.createOscillator();
+
+        oscA.type = "sine";
+        oscB.type = "triangle";
+        oscC.type = "sine";
+
+        // Warm pad chord-ish
+        oscA.frequency.value = 110;
+        oscB.frequency.value = 165;
+        oscC.frequency.value = 220;
+
+        const gA = audioCtx.createGain(); gA.gain.value = 0.18;
+        const gB = audioCtx.createGain(); gB.gain.value = 0.12;
+        const gC = audioCtx.createGain(); gC.gain.value = 0.10;
+
+        // LFO subtle tremolo
+        lfo = audioCtx.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 0.12;
+        lfoGain = audioCtx.createGain();
+        lfoGain.gain.value = 0.10; // modulation depth
+        lfo.connect(lfoGain);
+        lfoGain.connect(masterGain.gain);
+
+        oscA.connect(gA); gA.connect(masterGain);
+        oscB.connect(gB); gB.connect(masterGain);
+        oscC.connect(gC); gC.connect(masterGain);
+
+        masterGain.connect(audioCtx.destination);
+
+        oscA.start(); oscB.start(); oscC.start(); lfo.start();
+
+        // fade in
+        fadeMasterTo(RUNTIME.muted ? 0 : 0.55, 900);
+        log("AUDIO: started");
+      }catch(e){
+        RUNTIME.audioStarted = false;
+        log("AUDIO: blocked");
+      }
+    }
+
+    function fadeMasterTo(target, ms){
+      if(!audioCtx || !masterGain) return;
+      const t = audioCtx.currentTime;
+      const cur = masterGain.gain.value;
+      masterGain.gain.cancelScheduledValues(t);
+      masterGain.gain.setValueAtTime(cur, t);
+      // use exponential-ish safe ramp (avoid 0)
+      const safeTarget = Math.max(0.0001, target);
+      masterGain.gain.linearRampToValueAtTime(safeTarget, t + Math.max(0.06, ms/1000));
+      if(target === 0){
+        // hard to true zero after ramp
+        setTimeout(()=>{ if(masterGain) masterGain.gain.value = 0; }, ms+40);
+      }
+    }
+
+    function setMuted(m){
+      RUNTIME.muted = !!m;
+      if(RUNTIME.muted){
+        dom.soundBtn.classList.remove("on");
+        dom.soundBtn.classList.add("off");
+        fadeMasterTo(0, 240);
+      }else{
+        dom.soundBtn.classList.remove("off");
+        dom.soundBtn.classList.add("on");
+        if(RUNTIME.audioStarted) fadeMasterTo(0.55, 420);
+      }
+      renderDebug();
+    }
+
+    /********************************************************************
+     * 10) Anim helpers
+     ********************************************************************/
+    function wait(ms){ return new Promise(r=>setTimeout(r, ms)); }
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+    function rand(a,b){ return (a + Math.random()*(b-a))|0; }
+
+    function easeInOut(t){ return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2; }
+    function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+    function easeOutBack(t){
+      const c1 = 1.70158; const c3 = c1 + 1;
+      return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2);
+    }
+
+    function animate(ms, onTick, onDone){
+      const t0 = now();
+      const dur = Math.max(16, ms|0);
+      function step(){
+        const t = (now()-t0)/dur;
+        const k = t>=1 ? 1 : t;
+        onTick?.(k);
+        if(k<1) requestAnimationFrame(step);
+        else onDone?.();
+      }
+      requestAnimationFrame(step);
+    }
+
+    function softWrap(str, max){
+      const out=[]; let s=str.trim();
+      while(s.length){
+        if(s.length<=max){ out.push(s); break; }
+        let cut = s.lastIndexOf(" ", max);
+        if(cut<18) cut=max;
+        out.push(s.slice(0,cut).trim());
+        s = s.slice(cut).trim();
+      }
+      return out;
+    }
+
+    function splitToLines(text, targetLines){
+      const cleaned = String(text).replace(/\s+/g," ").trim();
+      const parts = cleaned.split(/(?<=[\.\!\?。！？])\s+/).filter(Boolean);
+      const lines=[];
+      let i=0;
+      while(i<parts.length){
+        let line = parts[i];
+        if(lines.length < targetLines-1 && i+1<parts.length){
+          if(line.length < 55){ line += " " + parts[i+1]; i+=2; }
+          else i+=1;
+        } else i+=1;
+        lines.push(line.trim());
+      }
+      if(lines.length<4) return softWrap(cleaned, 50);
+      if(lines.length>8) return softWrap(cleaned, 58).slice(0,8);
+      return lines;
+    }
+
+    /********************************************************************
+     * 11) Modules: Wheel / Envelope / Scroll+Text / Seal
+     ********************************************************************/
+    const Wheel = (() => {
+      let spinning=false, raf=0, startAt=0, dur=0, fromDeg=0, toDeg=0, lastDeg=0;
+
+      function reset(){
+        spinning=false;
+        cancelAnimationFrame(raf);
+        fromDeg=0; toDeg=0; lastDeg=0;
+        dom.wheel.style.transform="rotate(0deg)";
+        dom.wheelWrap.style.opacity="1";
+        dom.wheelWrap.style.transform="translate(-50%,-50%) scale(1)";
+      }
+
+      function spinToSegment(segIndex){
+        if(spinning) return false;
+        spinning=true;
+
+        const segments = TIMING.wheelSpin.segmentCount;
+        const segAngle = 360/segments;
+        const targetCenter = segIndex*segAngle + segAngle/2;
+        const landing = 360*TIMING.wheelSpin.extraTurns + (360 - targetCenter);
+
+        fromDeg = lastDeg;
+        toDeg = landing;
+        startAt = now();
+        dur = rand(TIMING.wheelSpin.durMin, TIMING.wheelSpin.durMax);
+
+        log(`WHEEL: start seg=${segIndex} dur=${dur}ms`);
+
+        function tick(){
+          const t=(now()-startAt)/dur;
+          const k=t>=1?1:t;
+          const e=easeOutCubic(k);
+
+          const deg=fromDeg + (toDeg-fromDeg)*e;
+          lastDeg = deg % 360;
+          dom.wheel.style.transform = `rotate(${deg}deg)`;
+
+          const breath = 1 + Math.sin((now()-startAt)/140)*0.0025;
+          dom.wheelWrap.style.transform = `translate(-50%,-50%) scale(${breath})`;
+
+          if(k<1) raf=requestAnimationFrame(tick);
+          else{
+            spinning=false;
+            dom.wheelWrap.style.transform="translate(-50%,-50%) scale(1)";
+            log("WHEEL: stopped");
+            machine.send("WHEEL_STOPPED", { segIndex });
+          }
+        }
+        raf=requestAnimationFrame(tick);
+        return true;
+      }
+
+      return { reset, spinToSegment };
+    })();
+
+    const Envelope = (() => {
+      let localOnceShow=false;
+
+      function hardReset(){
+        localOnceShow=false;
+        RUNTIME.envelopePhase="idle";
+        dom.envelope.style.opacity="0";
+        dom.envelope.style.transform="translate(-50%,-50%) scale(.98)";
+      }
+
+      function show(){
+        if(localOnceShow){ log("ENVELOPE: show blocked (local once)"); return; }
+        if(!machine.flagOnce(`ENVELOPE_SHOW_ONCE_${RUNTIME.runId}`)){ log("ENVELOPE: show blocked (global once)"); return; }
+        localOnceShow=true;
+        RUNTIME.envelopePhase="show";
+
+        dom.envelope.style.opacity="0";
+        dom.envelope.style.transform="translate(-50%,-50%) scale(.96)";
+
+        animate(TIMING.envelope.showMs, (k)=>{
+          const e=easeOutCubic(k);
+          dom.envelope.style.opacity=String(lerp(0,1,e));
+          dom.envelope.style.transform=`translate(-50%,-50%) scale(${lerp(.96,1.0,e)})`;
+        }, ()=>{
+          RUNTIME.envelopePhase="hold";
+          machine.send("ENVELOPE_SHOWN");
+        });
+      }
+
+      function hold(){
+        if(RUNTIME.envelopePhase!=="hold"){ log("ENVELOPE: hold blocked"); return; }
+        animate(TIMING.envelope.holdMs, ()=>{
+          const floatY = Math.sin(now()/260)*1.1;
+          dom.envelope.style.transform = `translate(-50%, calc(-50% + ${floatY}px)) scale(1.00)`;
+        }, ()=>{
+          RUNTIME.envelopePhase="dissolve";
+          machine.send("ENVELOPE_HOLD_DONE");
+        });
+      }
+
+      function dissolve(){
+        if(RUNTIME.envelopePhase!=="dissolve"){ log("ENVELOPE: dissolve blocked"); return; }
+        animate(TIMING.envelope.dissolveMs, (k)=>{
+          const e=easeInOut(k);
+          dom.envelope.style.opacity=String(lerp(1,0,e));
+          dom.envelope.style.transform=`translate(-50%,-50%) scale(${lerp(1.0,1.03,e)})`;
+        }, ()=>{
+          RUNTIME.envelopePhase="done";
+          machine.send("ENVELOPE_DISSOLVED");
+        });
+      }
+
+      return { hardReset, show, hold, dissolve };
+    })();
+
+    const Scroll = (() => {
+      function hardReset(){
+        dom.scroll.style.opacity="0";
+        dom.scroll.style.transform="translate(-50%,-50%) scale(.98)";
+        dom.inkLayer.innerHTML="";
+        dom.seal.style.opacity="0";
+        dom.sealFx.style.opacity="0";
+        dom.soakRing.style.opacity="0";
+        dom.emboss.style.opacity="0";
+        dom.edgeSparkle.style.opacity="0";
+        dom.dust.style.opacity="0";
+        dom.dust.innerHTML="";
+      }
+
+      function appear(){
+        dom.scroll.style.opacity="0";
+        dom.scroll.style.transform="translate(-50%,-50%) scale(.965)";
+        animate(TIMING.scroll.appearMs, (k)=>{
+          const e=easeOutCubic(k);
+          dom.scroll.style.opacity=String(lerp(0,1,e));
+          dom.scroll.style.transform=`translate(-50%,-50%) scale(${lerp(.965,1.0,e)})`;
+        }, ()=>{ machine.send("SCROLL_READY"); });
+      }
+
+      async function writeText(lines){
+        dom.inkLayer.innerHTML="";
+        const els=[];
+        for(const line of lines){
+          const wrap=document.createElement("div");
+          wrap.className="ink-line";
+          wrap.innerHTML = `<div class="mask"><span class="txt">${escapeHtml(line)}</span></div><div class="grain2"></div>`;
+          dom.inkLayer.appendChild(wrap);
+          els.push(wrap);
         }
 
-        // Initialize the app
-        const app = new TonTempleLegendary();
-        window.app = app; // Make globally accessible for onclick handlers
-    </script>
+        for(let i=0;i<els.length;i++){
+          const lineEl = els[i];
+          const mask = lineEl.querySelector(".mask");
+          const txt = lineEl.querySelector(".txt");
+          mask.style.width="0%";
+
+          const lineMs = rand(TIMING.text.lineDurMin, TIMING.text.lineDurMax);
+          await new Promise(res=>{
+            animate(lineMs, (k)=>{
+              const e = easeOutCubic(k)*0.92 + easeInOut(k)*0.08;
+              mask.style.width = `${(e*100).toFixed(3)}%`;
+              const jitter = (Math.sin(now()/43 + i*1.7)*0.35) + (Math.sin(now()/61 + i*0.9)*0.18);
+              lineEl.style.transform = `translateY(${(Math.sin(now()/320 + i)*0.25).toFixed(2)}px)`;
+              txt.style.transform = `translateX(${jitter.toFixed(2)}px)`;
+            }, ()=>{
+              mask.style.width="100%";
+              res();
+            });
+          });
+
+          const pause = rand(TIMING.text.linePauseMin, TIMING.text.linePauseMax);
+          await wait(pause);
+        }
+
+        machine.send("TEXT_DONE");
+      }
+
+      return { hardReset, appear, writeText };
+    })();
+
+    const Seal = (() => {
+      let localOnceHit=false;
+
+      function hardReset(){
+        localOnceHit=false;
+        RUNTIME.sealPhase="idle";
+        dom.seal.style.opacity="0";
+        dom.seal.style.transform="rotate(-2deg) scale(.98)";
+        dom.seal.style.filter="drop-shadow(0 14px 22px rgba(0,0,0,.34))";
+        dom.sealFx.style.opacity="0";
+        dom.soakRing.style.opacity="0";
+        dom.emboss.style.opacity="0";
+        dom.edgeSparkle.style.opacity="0";
+        dom.dust.style.opacity="0";
+        dom.dust.innerHTML="";
+      }
+
+      function place(){
+        if(RUNTIME.sealPhase!=="idle"){ log("SEAL: place blocked"); return; }
+        if(!machine.flagOnce(`SEAL_PLACE_ONCE_${RUNTIME.runId}`)){ log("SEAL: place blocked (global once)"); return; }
+
+        RUNTIME.sealPhase="place";
+        const h = hashString(TG_USER.username || "guest");
+        const sign = (h%2===0) ? -1 : 1;
+        const rot = sign * (2 + (h%3)); // 2..4
+
+        dom.seal.style.opacity="0";
+        dom.seal.style.transform=`rotate(${rot}deg) scale(.96) translateY(-2px)`;
+
+        animate(TIMING.seal.placeMs, (k)=>{
+          const e=easeOutCubic(k);
+          dom.seal.style.opacity=String(lerp(0,1,e));
+          dom.seal.style.transform=`rotate(${rot}deg) scale(${lerp(.96,1.0,e)}) translateY(${lerp(-2,0,e)}px)`;
+        }, ()=>{
+          RUNTIME.sealPhase="placed";
+          machine.send("SEAL_PLACED", {rot});
+        });
+      }
+
+      function hit(){
+        if(localOnceHit){ log("SEAL: hit blocked (local once)"); return; }
+        if(!machine.flagOnce(`SEAL_HIT_ONCE_${RUNTIME.runId}`)){ log("SEAL: hit blocked (global once)"); return; }
+        localOnceHit=true;
+        if(RUNTIME.sealPhase!=="placed"){ log("SEAL: hit blocked (phase mismatch)"); return; }
+
+        RUNTIME.sealPhase="hit";
+        bloomSpike();
+        lacquerTick();
+        goldDustBurst(192);
+
+        animate(TIMING.seal.hitMs, (k)=>{
+          const e=easeOutBack(k);
+          const press=lerp(0,1,e);
+          // compose translateY + scale safely
+          const baseRot = dom.seal.style.transform.match(/rotate\([^)]+\)/)?.[0] || "rotate(-2deg)";
+          dom.seal.style.transform = `${baseRot} translateY(${lerp(0,2.6,press).toFixed(2)}px) scale(${lerp(1.0,1.02,press).toFixed(3)})`;
+          dom.seal.style.filter =
+            `drop-shadow(0 ${lerp(14,10,press).toFixed(1)}px ${lerp(22,18,press).toFixed(1)}px rgba(0,0,0,.36))` +
+            ` drop-shadow(0 0 ${lerp(0,18,press).toFixed(1)}px rgba(242,208,107,${lerp(0,.16,press).toFixed(3)}))`;
+        }, ()=>{
+          RUNTIME.sealPhase="hitDone";
+          machine.send("SEAL_HIT_DONE");
+        });
+      }
+
+      function soak(){
+        if(RUNTIME.sealPhase!=="hitDone"){ log("SEAL: soak blocked"); return; }
+        if(!machine.flagOnce(`SEAL_SOAK_ONCE_${RUNTIME.runId}`)){ log("SEAL: soak blocked (global once)"); return; }
+
+        RUNTIME.sealPhase="soak";
+        dom.sealFx.style.opacity="1";
+
+        dom.soakRing.style.opacity="0";
+        dom.soakRing.style.transform="scale(.96)";
+        dom.emboss.style.opacity="0";
+        dom.edgeSparkle.style.opacity="0";
+
+        animate(TIMING.seal.soakMs, (k)=>{
+          const e=easeInOut(k);
+          dom.soakRing.style.opacity=String(lerp(0,0.70,e));
+          dom.soakRing.style.transform=`scale(${lerp(.96,1.02,e).toFixed(3)})`;
+
+          dom.emboss.style.opacity=String(lerp(0,0.75, clamp01((k-0.18)/0.82)));
+          dom.edgeSparkle.style.opacity=String(lerp(0,0.28, clamp01((k-0.28)/0.72)));
+
+          const press=lerp(1,0.86,e);
+          const baseRot = dom.seal.style.transform.match(/rotate\([^)]+\)/)?.[0] || "rotate(-2deg)";
+          dom.seal.style.transform = `${baseRot} translateY(2.1px) scale(${press.toFixed(3)})`;
+          dom.seal.style.filter =
+            `drop-shadow(0 ${lerp(10,7,e).toFixed(1)}px ${lerp(18,14,e).toFixed(1)}px rgba(0,0,0,.34))` +
+            ` drop-shadow(0 0 ${lerp(10,0,e).toFixed(1)}px rgba(242,208,107,.10))`;
+        }, ()=>{
+          RUNTIME.sealPhase="done";
+          machine.send("SEAL_SOAK_DONE");
+        });
+      }
+
+      function bloomSpike(){
+        const t0 = now();
+        const spike = TIMING.bloom.spikeMs;
+        const settle = TIMING.bloom.settleMs;
+        function step(){
+          const t = now()-t0;
+          if(t < spike){
+            const k=t/spike, e=easeOutCubic(k);
+            dom.seal.style.filter =
+              `drop-shadow(0 10px 18px rgba(0,0,0,.34))` +
+              ` drop-shadow(0 0 ${lerp(0,34,e).toFixed(1)}px rgba(242,208,107,${lerp(0,.22,e).toFixed(3)}))`;
+            requestAnimationFrame(step);
+          } else if(t < spike+settle){
+            const k=(t-spike)/settle, e=easeInOut(k);
+            dom.seal.style.filter =
+              `drop-shadow(0 10px 18px rgba(0,0,0,.34))` +
+              ` drop-shadow(0 0 ${lerp(34,10,e).toFixed(1)}px rgba(242,208,107,${lerp(.22,.10,e).toFixed(3)}))`;
+            requestAnimationFrame(step);
+          } else {
+            dom.seal.style.filter="drop-shadow(0 14px 22px rgba(0,0,0,.34))";
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function goldDustBurst(count){
+        dom.dust.innerHTML="";
+        dom.dust.style.opacity="1";
+        const rect = dom.seal.getBoundingClientRect();
+        const cx = rect.width/2, cy = rect.height/2;
+        const particles=[];
+        for(let i=0;i<count;i++){
+          const p=document.createElement("i");
+          dom.dust.appendChild(p);
+          const ang=Math.random()*Math.PI*2;
+          const r=6+Math.random()*18;
+          const vx=Math.cos(ang)*r;
+          const vy=Math.sin(ang)*r-(6+Math.random()*10);
+          p.style.left=(cx+vx)+"px";
+          p.style.top =(cy+vy)+"px";
+          p.style.opacity="0";
+          particles.push({el:p,vx,vy});
+        }
+
+        const t0=now();
+        const burstMs=TIMING.dust.burstMs;
+        const fadeMs=TIMING.dust.fadeMs;
+
+        function step(){
+          const t=now()-t0;
+          if(t<burstMs){
+            const k=t/burstMs, e=easeOutCubic(k);
+            for(const pr of particles){
+              const dx=pr.vx*e;
+              const dy=pr.vy*e + (k*k)*8;
+              pr.el.style.transform=`translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+              pr.el.style.opacity=String(lerp(0,0.95,e));
+            }
+            requestAnimationFrame(step);
+          } else if(t<burstMs+fadeMs){
+            const k=(t-burstMs)/fadeMs, e=easeInOut(k);
+            for(const pr of particles){ pr.el.style.opacity=String(lerp(0.95,0,e)); }
+            requestAnimationFrame(step);
+          } else {
+            dom.dust.style.opacity="0";
+            dom.dust.innerHTML="";
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function lacquerTick(){
+        try{
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type="triangle";
+          o.frequency.value=2100;
+          g.gain.value=0.0001;
+          o.connect(g); g.connect(ctx.destination);
+          o.start();
+          const t=ctx.currentTime;
+          g.gain.exponentialRampToValueAtTime(0.03, t+0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, t+0.06);
+          o.stop(t+0.07);
+          o.onended=()=>ctx.close();
+        }catch(e){}
+      }
+
+      return { hardReset, place, hit, soak };
+    })();
+
+    /********************************************************************
+     * 12) Machine + Enter handlers
+     ********************************************************************/
+    let machine = null;
+
+    function buildMachine(){
+      machine = createMachine({
+        transitions,
+        guards,
+        log,
+        onTransition: ({next})=>{
+          updateChips();
+          renderDebug();
+          enter(next);
+        }
+      });
+    }
+
+    async function enter(state){
+      switch(state){
+        case "IDLE":
+          Wheel.reset();
+          Envelope.hardReset();
+          Scroll.hardReset();
+          Seal.hardReset();
+          dom.wheelWrap.style.opacity="1";
+          break;
+
+        case "WHEEL_SPIN": {
+          Envelope.hardReset();
+          Scroll.hardReset();
+          Seal.hardReset();
+          dom.wheelWrap.style.opacity="1";
+          const seg = (Math.random()*TIMING.wheelSpin.segmentCount)|0;
+          Wheel.spinToSegment(seg);
+          break;
+        }
+
+        case "ENVELOPE_SHOW":
+          dom.wheelWrap.style.opacity="0.55";
+          Envelope.show();
+          break;
+
+        case "ENVELOPE_HOLD":
+          Envelope.hold();
+          break;
+
+        case "ENVELOPE_DISSOLVE":
+          Envelope.dissolve();
+          break;
+
+        case "SCROLL_APPEAR":
+          dom.wheelWrap.style.opacity="0.35";
+          Scroll.appear();
+          break;
+
+        case "TEXT_WRITE": {
+          const c10 = clicksLast10s();
+          const pred = drawPrediction({
+            lang: RUNTIME.lang,
+            mode: RUNTIME.mode,
+            c10,
+            username: TG_USER.username || "guest"
+          });
+          RUNTIME.prediction = pred;
+          renderDebug();
+          const lines = splitToLines(pred.text, 5);
+          Scroll.writeText(lines);
+          break;
+        }
+
+        case "SEAL_PLACE":
+          RUNTIME.sealPhase="idle";
+          Seal.place();
+          break;
+
+        case "SEAL_HIT":
+          Seal.hit();
+          break;
+
+        case "SEAL_SOAK":
+          Seal.soak();
+          break;
+
+        case "DONE":
+          dom.wheelWrap.style.opacity="0.25";
+          break;
+      }
+    }
+
+    /********************************************************************
+     * 13) Watchdog (soft reset to clean IDLE, no reload)
+     ********************************************************************/
+    const STATE_TIMEOUTS_MS = {
+      WHEEL_SPIN: 12000,
+      ENVELOPE_SHOW: 6000,
+      ENVELOPE_HOLD: 6000,
+      ENVELOPE_DISSOLVE: 6000,
+      SCROLL_APPEAR: 7000,
+      TEXT_WRITE: 18000,
+      SEAL_PLACE: 7000,
+      SEAL_HIT: 7000,
+      SEAL_SOAK: 12000
+    };
+
+    function softReset(reason){
+      log(`WATCHDOG: softReset ${reason}`);
+      RUNTIME.runId++;
+      // full module reset
+      Wheel.reset();
+      Envelope.hardReset();
+      Scroll.hardReset();
+      Seal.hardReset();
+      // rebuild machine (guaranteed clean)
+      buildMachine();
+      machine.forceState("IDLE");
+    }
+
+    let watchdogRaf=0;
+    function watchdogLoop(){
+      const st = machine.getState();
+      const limit = STATE_TIMEOUTS_MS[st];
+      if(limit){
+        const elapsed = now() - machine.getStateEnterAt();
+        if(elapsed > limit){
+          softReset(`timeout state=${st} elapsed=${Math.floor(elapsed)}ms`);
+          return;
+        }
+      }
+      watchdogRaf = requestAnimationFrame(watchdogLoop);
+    }
+
+    /********************************************************************
+     * 14) TonConnect (no password flow)
+     ********************************************************************/
+    let tonConnectUI = null;
+
+    function initTonConnect(){
+      try{
+        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: TON.MANIFEST_URL });
+
+        tonConnectUI.onStatusChange((wallet)=>{
+          if(wallet){
+            RUNTIME.walletConnected = true;
+            RUNTIME.walletAddress = wallet.account?.address || null;
+            log("WALLET: connected");
+          } else {
+            RUNTIME.walletConnected = false;
+            RUNTIME.walletAddress = null;
+            log("WALLET: disconnected");
+          }
+          updateChips();
+          renderDebug();
+        });
+
+        log("WALLET: TonConnect init ok");
+      }catch(e){
+        log("WALLET: TonConnect init failed");
+      }
+    }
+
+    async function openWalletModal(){
+      if(!tonConnectUI){ log("WALLET: UI not ready"); return; }
+      try{ await tonConnectUI.openModal(); }catch(e){ log("WALLET: openModal failed"); }
+    }
+
+    async function donateOneTon(){
+      if(!tonConnectUI){ log("DONATE: TonConnect missing"); return false; }
+      if(!RUNTIME.walletConnected){ log("DONATE: wallet not connected"); return false; }
+
+      try{
+        const tx = {
+          validUntil: Math.floor(Date.now()/1000) + 360,
+          messages: [{ address: TON.DONATION_ADDRESS, amount: TON.DONATION_AMOUNT_NANO }]
+        };
+        log("DONATE: sendTransaction 1 TON");
+        await tonConnectUI.sendTransaction(tx);
+        log("DONATE: tx submitted");
+        grantPaid(1);
+        updateChips();
+        return true;
+      }catch(e){
+        log("DONATE: cancelled/failed");
+        return false;
+      }
+    }
+
+    /********************************************************************
+     * 15) UI events (strict, deterministic)
+     ********************************************************************/
+    dom.btnStart.addEventListener("click", async ()=>{
+      recordClick();
+      await ensureAudio();
+
+      const st = machine.getState();
+      if(st === "IDLE"){
+        machine.send("START");
+      } else if(st === "DONE"){
+        // Start ritual again ONLY through "Again" button (quota gate).
+        // Здесь Start в DONE не перезапускает, чтобы не было обхода paywall/лимита.
+        log("UI: use 'Get another prediction' to restart (quota gate)");
+      } else {
+        log("UI: start ignored (ritual in progress)");
+      }
+    });
+
+    dom.btnAgain.addEventListener("click", async ()=>{
+      recordClick();
+      await ensureAudio();
+
+      if(machine.getState() !== "DONE"){
+        log("UI: again ignored (not DONE)");
+        return;
+      }
+
+      const snap = monetizationSnapshot();
+      let ok=false;
+      if(snap.freeAvail){
+        ok = consumeFree();
+        if(ok) log("MONETIZATION: consumed FREE today");
+      } else {
+        ok = consumePaid();
+        if(ok) log("MONETIZATION: consumed PAID credit");
+      }
+
+      if(!ok){
+        log("MONETIZATION: no free, no paid");
+        updateChips();
+        return;
+      }
+
+      // New run: strict reset of one-shot flags + phases
+      RUNTIME.runId++;
+      machine.resetOnce();
+      Envelope.hardReset();
+      Scroll.hardReset();
+      Seal.hardReset();
+      RUNTIME.envelopePhase="idle";
+      RUNTIME.sealPhase="idle";
+
+      updateChips();
+      machine.send("AGAIN");
+    });
+
+    dom.btnDonate.addEventListener("click", async ()=>{
+      recordClick();
+      await ensureAudio();
+
+      if(!RUNTIME.walletConnected){
+        await openWalletModal();
+        return;
+      }
+      const ok = await donateOneTon();
+      if(ok) log("DONATE: +1 credit granted");
+      updateChips();
+    });
+
+    dom.walletBtn.addEventListener("click", async ()=>{
+      recordClick();
+      await ensureAudio();
+      await openWalletModal();
+    });
+
+    dom.soundBtn.addEventListener("click", async ()=>{
+      recordClick();
+      await ensureAudio();
+      setMuted(!RUNTIME.muted);
+    });
+
+    dom.debugBtn.addEventListener("click", ()=>{
+      recordClick();
+      RUNTIME.debug = !RUNTIME.debug;
+      dom.debugPanel.style.display = RUNTIME.debug ? "block" : "none";
+      renderDebug();
+    });
+
+    dom.langEN.addEventListener("click", ()=>{ recordClick(); setLang(LANGS.EN); });
+    dom.langCN.addEventListener("click", ()=>{ recordClick(); setLang(LANGS.CN); });
+    function setLang(lang){
+      RUNTIME.lang = lang;
+      dom.langEN.classList.toggle("on", lang===LANGS.EN);
+      dom.langCN.classList.toggle("on", lang===LANGS.CN);
+      updateChips();
+      renderDebug();
+      log(`LANG: ${lang}`);
+    }
+
+    dom.modeLife.addEventListener("click", ()=>{ recordClick(); setMode(MODES.LIFE); });
+    dom.modeTrade.addEventListener("click", ()=>{ recordClick(); setMode(MODES.TRADE); });
+    function setMode(mode){
+      RUNTIME.mode = mode;
+      dom.modeLife.classList.toggle("on", mode===MODES.LIFE);
+      dom.modeTrade.classList.toggle("on", mode===MODES.TRADE);
+      updateChips();
+      renderDebug();
+      log(`MODE: ${mode}`);
+    }
+
+    // Touch-gated audio start
+    window.addEventListener("pointerdown", async ()=>{ await ensureAudio(); }, {passive:true});
+
+    /********************************************************************
+     * 16) Boot
+     ********************************************************************/
+    function boot(){
+      setMuted(false);
+      setLang(LANGS.EN);
+      setMode(MODES.LIFE);
+
+      buildMachine();
+      machine.forceState("IDLE");
+
+      initTonConnect();
+
+      cancelAnimationFrame(watchdogRaf);
+      watchdogRaf = requestAnimationFrame(watchdogLoop);
+
+      updateChips();
+      log("BOOT: ready");
+    }
+    boot();
+
+    /********************************************************************
+     * 17) Telegram WebApp init (safe)
+     ********************************************************************/
+    try{
+      if(window.Telegram && window.Telegram.WebApp){
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+    }catch(e){}
+  </script>
 </body>
 </html>
